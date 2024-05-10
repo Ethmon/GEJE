@@ -30,8 +30,11 @@ namespace GEJE
                 double yRotRad = Math.PI * moved.yrot / 180.0;
                 //Console.WriteLine(yRotRad);
                 // Calculate movement direction based on current rotation
-                double movementX = Math.Sin(yRotRad);
-                double movementY = Math.Cos(yRotRad);
+                double movementX = Math.Sin(-yRotRad);
+                double movementY = Math.Cos(-yRotRad);
+                //Console.WriteLine(moved.yrot);
+                //Console.WriteLine(yRotRad);
+                //Console.WriteLine((Math.PI * moved.yrot / 180.0 == yRotRad) ? "true" : "false");
                 if (moved.yrot == 0 || moved.yrot == 360 || moved.yrot == -360)
                 {
                     movementX = 0.0;
