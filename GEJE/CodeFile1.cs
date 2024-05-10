@@ -67,18 +67,18 @@ namespace GEJE
             //    item.add_propertie(box2);
             //    sceen.add_item(item);
             //}
-            //for (int i = 0; i < 10; i++)
-            //{
-            //    Item item = new Item(0, 0, 250 + i*20, 0, 0, 0);
-            //    Mesh box2 = new Mesh(@"C:\Users\ethan\OneDrive\Desktop\GEJE_Images\Complex2.json", 0, 0, 0, 90, 0, 0);
-            //    item.add_propertie(box2);
-            //    sceen.add_item(item);
-            //}
+            for (int i = 0; i < 10; i++)
+            {
+                Item item = new Item(0, -10, 250 + i*60, 0, 0, 0);
+                Mesh box2 = new Mesh(@"C:\Users\ethan\OneDrive\Desktop\GEJE_Images\Complex1.json", 0, 0, 0, 90, 0, 0);
+                item.add_propertie(box2);
+                sceen.add_item(item);
+            }
 
 
 
             Item camera = new Item(0, 0, -30, 0, 0, 0);
-            Window win = new Window(400, 200);
+            Window win = new Window(600, 300);
             Camera cam = new Camera(0,0, 0, 0, 0, 0, sceen, win,1);
             Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera,2);
             camera.add_propertie(cam_movement);

@@ -50,7 +50,7 @@ internal class Camera : Proportie
         double[,] rotationMatrixX = Rotation.GetRotationMatrixX(xRotRad);
         double[,] rotationMatrixY = Rotation.GetRotationMatrixY(yRotRad);
         double[,] rotationMatrixZ = Rotation.GetRotationMatrixZ(zRotRad);
-        double[,] combinedRotationMatrix = Rotation.CombineMatrices(rotationMatrixZ, Rotation.CombineMatrices(rotationMatrixY, rotationMatrixX));
+        double[,] combinedRotationMatrix = Rotation.CombineMatrices(rotationMatrixZ, Rotation.CombineMatrices(rotationMatrixX, rotationMatrixY));
 
 
         List<Line> pointss = new List<Line>();
