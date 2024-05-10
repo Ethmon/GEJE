@@ -42,7 +42,7 @@ namespace GEJE
                 }
                 else if (moved.yrot == 90 || moved.yrot == -270)
                 {
-                    movementX = 1.0;
+                    movementX = -1.0;
                     movementY = 0.0;
                 }
                 else if (moved.yrot == 180 || moved.yrot == -180)
@@ -52,7 +52,7 @@ namespace GEJE
                 }
                 else if (moved.yrot == 270 || moved.yrot == -90)
                 {
-                    movementX = -1.0;
+                    movementX = 1.0;
                     movementY = 0.0;
                 }
 
@@ -67,11 +67,11 @@ namespace GEJE
                 }
                 if (keyInfo.Key == ConsoleKey.A)
                 {
-                    moved.move(moved.x - movementY* speed, moved.y , moved.z - movementX* speed, moved.w);
+                    moved.move(moved.x - movementY* speed, moved.y , moved.z + movementX* speed, moved.w);
                 }
                 if (keyInfo.Key == ConsoleKey.D)
                 {
-                    moved.move(moved.x + movementY* speed, moved.y , moved.z + movementX* speed, moved.w);
+                    moved.move(moved.x + movementY* speed, moved.y , moved.z - movementX* speed, moved.w);
                 }
                 if (keyInfo.Key == ConsoleKey.DownArrow)
                 {

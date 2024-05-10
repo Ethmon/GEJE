@@ -67,13 +67,13 @@ namespace GEJE
             //    item.add_propertie(box2);
             //    sceen.add_item(item);
             //}
-            //for (int i = 0; i < 10; i++)
-            //{
-            //    Item item = new Item(0, -10, 250 + i*60, 0, 0, 0);
-            //    Mesh box2 = new Mesh(@"C:\Users\ethan\OneDrive\Desktop\GEJE_Images\Complex2.json", 0, 0, 0, 90, 0, 0);
-            //    item.add_propertie(box2);
-            //    sceen.add_item(item);
-            //}
+            for (int i = 0; i < 10; i++)
+            {
+                Item item = new Item(0, 0, 250 + i*60, 0, 0, 0);
+                Mesh box2 = new Mesh(@"C:\Users\ethan\OneDrive\Desktop\GEJE_Images\Complex2.json", 0, 0, 0, 90, 0, 0);
+                item.add_propertie(box2);
+                sceen.add_item(item);
+            }
 
 
 
