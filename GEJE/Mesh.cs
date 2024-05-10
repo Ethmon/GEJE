@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace GEJE
 {
-    internal class Mesh : Proportie
+    public class Mesh : Proportie
     {
         public List<Line> points = new List<Line>();
         public List<Line> oldpoints = new List<Line>();

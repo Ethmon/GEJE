@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace GEJE
 {
-    internal class Item
+    public class Item
     {
         public double x, y, z, w;
         public double xrot, yrot, zrot , wrot;

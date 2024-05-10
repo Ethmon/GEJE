@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GEJE
 {
-    internal class Point
+    public class Point
     {
         public double x, y, z, w;
         public int r, g, b;
@@ -22,7 +22,7 @@ namespace GEJE
             this.b = b;
         }
     }
-    internal class Line
+    public class Line
     {
         public Point p1, p2;
         public Line(Point p1, Point p2)

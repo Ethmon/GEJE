@@ -9,7 +9,7 @@ using System.Threading;
 using System.Diagnostics;
 namespace GEJE
 {
-    internal class ThreeDSceen
+    public class ThreeDSceen
     {
         public List<Item> items = new List<Item>();
         int xsize, ysize, zsize;

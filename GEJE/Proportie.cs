@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GEJE
 {
-    internal class Proportie
+    public class Proportie
     {
         public double x, y, z , w;
         public double xrot, yrot, zrot , wrot;

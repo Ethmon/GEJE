@@ -6,7 +6,7 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Reflection;
 
-internal class Camera : Proportie
+public class Camera : Proportie
 {
     public double near = 0.1;
     public double far = 50000;

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GEJE
 {
-    internal class Movement : Proportie
+    public class Movement : Proportie
     {
         private Item moved;
         float speed = 0.1f;
