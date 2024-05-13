@@ -77,10 +77,10 @@ namespace GEJE
 
 
 
-            Item camera = new Item(0, 0, -30, 0, 0, 0);
+            Item camera = new Item(0, 0, 0, 0, 0, 0);
             Window win = new Window(600, 300);
             Camera cam = new Camera(0,0, 0, 0, 0, 0, sceen, win,1);
-            Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera,2);
+            Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera,5);
             camera.add_propertie(cam_movement);
             camera.add_propertie(cam);
             camera.add_propertie(cam_movement);

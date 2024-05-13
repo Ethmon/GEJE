@@ -8,9 +8,9 @@ using System.Reflection;
 
 public class Camera : Proportie
 {
-    public double near = 0.1;
+    public double near = 0;
     public double far = 50000;
-    public double constant = 110;
+    public double constant = 10;
     private Window screen;
     private ThreeDSceen scene;
     public double fov = 40; // Field of view in degrees
