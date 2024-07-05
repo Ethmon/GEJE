@@ -409,51 +409,39 @@ public class Camera : Proportie
     }
     public void DrawFilledPolygonOnScreen(Window screen, double[] point1, double[] point2, double[] point3, int[] rgb)
     {
-        // Sort points by y-coordinate (top to bottom)
         List<int[]> sortedPoints = new List<int[]> { new int[] { (int)point1[0], (int)point1[1] }, new int[] { (int)point2[0], (int)point2[1] }, new int[] { (int)point3[0], (int)point3[1] } };
         sortedPoints.Sort((p1, p2) => p1[1].CompareTo(p2[1]));
-
         int[] topPoint = sortedPoints[0];
         int[] middlePoint = sortedPoints[1];
         int[] bottomPoint = sortedPoints[2];
-
         int totalHeight = bottomPoint[1] - topPoint[1];
-
-        // Draw the top part of the triangle
         for (int y = topPoint[1]; y <= middlePoint[1]; y++)
         {
             double segmentHeight = middlePoint[1] - topPoint[1] + 1;
             double alpha = (double)(y - topPoint[1]) / totalHeight;
-
             int startX = (int)((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
             int endX = (int)((1 - alpha) * topPoint[0] + alpha * middlePoint[0]);
-
             DrawHorizontalLine(screen, startX, endX, y, rgb);
         }
 
-        // Draw the bottom part of the triangle
         for (int y = middlePoint[1] + 1; y <= bottomPoint[1]; y++)
         {
             double segmentHeight = bottomPoint[1] - middlePoint[1] + 1;
             double alpha = (double)(y - topPoint[1]) / totalHeight;
-
             int startX = (int)((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
             int endX = (int)((1 - alpha) * middlePoint[0] + alpha * bottomPoint[0]);
-
             DrawHorizontalLine(screen, startX, endX, y, rgb);
         }
     }
 
     private void DrawHorizontalLine(Window screen, int x1, int x2, int y, int[] rgb)
     {
-        // Ensure x1 <= x2
         if (x1 > x2)
         {
             int temp = x1;
             x1 = x2;
             x2 = temp;
         }
-
         for (int x = x1; x <= x2; x++)
         {
             screen.PlaceColor(x, y, rgb[0], rgb[1], rgb[2]);
