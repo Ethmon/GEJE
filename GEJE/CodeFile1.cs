@@ -70,12 +70,12 @@ namespace GEJE
             //for (int i = 0; i < 10; i++)
             {
                 Item item = new Item(0, 0, 250 + 60, 0, 0, 0);
-                Mesh box2 = new Mesh(@"C:\Users\ethan\3dassets\simple.json", 0, 0, 0, 90, 0, 0);
+                Mesh box2 = new Mesh(@"C:\Users\ethan\3dassets\Box.json", 0, 0, 0, 90, 0, 0);
                 item.add_propertie(box2);
                 sceen.add_item(item);
             }
 
-
+            //Item.rotatei = true;
 
             Item camera = new Item(0, 0, -200, 0, 0, 0);
             Window win = new Window(400, 300,3,3);

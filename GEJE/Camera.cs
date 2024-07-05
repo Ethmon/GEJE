@@ -13,7 +13,7 @@ public class Camera : Proportie
     public double constant = 10;
     private Window screen;
     private ThreeDSceen scene;
-    public double fov = 40; // Field of view in degrees
+    public double fov = 80; // Field of view in degrees
     private double aspectRatio;
     private double[,] projectionMatrix;
     public bool outline = false;
@@ -118,26 +118,16 @@ public class Camera : Proportie
            // Console.WriteLine("____________________________________________________________________\n"+transformedPoint1[0] + " " + transformedPoint1[1] + " " + transformedPoint1[2]);
            // Console.WriteLine(transformedPoint2[0] + " " + transformedPoint2[1] + " " + transformedPoint2[2]+"__________________________________________________________________________\n");
 
-            if(transformedPoint1 == transformedPoint2 && transformedPoint1 == transformedPoint3 && transformedPoint2 == transformedPoint3)
-            {
-                continue;
-            }
+            //if(transformedPoint1 == transformedPoint2 && transformedPoint1 == transformedPoint3 && transformedPoint2 == transformedPoint3)
+            //{
+            //    continue;
+            //}
             // check if the dot product of the two points is less than 0
             if (transformedPoint1[0] * transformedPoint2[0] * transformedPoint3[0] + transformedPoint1[1] * transformedPoint2[1] * transformedPoint3[1] + transformedPoint1[2] * transformedPoint2[2] * transformedPoint3[2] < 0)
             {
                 continue;
             }
-            //check if just point 1 is behind the camera
-            if (transformedPoint1[2] < 0)
-            {
-                continue;
-            }
-            //check if just point 2 is behind the camera
-            if (transformedPoint2[2] < 0)
-            {
-                continue;
-            }
-            if(transformedPoint3[2] < 0)
+            if (transformedPoint1[2] < 0 || transformedPoint2[2] < 0 || transformedPoint3[2] < 0)
             {
                 continue;
             }
@@ -162,14 +152,22 @@ public class Camera : Proportie
 
             // Adjust for screen dimensions
 
+            projectedPoint1[0] /= projectedPoint1[3];
+            projectedPoint1[1] /= projectedPoint1[3];
+            projectedPoint1[2] /= projectedPoint1[3];
+            projectedPoint2[0] /= projectedPoint2[3];
+            projectedPoint2[1] /= projectedPoint2[3];
+            projectedPoint2[2] /= projectedPoint2[3];
+            projectedPoint3[0] /= projectedPoint3[3];
+            projectedPoint3[1] /= projectedPoint3[3];
+            projectedPoint3[2] /= projectedPoint3[3];
 
-
-            projectedPoint1[0] = (projectedPoint1[0] + 1) + (screen.Ethwidth / 2);
-            projectedPoint1[1] = (1 - projectedPoint1[1]) + (screen.Ethheight / 2);
-            projectedPoint2[0] = (projectedPoint2[0] + 1) + (screen.Ethwidth / 2);
-            projectedPoint2[1] = (1 - projectedPoint2[1]) + (screen.Ethheight / 2);
-            projectedPoint3[0] = (projectedPoint3[0] + 1) + (screen.Ethwidth / 2);
-            projectedPoint3[1] = (1 - projectedPoint3[1]) + (screen.Ethheight / 2);
+            projectedPoint1[0] = (projectedPoint1[0] + 1) * (screen.Ethwidth / 2);
+            projectedPoint1[1] = (1 - projectedPoint1[1]) * (screen.Ethheight / 2);
+            projectedPoint2[0] = (projectedPoint2[0] + 1) * (screen.Ethwidth / 2);
+            projectedPoint2[1] = (1 - projectedPoint2[1]) * (screen.Ethheight / 2);
+            projectedPoint3[0] = (projectedPoint3[0] + 1) * (screen.Ethwidth / 2);
+            projectedPoint3[1] = (1 - projectedPoint3[1]) * (screen.Ethheight / 2);
             // 
             //Console.WriteLine(transformedPoint[0] + " " + transformedPoint[1] + " " + transformedPoint[2]);
             //Console.WriteLine(projectedPoint1[0] + " " + projectedPoint1[1] + " " + projectedPoint2[0]+ " " + projectedPoint2[1]);
@@ -415,6 +413,7 @@ public class Camera : Proportie
         int[] middlePoint = sortedPoints[1];
         int[] bottomPoint = sortedPoints[2];
         int totalHeight = bottomPoint[1] - topPoint[1];
+
         for (int y = topPoint[1]; y <= middlePoint[1]; y++)
         {
             double segmentHeight = middlePoint[1] - topPoint[1] + 1;

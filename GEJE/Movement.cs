@@ -65,11 +65,11 @@ namespace GEJE
                 {
                     moved.move(moved.x + movementX* speed, moved.y , moved.z + movementY* speed, moved.w);
                 }
-                if (keyInfo.Key == ConsoleKey.A)
+                if (keyInfo.Key == ConsoleKey.D)
                 {
                     moved.move(moved.x - movementY* speed, moved.y , moved.z + movementX* speed, moved.w);
                 }
-                if (keyInfo.Key == ConsoleKey.D)
+                if (keyInfo.Key == ConsoleKey.A)
                 {
                     moved.move(moved.x + movementY* speed, moved.y , moved.z - movementX* speed, moved.w);
                 }
@@ -81,11 +81,11 @@ namespace GEJE
                 {
                     moved.rotate(moved.xrot+.25, moved.yrot, moved.zrot, moved.w);
                 }
-                if (keyInfo.Key == ConsoleKey.LeftArrow)
+                if (keyInfo.Key == ConsoleKey.RightArrow)
                 {
                     moved.rotate(moved.xrot, moved.yrot+.25, moved.zrot, moved.w);
                 }
-                if (keyInfo.Key == ConsoleKey.RightArrow)
+                if (keyInfo.Key == ConsoleKey.LeftArrow)
                 {
                     moved.rotate(moved.xrot, moved.yrot-.25, moved.zrot, moved.w);
                 }
