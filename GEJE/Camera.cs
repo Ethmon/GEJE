@@ -53,7 +53,7 @@ public class Camera : Proportie
         double[,] combinedRotationMatrix = Rotation.CombineMatrices(rotationMatrixZ, Rotation.CombineMatrices(rotationMatrixX, rotationMatrixY));
 
 
-        List<Line> pointss = new List<Line>();
+        List<Polygon> pointss = new List<Polygon>();
 
         foreach (Item item in scene.items)
         {
@@ -76,7 +76,7 @@ public class Camera : Proportie
                     {
                         if (propertie.GetType() == typeof(Mesh))
                         {
-                            foreach (Line point in ((Mesh)propertie).points)
+                            foreach (Polygon point in ((Mesh)propertie).points)
                             {
 
                                 pointss.Add(point);
@@ -87,9 +87,9 @@ public class Camera : Proportie
             }
         }
         // sort lines by the average of the two points
-        List<Line> orderedLines = pointss.OrderByDescending(p => (((p.p1.x + p.p2.x)/2-this.nx) + ((p.p1.y + p.p2.y)/2-this.ny) + ((p.p1.z + p.p2.z)/2-this.nz))).ToList();
+        List<Polygon> orderedLines = pointss.OrderByDescending(p => (((p.p1.x + p.p2.x + p.p3.x)/3-this.nx) + ((p.p1.y + p.p2.y+p.p3.y)/3-this.ny) + ((p.p1.z + p.p2.z+p.p3.z)/3-this.nz))).ToList();
 
-        foreach (Line line in orderedLines)
+        foreach (Polygon line in orderedLines)
         {
             
             Point[] points = { line.p1, line.p2 };
@@ -97,27 +97,32 @@ public class Camera : Proportie
             Point point2 = line.p2;
             double[] point3D1 = { point1.x, point1.y, point1.z, point1.w };
             double[] point3D2 = { point2.x, point2.y, point2.z, point2.w };
+            double[] point3D3 = { line.p3.x, line.p3.y, line.p3.z, line.p3.w };
             point3D1[0] -= this.nx;
             point3D1[1] -= this.ny;
             point3D1[2] -= this.nz;
             point3D2[0] -= this.nx;
             point3D2[1] -= this.ny;
             point3D2[2] -= this.nz;
+            point3D3[0] -= this.nx;
+            point3D3[1] -= this.ny;
+            point3D3[2] -= this.nz;
             
 
             // Apply camera transformations (rotation and translation)
             double[] transformedPoint1 = MatrixMultiply(combinedRotationMatrix, point3D1);
             double[] transformedPoint2 = MatrixMultiply(combinedRotationMatrix, point3D2);
+            double[] transformedPoint3 = MatrixMultiply(combinedRotationMatrix, point3D3);
             //Console.WriteLine(transformedPoint1[0]+ " : " + transformedPoint1[1]);
            // Console.WriteLine("____________________________________________________________________\n"+transformedPoint1[0] + " " + transformedPoint1[1] + " " + transformedPoint1[2]);
            // Console.WriteLine(transformedPoint2[0] + " " + transformedPoint2[1] + " " + transformedPoint2[2]+"__________________________________________________________________________\n");
 
-            if(transformedPoint1 == transformedPoint2)
+            if(transformedPoint1 == transformedPoint2 && transformedPoint1 == transformedPoint3 && transformedPoint2 == transformedPoint3)
             {
                 continue;
             }
             // check if the dot product of the two points is less than 0
-            if (transformedPoint1[0] * transformedPoint2[0] + transformedPoint1[1] * transformedPoint2[1] + transformedPoint1[2] * transformedPoint2[2] < 0)
+            if (transformedPoint1[0] * transformedPoint2[0] * transformedPoint3[0] + transformedPoint1[1] * transformedPoint2[1] * transformedPoint3[1] + transformedPoint1[2] * transformedPoint2[2] * transformedPoint3[2] < 0)
             {
                 continue;
             }
@@ -128,6 +133,10 @@ public class Camera : Proportie
             }
             //check if just point 2 is behind the camera
             if (transformedPoint2[2] < 0)
+            {
+                continue;
+            }
+            if(transformedPoint3[2] < 0)
             {
                 continue;
             }
@@ -148,6 +157,7 @@ public class Camera : Proportie
             // Apply projection matrix
             double[] projectedPoint1 = MatrixMultiply(projectionMatrix, transformedPoint1);
             double[] projectedPoint2 = MatrixMultiply(projectionMatrix, transformedPoint2);
+            double[] projectedPoint3 = MatrixMultiply(projectionMatrix, transformedPoint3);
 
             // Adjust for screen dimensions
 
@@ -157,12 +167,18 @@ public class Camera : Proportie
             projectedPoint1[1] = (1 - projectedPoint1[1]) + (screen.Ethheight / 2);
             projectedPoint2[0] = (projectedPoint2[0] + 1) + (screen.Ethwidth / 2);
             projectedPoint2[1] = (1 - projectedPoint2[1]) + (screen.Ethheight / 2);
+            projectedPoint3[0] = (projectedPoint3[0] + 1) + (screen.Ethwidth / 2);
+            projectedPoint3[1] = (1 - projectedPoint3[1]) + (screen.Ethheight / 2);
             // 
             //Console.WriteLine(transformedPoint[0] + " " + transformedPoint[1] + " " + transformedPoint[2]);
             //Console.WriteLine(projectedPoint1[0] + " " + projectedPoint1[1] + " " + projectedPoint2[0]+ " " + projectedPoint2[1]);
             // Draw the line on the screen
-            DrawLineOnScreen(screen, projectedPoint1, projectedPoint2,
-                new int[] { (int)line.p1.r, (int)line.p1.g, (int)line.p1.b });
+            DrawFilledPolygonOnScreen(screen, projectedPoint1, projectedPoint2, projectedPoint3,new int[] { (int)line.p1.r, (int)line.p1.g, (int)line.p1.b });
+            DrawLineOnScreen(screen, projectedPoint1, projectedPoint2, new int[] { 0, 0, 0 });
+            DrawLineOnScreen(screen, projectedPoint2, projectedPoint3, new int[] { 0, 0, 0 });
+            DrawLineOnScreen(screen, projectedPoint3, projectedPoint1, new int[] { 0, 0, 0 });
+            
+            
             //Console.WriteLine(projectedPoint1[0] + " , " + projectedPoint1[1] + " | " + projectedPoint2[0] + " , " + projectedPoint2[1]);
             
         }
@@ -387,6 +403,60 @@ public class Camera : Proportie
         }
         
     }
+    public void DrawFilledPolygonOnScreen(Window screen, double[] point1, double[] point2, double[] point3, int[] rgb)
+    {
+        // Sort points by y-coordinate (top to bottom)
+        List<int[]> sortedPoints = new List<int[]> { new int[] { (int)point1[0], (int)point1[1] }, new int[] { (int)point2[0], (int)point2[1] }, new int[] { (int)point3[0], (int)point3[1] } };
+        sortedPoints.Sort((p1, p2) => p1[1].CompareTo(p2[1]));
+
+        int[] topPoint = sortedPoints[0];
+        int[] middlePoint = sortedPoints[1];
+        int[] bottomPoint = sortedPoints[2];
+
+        int totalHeight = bottomPoint[1] - topPoint[1];
+
+        // Draw the top part of the triangle
+        for (int y = topPoint[1]; y <= middlePoint[1]; y++)
+        {
+            double segmentHeight = middlePoint[1] - topPoint[1] + 1;
+            double alpha = (double)(y - topPoint[1]) / totalHeight;
+
+            int startX = (int)((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
+            int endX = (int)((1 - alpha) * topPoint[0] + alpha * middlePoint[0]);
+
+            DrawHorizontalLine(screen, startX, endX, y, rgb);
+        }
+
+        // Draw the bottom part of the triangle
+        for (int y = middlePoint[1] + 1; y <= bottomPoint[1]; y++)
+        {
+            double segmentHeight = bottomPoint[1] - middlePoint[1] + 1;
+            double alpha = (double)(y - topPoint[1]) / totalHeight;
+
+            int startX = (int)((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
+            int endX = (int)((1 - alpha) * middlePoint[0] + alpha * bottomPoint[0]);
+
+            DrawHorizontalLine(screen, startX, endX, y, rgb);
+        }
+    }
+
+    private void DrawHorizontalLine(Window screen, int x1, int x2, int y, int[] rgb)
+    {
+        // Ensure x1 <= x2
+        if (x1 > x2)
+        {
+            int temp = x1;
+            x1 = x2;
+            x2 = temp;
+        }
+
+        for (int x = x1; x <= x2; x++)
+        {
+            screen.PlaceColor(x, y, rgb[0], rgb[1], rgb[2]);
+        }
+    }
+
+
     private double[,] CalculateProjectionMatrix(double fov, double aspectRatio, double near, double far)
     {
         double fovRad = fov * (Math.PI / 180);

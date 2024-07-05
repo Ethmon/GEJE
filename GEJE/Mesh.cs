@@ -8,8 +8,8 @@ namespace GEJE
 {
     public class Mesh : Proportie
     {
-        public List<Line> points = new List<Line>();
-        public List<Line> oldpoints = new List<Line>();
+        public List<Polygon> points = new List<Polygon>();
+        public List<Polygon> oldpoints = new List<Polygon>();
 
         public Mesh(string filename, double x, double y, double z, double xrot, double yrot, double zrot) : base(x, y, z, xrot, yrot, zrot)
         {
@@ -23,16 +23,20 @@ namespace GEJE
             // Read a json file with a list of lists with 3 doubles and 3 ints
             string jsonString = File.ReadAllText(filename);
             List<List<double>> data = JsonSerializer.Deserialize<List<List<double>>>(jsonString);
+            int count = 0;
             Point point1 = null;
+            Point point2 = null;
             foreach (List<double> point in data)
             {
-                if (point1 != null)
+                if (count == 2)
                 {
-                    oldpoints.Add(new Line(new Point((point[0] * 2), (point[1] * 2), (point[2] * 2), 1, (int)(point[3]), (int)(point[4]), (int)(point[5])), point1));
-                    point1 = null;
+                    oldpoints.Add(new Polygon(new Point((point[0] * 2), (point[1] * 2), (point[2] * 2), 1, (int)(point[3]), (int)(point[4]), (int)(point[5])), point1,point2));
+                    count = 0;
                 }
-                else 
+                else if (count == 0)
                     point1 = new Point((point[0] * 2), (point[1] * 2), (point[2] * 2), 1, (int)(point[3]), (int)(point[4]), (int)(point[5]));
+                else point2 = new Point((point[0] * 2), (point[1] * 2), (point[2] * 2), 1, (int)(point[3]), (int)(point[4]), (int)(point[5]));
+                count++;
             }
         }
 
@@ -53,13 +57,14 @@ namespace GEJE
             points.ForEach(p => { p = null; });
             points.Clear();
 
-            foreach (Line Lines in oldpoints)
+            foreach (Polygon Lines in oldpoints)
             {
                 Point point1 = Lines.p1;
-                for (int i = 0; i < 2; i++)
+                Point point2 = Lines.p2;
+                for (int i = 0; i <= 2; i++)
                 {
                     Point point = null;
-                    if (i == 1) { point = Lines.p2; } else { point = point1; }
+                    if (i == 0) { point = Lines.p1; } else if(i==1) { point = Lines.p2; } else { point = Lines.p3; }
                     double x = point.x;
                     double y = point.y;
                     double z = point.z;
@@ -75,10 +80,13 @@ namespace GEJE
                     newY += this.ny;
                     newZ += this.nz;*/
                     if(i==0) point1 = new Point(newX, newY, newZ, 1, point.r, point.g, point.b);
+                    else if (i == 1)
+                        point2 = new Point(newX, newY, newZ, 1, point.r, point.g, point.b);
                     else
-                        points.Add(new Line(point1, new Point(newX, newY, newZ, 1, point.r, point.g, point.b)));
+                        points.Add(new Polygon(point1, point2, new Point(newX, newY, newZ, 1, point.r, point.g, point.b)));
 
                 }
+
 
             }
         }

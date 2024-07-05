@@ -73,9 +73,9 @@ namespace GEJE
                 }
                 if(propertie is Mesh)
                 {
-                    //propertie.zrot+=.005;
-                    //propertie.yrot+=.0024;
-                    //propertie.xrot+=.003;
+                    propertie.zrot+=.005;
+                    propertie.yrot+=.0024;
+                    propertie.xrot+=.003;
                     //Console.WriteLine(propertie.nxrot);
                     //propertie.nxrot += 1;
                 }
