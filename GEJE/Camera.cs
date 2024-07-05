@@ -16,6 +16,7 @@ public class Camera : Proportie
     public double fov = 40; // Field of view in degrees
     private double aspectRatio;
     private double[,] projectionMatrix;
+    public bool outline = false;
 
     public Camera(double x, double y, double z, double xrot, double yrot, double zrot, ThreeDSceen scene, Window screen, double aspectRatio) : base(x, y, z, xrot, yrot, zrot)
     {
@@ -174,9 +175,12 @@ public class Camera : Proportie
             //Console.WriteLine(projectedPoint1[0] + " " + projectedPoint1[1] + " " + projectedPoint2[0]+ " " + projectedPoint2[1]);
             // Draw the line on the screen
             DrawFilledPolygonOnScreen(screen, projectedPoint1, projectedPoint2, projectedPoint3,new int[] { (int)line.p1.r, (int)line.p1.g, (int)line.p1.b });
-            DrawLineOnScreen(screen, projectedPoint1, projectedPoint2, new int[] { 0, 0, 0 });
-            DrawLineOnScreen(screen, projectedPoint2, projectedPoint3, new int[] { 0, 0, 0 });
-            DrawLineOnScreen(screen, projectedPoint3, projectedPoint1, new int[] { 0, 0, 0 });
+            if (outline)
+            {
+                DrawLineOnScreen(screen, projectedPoint1, projectedPoint2, new int[] { 0, 0, 0 });
+                DrawLineOnScreen(screen, projectedPoint2, projectedPoint3, new int[] { 0, 0, 0 });
+                DrawLineOnScreen(screen, projectedPoint3, projectedPoint1, new int[] { 0, 0, 0 });
+            }
             
             
             //Console.WriteLine(projectedPoint1[0] + " , " + projectedPoint1[1] + " | " + projectedPoint2[0] + " , " + projectedPoint2[1]);

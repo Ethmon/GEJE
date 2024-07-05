@@ -11,6 +11,7 @@ namespace GEJE
     public class Item
     {
         public double x, y, z, w;
+        public static bool rotatei = false;
         public double xrot, yrot, zrot , wrot;
         public List<Proportie> properties = new List<Proportie>();
         public Item(double x, double y, double z,double xrot,double yrot, double zrot)
@@ -73,9 +74,12 @@ namespace GEJE
                 }
                 if(propertie is Mesh)
                 {
-                    propertie.zrot+=.005;
-                    propertie.yrot+=.0024;
-                    propertie.xrot+=.003;
+                    if (rotatei)
+                    {
+                        propertie.zrot += .005;
+                        propertie.yrot += .0024;
+                        propertie.xrot += .003;
+                    }
                     //Console.WriteLine(propertie.nxrot);
                     //propertie.nxrot += 1;
                 }
