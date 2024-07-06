@@ -15,29 +15,6 @@ namespace GEJE
         {
             ThreeDSceen sceen = new ThreeDSceen(100, 100, 100);
 
-            //Item item = new Item(200, 0, 0, 0, 0, 0);
-            //Mesh box2 = new Mesh(@"C:\Users\ethan\OneDrive\Desktop\GEJE_Images\Pyramid.json", 0, 0, 0, 0, 0, 0);
-
-            //Item item1 = new Item(-200, 0, 0, 0, 0, 0);
-            //Mesh box21 = new Mesh(@"C:\Users\ethan\OneDrive\Desktop\GEJE_Images\Pyramid.json", 0, 0, 0, 30, 60, 60);
-
-
-            //Item item3 = new Item(0, 0, 200, 0, 0, 0);
-            //Mesh box23 = new Mesh(@"C:\Users\ethan\OneDrive\Desktop\GEJE_Images\box.json", 0, 0, 0, 0, 0, 0);
-
-            ////Item item13 = new Item(0, 0, -200, 0, 0, 0);
-            ////Mesh box213 = new Mesh(@"C:\Users\ethan\OneDrive\Desktop\GEJE_Images\box.json", 0, 0, 0, 30, 60, 60);
-
-            //Item item4 = new Item(200, 0, 200, 0, 0, 0);
-            //Mesh box24 = new Mesh(@"C:\Users\ethan\OneDrive\Desktop\GEJE_Images\Prisim.json", 0, 0, 0, 0, 0, 0);
-
-            //Item item14 = new Item(-200, 0, -200, 0, 0, 0);
-            //Mesh box214 = new Mesh(@"C:\Users\ethan\OneDrive\Desktop\GEJE_Images\Prisim.json", 0, 0, 0, 30, 60, 60);
-
-
-            ////Mesh box3 = new Mesh(@"C:\Users\ethan\OneDrive\Desktop\GEJE_Images\box.json", 800, 200, -10, -20, 0, -20);
-            ////Mesh box3 = new Mesh(@"C:\Users\ethan\Downloads\Box.json", 10, 20, 0, 0, 0, 0);// No initial rotation for the mesh
-
             ////item.add_propertie(box3);
             ////Mesh box3 = new Mesh(@"C:\Users\ethan\Downloads\Box.json", 0, 8, 10, 90, -90, 01);
             //item.add_propertie(box2);
@@ -67,15 +44,16 @@ namespace GEJE
             //    item.add_propertie(box2);
             //    sceen.add_item(item);
             //}
-            //for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 50; i++)
             {
-                Item item = new Item(0, 0, 250 + 60, 0, 0, 0);
+                Item item = new Item(0, 0, 250 + i*6, 0, 0, 0);
                 Mesh box2 = new Mesh(@"C:\Users\ethan\3dassets\Box.json", 0, 0, 0, 90, 0, 0);
                 item.add_propertie(box2);
                 sceen.add_item(item);
+                
             }
 
-            //Item.rotatei = true;
+            Item.rotatei = true;
 
             Item camera = new Item(0, 0, -200, 0, 0, 0);
             Window win = new Window(400, 300,3,3);

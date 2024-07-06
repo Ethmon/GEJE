@@ -5,11 +5,12 @@ using System.Linq;
 //using System.Drawing;
 using System.Windows.Forms;
 using System.Reflection;
+using System.Diagnostics;
 
 public class Camera : Proportie
 {
     public double near = 0;
-    public double far = 50000;
+    public double far = 500000;
     public double constant = 10;
     private Window screen;
     private ThreeDSceen scene;
@@ -59,7 +60,7 @@ public class Camera : Proportie
         foreach (Item item in scene.items)
         {
             // check if the item is in range for the camera
-            double distance = Math.Sqrt(Math.Pow(item.x - nx, 2) + Math.Pow(item.y - ny, 2) + Math.Pow(item.z - nz, 2));
+            double distance = (Math.Pow(item.x - nx, 2) + Math.Pow(item.y - ny, 2) + Math.Pow(item.z - nz, 2));
             //Console.WriteLine(distance);
             if (distance < far && distance > near)
             {
@@ -141,7 +142,8 @@ public class Camera : Proportie
 
 
 
-
+            
+            
 
 
 
@@ -149,9 +151,9 @@ public class Camera : Proportie
             double[] projectedPoint1 = MatrixMultiply(projectionMatrix, transformedPoint1);
             double[] projectedPoint2 = MatrixMultiply(projectionMatrix, transformedPoint2);
             double[] projectedPoint3 = MatrixMultiply(projectionMatrix, transformedPoint3);
-
+            
             // Adjust for screen dimensions
-
+            
             projectedPoint1[0] /= projectedPoint1[3];
             projectedPoint1[1] /= projectedPoint1[3];
             projectedPoint1[2] /= projectedPoint1[3];
@@ -161,28 +163,57 @@ public class Camera : Proportie
             projectedPoint3[0] /= projectedPoint3[3];
             projectedPoint3[1] /= projectedPoint3[3];
             projectedPoint3[2] /= projectedPoint3[3];
-
+            
+            
             projectedPoint1[0] = (projectedPoint1[0] + 1) * (screen.Ethwidth / 2);
             projectedPoint1[1] = (1 - projectedPoint1[1]) * (screen.Ethheight / 2);
             projectedPoint2[0] = (projectedPoint2[0] + 1) * (screen.Ethwidth / 2);
             projectedPoint2[1] = (1 - projectedPoint2[1]) * (screen.Ethheight / 2);
             projectedPoint3[0] = (projectedPoint3[0] + 1) * (screen.Ethwidth / 2);
             projectedPoint3[1] = (1 - projectedPoint3[1]) * (screen.Ethheight / 2);
+            //if out of bounds, skip
+            int outOfBoundsCount = 0;
+
+            // Check each condition and count the number of true conditions
+            if (projectedPoint1[0] < 0 || projectedPoint1[0] > screen.Ethwidth || projectedPoint1[1] < 0 || projectedPoint1[1] > screen.Ethheight)
+            {
+                outOfBoundsCount++;
+            }
+
+            if (projectedPoint2[0] < 0 || projectedPoint2[0] > screen.Ethwidth || projectedPoint2[1] < 0 || projectedPoint2[1] > screen.Ethheight)
+            {
+                outOfBoundsCount++;
+            }
+
+            if (projectedPoint3[0] < 0 || projectedPoint3[0] > screen.Ethwidth || projectedPoint3[1] < 0 || projectedPoint3[1] > screen.Ethheight)
+            {
+                outOfBoundsCount++;
+            }
+
+            // If at least two out of three conditions are true
+            if (outOfBoundsCount >= 2)
+            {
+                continue;
+            }
+
             // 
             //Console.WriteLine(transformedPoint[0] + " " + transformedPoint[1] + " " + transformedPoint[2]);
             //Console.WriteLine(projectedPoint1[0] + " " + projectedPoint1[1] + " " + projectedPoint2[0]+ " " + projectedPoint2[1]);
             // Draw the line on the screen
+
             DrawFilledPolygonOnScreen(screen, projectedPoint1, projectedPoint2, projectedPoint3,new int[] { (int)line.p1.r, (int)line.p1.g, (int)line.p1.b });
+
             if (outline)
             {
                 DrawLineOnScreen(screen, projectedPoint1, projectedPoint2, new int[] { 0, 0, 0 });
                 DrawLineOnScreen(screen, projectedPoint2, projectedPoint3, new int[] { 0, 0, 0 });
                 DrawLineOnScreen(screen, projectedPoint3, projectedPoint1, new int[] { 0, 0, 0 });
             }
-            
+
+
             
             //Console.WriteLine(projectedPoint1[0] + " , " + projectedPoint1[1] + " | " + projectedPoint2[0] + " , " + projectedPoint2[1]);
-            
+
         }
 
 

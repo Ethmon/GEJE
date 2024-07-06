@@ -73,21 +73,21 @@ namespace GEJE
                 {
                     moved.move(moved.x + movementY* speed, moved.y , moved.z - movementX* speed, moved.w);
                 }
-                if (keyInfo.Key == ConsoleKey.DownArrow)
-                {
-                    moved.rotate(moved.xrot-.25, moved.yrot, moved.zrot, moved.w);
-                }
                 if (keyInfo.Key == ConsoleKey.UpArrow)
                 {
-                    moved.rotate(moved.xrot+.25, moved.yrot, moved.zrot, moved.w);
+                    moved.rotate(moved.xrot-.5, moved.yrot, moved.zrot, moved.w);
+                }
+                if (keyInfo.Key == ConsoleKey.DownArrow)
+                {
+                    moved.rotate(moved.xrot+.5, moved.yrot, moved.zrot, moved.w);
                 }
                 if (keyInfo.Key == ConsoleKey.RightArrow)
                 {
-                    moved.rotate(moved.xrot, moved.yrot+.25, moved.zrot, moved.w);
+                    moved.rotate(moved.xrot, moved.yrot+.5, moved.zrot, moved.w);
                 }
                 if (keyInfo.Key == ConsoleKey.LeftArrow)
                 {
-                    moved.rotate(moved.xrot, moved.yrot-.25, moved.zrot, moved.w);
+                    moved.rotate(moved.xrot, moved.yrot-.5, moved.zrot, moved.w);
                 }
                 Console.WriteLine("x: " + moved.x + " y: " + moved.y + " z: " + moved.z + " xrot: " + moved.xrot + " yrot: " + moved.yrot + " zrot: " + moved.zrot);
             }

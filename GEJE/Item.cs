@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Diagnostics;
 
 namespace GEJE
 {
@@ -14,6 +15,7 @@ namespace GEJE
         public static bool rotatei = false;
         public double xrot, yrot, zrot , wrot;
         public List<Proportie> properties = new List<Proportie>();
+        public bool state = true;
         public Item(double x, double y, double z,double xrot,double yrot, double zrot)
         {
             this.x = x;
@@ -104,7 +106,15 @@ namespace GEJE
                 propertie.nxrot = Rotation.WrapAngle(this.xrot+propertie.xrot);
                 propertie.nyrot = Rotation.WrapAngle(this.yrot+propertie.yrot);
                 propertie.nzrot = Rotation.WrapAngle(this.zrot+propertie.zrot);
-                
+                //if(propertie is Camera)
+                //{
+                //    var watch = new Stopwatch();
+                //    watch.Start();
+                //    watch.Stop();
+                //    Console.WriteLine(watch.ElapsedMilliseconds);
+                //    continue;
+
+                //}
                 propertie.Update();
             }
             //Thread.Sleep(3);
