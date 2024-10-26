@@ -10,7 +10,7 @@ using System.Diagnostics;
 public class Camera : Proportie
 {
     public double near = 0;
-    public double far = 500000;
+    public double far = 900000;
     public double constant = 10;
     private Window screen;
     private ThreeDSceen scene;
@@ -18,7 +18,7 @@ public class Camera : Proportie
     private double aspectRatio;
     private double[,] projectionMatrix;
     public bool outline = false;
-
+    public bool fillin = true;
     public Camera(double x, double y, double z, double xrot, double yrot, double zrot, ThreeDSceen scene, Window screen, double aspectRatio) : base(x, y, z, xrot, yrot, zrot)
     {
         this.x = x;
@@ -200,8 +200,8 @@ public class Camera : Proportie
             //Console.WriteLine(transformedPoint[0] + " " + transformedPoint[1] + " " + transformedPoint[2]);
             //Console.WriteLine(projectedPoint1[0] + " " + projectedPoint1[1] + " " + projectedPoint2[0]+ " " + projectedPoint2[1]);
             // Draw the line on the screen
-
-            DrawFilledPolygonOnScreen(screen, projectedPoint1, projectedPoint2, projectedPoint3,new int[] { (int)line.p1.r, (int)line.p1.g, (int)line.p1.b });
+            if(fillin)
+                DrawFilledPolygonOnScreen(screen, projectedPoint1, projectedPoint2, projectedPoint3,new int[] { (int)line.p1.r, (int)line.p1.g, (int)line.p1.b });
 
             if (outline)
             {
@@ -443,6 +443,8 @@ public class Camera : Proportie
         int[] topPoint = sortedPoints[0];
         int[] middlePoint = sortedPoints[1];
         int[] bottomPoint = sortedPoints[2];
+       
+
         int totalHeight = bottomPoint[1] - topPoint[1];
 
         for (int y = topPoint[1]; y <= middlePoint[1]; y++)

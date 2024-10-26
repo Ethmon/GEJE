@@ -44,21 +44,22 @@ namespace GEJE
             //    item.add_propertie(box2);
             //    sceen.add_item(item);
             //}
-            for (int i = 0; i < 50; i++)
-            {
-                Item item = new Item(0, 0, 250 + i*6, 0, 0, 0);
-                Mesh box2 = new Mesh(@"C:\Users\ethan\3dassets\Box.json", 0, 0, 0, 90, 0, 0);
+            //for (int i = 0; i < 50; i++)
+            //{
+                Item item = new Item(0, 0, 40, 30, 90, 0);
+                Mesh box2 = new Mesh(@"C:\Users\ethan\OneDrive\Desktop\GEJE_Images\Prisim.json", 0, 0, 0, 0, 0, 0);
                 item.add_propertie(box2);
                 sceen.add_item(item);
                 
-            }
+            //}
 
-            Item.rotatei = true;
+            //Item.rotatei = true;
 
             Item camera = new Item(0, 0, -200, 0, 0, 0);
-            Window win = new Window(400, 300,3,3);
+            Window win = new Window(400, 300,2,2);
             Camera cam = new Camera(0,0, 0, 0, 0, 0, sceen, win,1);
             cam.outline = true;
+            //cam.fillin = false;
             Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera,5);
             camera.add_propertie(cam_movement);
             camera.add_propertie(cam);
