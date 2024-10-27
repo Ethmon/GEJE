@@ -35,15 +35,15 @@ namespace GEJE
             while (true)
             {
                 //Thread.Sleep(3);
-                var watch = new Stopwatch();
-                watch.Start();
+                //var watch = new Stopwatch();
+                //watch.Start();
                 foreach (Item item in items)
                 {
                    if(item.state)
                     item.Update();
                 }
-                watch.Stop();
-                Console.WriteLine(watch.ElapsedMilliseconds);
+                //watch.Stop();
+                //Console.WriteLine(watch.ElapsedMilliseconds);
             }
         }
         public void Start_scene()

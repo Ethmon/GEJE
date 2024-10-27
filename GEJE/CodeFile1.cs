@@ -46,20 +46,28 @@ namespace GEJE
             //}
             //for (int i = 0; i < 50; i++)
             //{
-                Item item = new Item(0, 0, 40, 30, 90, 0);
-                Mesh box2 = new Mesh(@"C:\Users\ethan\OneDrive\Desktop\GEJE_Images\Prisim.json", 0, 0, 0, 0, 0, 0);
+            // other files { @"C:\Users\ethan\3dassets\Box.json" , @"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON" }
+
+            Item item = new Item(0, 0, 40, 0, 0, 0);
+                Mesh box2 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 0, 0);
+                //Mesh box3 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 0, 180);
+                //Mesh box4 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 180, 0);
+                //Mesh box5 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 180, 180);
+                //item.add_propertie(box3);
                 item.add_propertie(box2);
-                sceen.add_item(item);
-                
+                //item.add_propertie(box4);
+                //item.add_propertie(box5);
+            sceen.add_item(item);
+
             //}
 
-            //Item.rotatei = true;
-
-            Item camera = new Item(0, 0, -200, 0, 0, 0);
-            Window win = new Window(400, 300,2,2);
+            Item.rotatei = false;
+            Console.WriteLine(box2.ToString());
+            Item camera = new Item(0, 20, -200, 0, 0, 0);
+            Window win = new Window(600, 400,2,2);
             Camera cam = new Camera(0,0, 0, 0, 0, 0, sceen, win,1);
             cam.outline = true;
-            //cam.fillin = false;
+            cam.fillin = false;
             Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera,5);
             camera.add_propertie(cam_movement);
             camera.add_propertie(cam);

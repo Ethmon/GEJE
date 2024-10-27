@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.IO;
 using System.Text.Json;
@@ -38,8 +39,22 @@ namespace GEJE
                 else point2 = new Point((point[0] * 2), (point[1] * 2), (point[2] * 2), 1, (int)(point[3]), (int)(point[4]), (int)(point[5]));
                 count++;
             }
+            
         }
-
+        public override string ToString()
+        {
+            string answer = "";
+            if (oldpoints != null) { return answer; }
+            else
+            {
+                foreach (Polygon point in oldpoints)
+                {
+                    answer += point.ToString() + "\n";
+                    Console.WriteLine("hello");
+                }
+            }
+            return answer;
+        }
         public override void Update()
         {
             this.nxrot = Rotation.WrapAngle(this.nxrot);

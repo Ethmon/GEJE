@@ -53,6 +53,7 @@ namespace GEJE
                 propertie.Start();
             }
         }
+        bool dddd = true;
         public void Update()
         {
             this.xrot = Rotation.WrapAngle(this.xrot);
@@ -82,6 +83,8 @@ namespace GEJE
                         propertie.yrot += .0024;
                         propertie.xrot += .003;
                     }
+
+                    
                     //Console.WriteLine(propertie.nxrot);
                     //propertie.nxrot += 1;
                 }
@@ -116,7 +119,19 @@ namespace GEJE
 
                 //}
                 propertie.Update();
+                if (propertie is Mesh)
+                {
+                    if (dddd)
+                    {
+                        foreach (Polygon polygon in ((Mesh)propertie).points)
+                        {
+                            Console.WriteLine(polygon.ToString());
+                        }
+                        
+                    }
+                }
             }
+            dddd = false;
             //Thread.Sleep(3);
         }
 

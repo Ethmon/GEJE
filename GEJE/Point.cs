@@ -21,6 +21,10 @@ namespace GEJE
             this.g = g;
             this.b = b;
         }
+        public override string ToString()
+        {
+            return x + ", " + y + ", " + z;
+        }
     }
     public class Line
     {
@@ -39,6 +43,10 @@ namespace GEJE
             this.p1 = p1;
             this.p2 = p2;
             this.p3 = p3;
+        }
+        public override string ToString()
+        {
+            return p1.ToString() + " | " + p2.ToString() + " | " + p3.ToString();
         }
     }
 
