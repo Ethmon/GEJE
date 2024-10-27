@@ -89,8 +89,8 @@ public class Camera : Proportie
             }
         }
         // sort lines by the average of the two points
-        List<Polygon> orderedLines = pointss.OrderByDescending(p => (((p.p1.x + p.p2.x + p.p3.x)/3-this.nx) + ((p.p1.y + p.p2.y+p.p3.y)/3-this.ny) + ((p.p1.z + p.p2.z+p.p3.z)/3-this.nz))).ToList();
-
+        List<Polygon> orderedLines = pointss.OrderByDescending(p => ((((p.p1.x + p.p2.x + p.p3.x)/3)-this.nx) + (((p.p1.y + p.p2.y+p.p3.y)/3)-this.ny) + (((p.p1.z + p.p2.z+p.p3.z)/3)-this.nz))).ToList();
+        
         foreach (Polygon line in orderedLines)
         {
             
@@ -200,6 +200,7 @@ public class Camera : Proportie
             //Console.WriteLine(transformedPoint[0] + " " + transformedPoint[1] + " " + transformedPoint[2]);
             //Console.WriteLine(projectedPoint1[0] + " " + projectedPoint1[1] + " " + projectedPoint2[0]+ " " + projectedPoint2[1]);
             // Draw the line on the screen
+            
             if(fillin)
                 DrawFilledPolygonOnScreen(screen, projectedPoint1, projectedPoint2, projectedPoint3,new int[] { (int)line.p1.r, (int)line.p1.g, (int)line.p1.b });
 
@@ -215,6 +216,8 @@ public class Camera : Proportie
             //Console.WriteLine(projectedPoint1[0] + " , " + projectedPoint1[1] + " | " + projectedPoint2[0] + " , " + projectedPoint2[1]);
 
         }
+
+        //screen.Draw();
 
 
 
@@ -451,8 +454,9 @@ public class Camera : Proportie
         {
             double segmentHeight = middlePoint[1] - topPoint[1] + 1;
             double alpha = (double)(y - topPoint[1]) / totalHeight;
-            int startX = (int)((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
-            int endX = (int)((1 - alpha) * topPoint[0] + alpha * middlePoint[0]);
+            double alpha2 = (double)(y - topPoint[1]) / segmentHeight;
+            int startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
+            int endX = (int)Math.Round((1 - alpha2) * topPoint[0] + alpha2 * middlePoint[0]);
             DrawHorizontalLine(screen, startX, endX, y, rgb);
         }
 
@@ -460,8 +464,9 @@ public class Camera : Proportie
         {
             double segmentHeight = bottomPoint[1] - middlePoint[1] + 1;
             double alpha = (double)(y - topPoint[1]) / totalHeight;
-            int startX = (int)((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
-            int endX = (int)((1 - alpha) * middlePoint[0] + alpha * bottomPoint[0]);
+            double alpha2 = (double)(y - middlePoint[1]) / segmentHeight;
+            int startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
+            int endX = (int)Math.Round((1 - alpha2) * middlePoint[0] + alpha2 * bottomPoint[0]);
             DrawHorizontalLine(screen, startX, endX, y, rgb);
         }
     }

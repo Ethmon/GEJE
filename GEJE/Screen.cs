@@ -4,6 +4,7 @@ using System.Threading;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Drawing.Imaging;
+using System.Diagnostics.Contracts;
 
 namespace GEJE
 {
@@ -11,6 +12,7 @@ namespace GEJE
     {
         private int[,,] tiles;
         private Bitmap[] buffers;
+        
         private int currentBufferIndex;
         private readonly object graphicsLock = new object();
         private readonly object RenderLock = new object();
@@ -102,6 +104,7 @@ namespace GEJE
         {
             while (true)
             {
+                
                 {
                     //var watch = Stopwatch.StartNew();
                     //watch.Start();
@@ -114,7 +117,7 @@ namespace GEJE
                         }
                     }));
 
-                    //Thread.Sleep(4);
+                    Thread.Sleep(4);
                     if (d)
                         Clear();
                     d = !d;
