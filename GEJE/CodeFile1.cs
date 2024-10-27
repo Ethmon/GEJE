@@ -48,7 +48,7 @@ namespace GEJE
             //{
             // other files { @"C:\Users\ethan\3dassets\Box.json" , @"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON" }
 
-            Item item = new Item(0, 0, 40, 0, 0, 0);
+            Item item = new Item(0, 0, 20, 0, 40, 0);
                 Mesh box2 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 0, 0);
                 //Mesh box3 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 0, 180);
                 //Mesh box4 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 180, 0);
