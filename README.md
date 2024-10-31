@@ -127,10 +127,9 @@ nuget restore GEJE.sln
 1. Controls:
    - WASD: Camera movement
    - Arrow Keys: Camera rotation
-   - ESC: Exit application
 
 2. Loading Models:
-   - Place JSON model files in the models directory
+   - Place JSON model files in the GEJE directoy
    - Format: Array of vertex coordinates and RGB colors
    ```json
    [
@@ -138,6 +137,8 @@ nuget restore GEJE.sln
      // Additional vertices...
    ]
    ```
+   - Add a mesh to CodeFile1.cs with the name of your JSON file and connect that mesh to an item.
+   - Add the item to your ThreeDSceen
 
 ## Performance Notes
 - Rendering optimized for modern multi-core processors
