@@ -2,7 +2,6 @@
 
 A custom 3D graphics engine built entirely in C# without using any game engines or graphics libraries. The engine implements real-time 3D rendering, perspective projection, and multi-threaded architecture to create a fully functional 3D visualization system.
 
-![Engine Demo](/api/placeholder/400/200)
 
 ## Core Features
 
@@ -106,7 +105,7 @@ GraphicsEngine/
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/graphics-engine.git
+git clone https://github.com/Ethmon/GEJE.git
 cd graphics-engine
 ```
 
@@ -163,11 +162,9 @@ nuget restore GEJE.sln
 MIT License - See LICENSE file for details
 
 ## Contact
-[Your Name]
-- GitHub: [Your GitHub]
-- Email: [Your Email]
+Ethan
+- GitHub: TEthmon
+- Email: Ethan6Salu@gmail.com
 
-## Acknowledgments
-Special thanks to the computer graphics community and the wealth of academic resources that made this project possible.
 
-Built with C# and a passion for computer graphics. 🚀
+Built with C# and a passion for learning from scratch.
