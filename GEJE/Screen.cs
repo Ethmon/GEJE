@@ -93,9 +93,9 @@ namespace GEJE
             {
                 for (int j = 0; j < Ethheight; j++)
                 {
-                    tiles[i, j, 0] = 255;
-                    tiles[i, j, 1] = 255;
-                    tiles[i, j, 2] = 255;
+                    tiles[i, j, 0] = 139;
+                    tiles[i, j, 1] = 149;
+                    tiles[i, j, 2] = 158;
                 }
             }
         }

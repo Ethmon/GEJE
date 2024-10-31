@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Drawing;
+using System.Drawing.Printing;
 using System.IO;
 using System.Text.Json;
 
@@ -11,7 +12,13 @@ namespace GEJE
     {
         public List<Polygon> points = new List<Polygon>();
         public List<Polygon> oldpoints = new List<Polygon>();
-
+        public string getPath()
+        {
+            string aa = System.IO.Directory.GetCurrentDirectory();
+            aa = aa.Replace("GEJE\\bin\\Debug", "GEJE\\");
+            Console.Write(aa);
+            return aa;
+        }
         public Mesh(string filename, double x, double y, double z, double xrot, double yrot, double zrot) : base(x, y, z, xrot, yrot, zrot)
         {
             this.x = x;
@@ -22,7 +29,7 @@ namespace GEJE
             this.zrot = zrot;
 
             // Read a json file with a list of lists with 3 doubles and 3 ints
-            string jsonString = File.ReadAllText(filename);
+            string jsonString = File.ReadAllText(getPath()+"\\"+filename);
             List<List<double>> data = JsonSerializer.Deserialize<List<List<double>>>(jsonString);
             int count = 0;
             Point point1 = null;
