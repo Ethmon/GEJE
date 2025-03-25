@@ -18,7 +18,7 @@ namespace GEJE
         private readonly object RenderLock = new object();
         public int Ethwidth;
         public int Ethheight;
-
+        public Camera cam;
         // New variables for controlling pixel size
         public int PixelWidth;
         public int PixelHeight;
@@ -86,6 +86,16 @@ namespace GEJE
                 tiles[x, y, 2] = b;
             }
         }
+        public void QPlaceColor(int x, int y, int r, int g, int b)
+        {
+            if (x < Ethwidth && x >= 0 && y < Ethheight && y >= 0 && tiles[x, y, 0] == 255 && tiles[x, y, 1] == 255 && tiles[x,y,2]==255)
+            {
+                tiles[x, y, 0] = r;
+                tiles[x, y, 1] = g;
+                tiles[x, y, 2] = b;
+            }
+        }
+
 
         public void Clear()
         {
@@ -93,9 +103,9 @@ namespace GEJE
             {
                 for (int j = 0; j < Ethheight; j++)
                 {
-                    tiles[i, j, 0] = 139;
-                    tiles[i, j, 1] = 149;
-                    tiles[i, j, 2] = 158;
+                    tiles[i, j, 0] = 255;
+                    tiles[i, j, 1] = 255;
+                    tiles[i, j, 2] = 255;
                 }
             }
         }
@@ -121,6 +131,7 @@ namespace GEJE
                     if (d)
                         Clear();
                     d = !d;
+                    
                     //watch.Stop();
                     //Console.WriteLine(watch.ElapsedMilliseconds);
                 }

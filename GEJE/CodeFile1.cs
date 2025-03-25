@@ -63,7 +63,7 @@ namespace GEJE
 
             //}
 
-            Item.rotatei = false;
+            Item.rotatei = true;
             //Console.WriteLine(box2.ToString());
             Item camera = new Item(0, 20, -200, 0, 0, 0);
             Window win = new Window(600, 400,2,2);
@@ -73,9 +73,9 @@ namespace GEJE
             Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera,5);
             camera.add_propertie(cam_movement);
             camera.add_propertie(cam);
-            camera.add_propertie(cam_movement);
+            //camera.add_propertie(cam_movement);
             sceen.add_item(camera);
-
+            win.cam = cam;
             sceen.Start_scene();
             
             win.Run();

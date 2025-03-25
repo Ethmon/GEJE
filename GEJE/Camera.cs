@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Reflection;
 using System.Diagnostics;
+using static System.Windows.Forms.LinkLabel;
 
 public class Camera : Proportie
 {
@@ -90,7 +91,7 @@ public class Camera : Proportie
         }
         // sort lines by the average of the two points
         List<Polygon> orderedLines = pointss.OrderByDescending(p => ((((p.p1.x + p.p2.x + p.p3.x)/3)-this.nx) + (((p.p1.y + p.p2.y+p.p3.y)/3)-this.ny) + (((p.p1.z + p.p2.z+p.p3.z)/3)-this.nz))).ToList();
-        
+        List<List<object>> group = new List<List<object>>();
         foreach (Polygon line in orderedLines)
         {
             
@@ -200,21 +201,34 @@ public class Camera : Proportie
             //Console.WriteLine(transformedPoint[0] + " " + transformedPoint[1] + " " + transformedPoint[2]);
             //Console.WriteLine(projectedPoint1[0] + " " + projectedPoint1[1] + " " + projectedPoint2[0]+ " " + projectedPoint2[1]);
             // Draw the line on the screen
-            
-            if(fillin)
-                DrawFilledPolygonOnScreen(screen, projectedPoint1, projectedPoint2, projectedPoint3,new int[] { (int)line.p1.r, (int)line.p1.g, (int)line.p1.b });
+            group.Add(new List<object>() { projectedPoint1, projectedPoint2, projectedPoint3, new int[] { (int)line.p1.r, (int)line.p1.g, (int)line.p1.b } });
+            //if (fillin)
+            //    DrawFilledPolygonOnScreen(screen, projectedPoint1, projectedPoint2, projectedPoint3,new int[] { (int)line.p1.r, (int)line.p1.g, (int)line.p1.b });
 
-            if (outline)
-            {
-                DrawLineOnScreen(screen, projectedPoint1, projectedPoint2, new int[] { 0, 0, 0 });
-                DrawLineOnScreen(screen, projectedPoint2, projectedPoint3, new int[] { 0, 0, 0 });
-                DrawLineOnScreen(screen, projectedPoint3, projectedPoint1, new int[] { 0, 0, 0 });
-            }
+            //if (outline)
+            //{
+            //    DrawLineOnScreen(screen, projectedPoint1, projectedPoint2, new int[] { 0, 0, 0 });
+            //    DrawLineOnScreen(screen, projectedPoint2, projectedPoint3, new int[] { 0, 0, 0 });
+            //    DrawLineOnScreen(screen, projectedPoint3, projectedPoint1, new int[] { 0, 0, 0 });
+            //}
 
 
             
             //Console.WriteLine(projectedPoint1[0] + " , " + projectedPoint1[1] + " | " + projectedPoint2[0] + " , " + projectedPoint2[1]);
 
+        }
+        group.Reverse();
+        foreach(List<object> list in group)
+        {
+            if (fillin)
+                DrawFilledPolygonOnScreen(screen, (double[])list[0], (double[])list[1], (double[])list[2], (int[])list[3]);
+
+            if (outline)
+            {
+                DrawLineOnScreen(screen, (double[])list[0], (double[])list[1], new int[] { 0, 0, 0 });
+                DrawLineOnScreen(screen, (double[])list[1], (double[])list[2], new int[] { 0, 0, 0 });
+                DrawLineOnScreen(screen, (double[])list[2], (double[])list[0], new int[] { 0, 0, 0 });
+            }
         }
 
         //screen.Draw();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Configuration;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -72,6 +73,14 @@ namespace GEJE
                 if (keyInfo.Key == ConsoleKey.A)
                 {
                     moved.move(moved.x + movementY* speed, moved.y , moved.z - movementX* speed, moved.w);
+                }
+                if(keyInfo.Key == ConsoleKey.E)
+                {
+                    moved.move(moved.x, moved.y + speed, moved.z, moved.w);
+                }
+                if(keyInfo.Key == ConsoleKey.Q)
+                {
+                    moved.move(moved.x, moved.y - speed, moved.z, moved.w);
                 }
                 if (keyInfo.Key == ConsoleKey.UpArrow)
                 {
