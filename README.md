@@ -2,7 +2,6 @@
 
 A custom 3D graphics engine built entirely in C# without using any game engines or graphics libraries. The engine implements real-time 3D rendering, perspective projection, and multi-threaded architecture to create a fully functional 3D visualization system.
 
-![Engine Demo](/api/placeholder/400/200)
 
 ## Core Features
 
@@ -106,7 +105,7 @@ GraphicsEngine/
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/graphics-engine.git
+git clone https://github.com/Ethmon/GEJE.git
 cd graphics-engine
 ```
 
@@ -128,10 +127,9 @@ nuget restore GEJE.sln
 1. Controls:
    - WASD: Camera movement
    - Arrow Keys: Camera rotation
-   - ESC: Exit application
 
 2. Loading Models:
-   - Place JSON model files in the models directory
+   - Place JSON model files in the GEJE directoy
    - Format: Array of vertex coordinates and RGB colors
    ```json
    [
@@ -139,6 +137,8 @@ nuget restore GEJE.sln
      // Additional vertices...
    ]
    ```
+   - Add a mesh to CodeFile1.cs with the name of your JSON file and connect that mesh to an item.
+   - Add the item to your ThreeDSceen
 
 ## Performance Notes
 - Rendering optimized for modern multi-core processors
@@ -163,11 +163,9 @@ nuget restore GEJE.sln
 MIT License - See LICENSE file for details
 
 ## Contact
-[Your Name]
-- GitHub: [Your GitHub]
-- Email: [Your Email]
+Ethan
+- GitHub: TEthmon
+- Email: Ethan6Salu@gmail.com
 
-## Acknowledgments
-Special thanks to the computer graphics community and the wealth of academic resources that made this project possible.
 
-Built with C# and a passion for computer graphics. 🚀
+Built with C# and a passion for learning from scratch.
