@@ -79,9 +79,9 @@ namespace GEJE
                 {
                     if (rotatei)
                     {
-                        propertie.zrot += .005;
-                        propertie.yrot += .0024;
-                        propertie.xrot += .003;
+                        propertie.zrot += .5;
+                        propertie.yrot += .24;
+                        propertie.xrot += .3;
                     }
 
                     

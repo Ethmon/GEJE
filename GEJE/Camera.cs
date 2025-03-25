@@ -90,7 +90,7 @@ public class Camera : Proportie
             }
         }
         // sort lines by the average of the two points
-        List<Polygon> orderedLines = pointss.OrderByDescending(p => ((((p.p1.x + p.p2.x + p.p3.x)/3)-this.nx) + (((p.p1.y + p.p2.y+p.p3.y)/3)-this.ny) + (((p.p1.z + p.p2.z+p.p3.z)/3)-this.nz))).ToList();
+        List<Polygon> orderedLines = pointss.OrderByDescending(p => (Math.Abs(((p.p1.x + p.p2.x + p.p3.x - (this.nx * 3)) /3)) + Math.Abs(((p.p1.y + p.p2.y+p.p3.y - (this.ny * 3)) /3)) + Math.Abs(((p.p1.z + p.p2.z+p.p3.z - (this.nz * 3))/3)))).ToList();
         List<List<object>> group = new List<List<object>>();
         foreach (Polygon line in orderedLines)
         {
@@ -217,7 +217,7 @@ public class Camera : Proportie
             //Console.WriteLine(projectedPoint1[0] + " , " + projectedPoint1[1] + " | " + projectedPoint2[0] + " , " + projectedPoint2[1]);
 
         }
-        group.Reverse();
+        //group.Reverse();
         foreach(List<object> list in group)
         {
             if (fillin)
@@ -230,6 +230,7 @@ public class Camera : Proportie
                 DrawLineOnScreen(screen, (double[])list[2], (double[])list[0], new int[] { 0, 0, 0 });
             }
         }
+        screen.UpdateLoop();
 
         //screen.Draw();
 
@@ -415,7 +416,7 @@ public class Camera : Proportie
     }
         */
         // ...
-        
+
         //screen.update();
         //Console.WriteLine(this.nxrot + " " + this.nyrot + " " + this.nzrot);
 

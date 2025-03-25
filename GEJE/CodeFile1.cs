@@ -47,9 +47,9 @@ namespace GEJE
             //for (int i = 0; i < 50; i++)
             //{
             // other files { @"C:\Users\ethan\3dassets\Box.json" , @"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON" }
-            for (int i = 1; i < 2; i++)
+            for (int i = 1; i < 3; i++)
             {
-                Item item = new Item(-300 + 240*i, 0, 20 + i* 20 , 0, 180, 0);
+                Item item = new Item(-300 + 240*i, 0, 20 + i* 20 , 45, 180, 0);
                 Mesh box2 = new Mesh("Poly.JSON", 0, 0, 0, 0, 0, 0);
                 //Mesh box3 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 0, 180);
                 //Mesh box4 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 180, 0);
@@ -63,7 +63,7 @@ namespace GEJE
 
             //}
 
-            Item.rotatei = true;
+            Item.rotatei = false;
             //Console.WriteLine(box2.ToString());
             Item camera = new Item(0, 20, -200, 0, 0, 0);
             Window win = new Window(600, 400,2,2);

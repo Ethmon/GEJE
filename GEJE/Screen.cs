@@ -66,8 +66,8 @@ namespace GEJE
 
         public void Run()
         {
-            Thread video_rendering = new Thread(new ThreadStart(UpdateLoop));
-            video_rendering.Start();
+            //Thread video_rendering = new Thread(new ThreadStart(UpdateLoop));
+            //video_rendering.Start();
             Application.Run(this);
         }
         public void update()
@@ -110,9 +110,9 @@ namespace GEJE
             }
         }
         bool d = false;
-        private void UpdateLoop()
+        public void UpdateLoop()
         {
-            while (true)
+            //while (true)
             {
                 
                 {
@@ -127,7 +127,7 @@ namespace GEJE
                         }
                     }));
 
-                    Thread.Sleep(4);
+                    //Thread.Sleep(4);
                     if (d)
                         Clear();
                     d = !d;
