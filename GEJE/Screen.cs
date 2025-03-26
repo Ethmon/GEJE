@@ -128,7 +128,7 @@ namespace GEJE
                     }));
 
                     //Thread.Sleep(4);
-                    if (d)
+                    //if (d)
                         Clear();
                     d = !d;
                     

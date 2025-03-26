@@ -192,7 +192,7 @@ public class Camera : Proportie
             }
 
             // If at least two out of three conditions are true
-            if (outOfBoundsCount >= 2)
+            if (outOfBoundsCount >= 3)
             {
                 continue;
             }
@@ -469,6 +469,9 @@ public class Camera : Proportie
         {
             for (int y = topPoint[1]; y <= middlePoint[1]; y++)
             {
+                if (y < 0 && middlePoint[1] > 0) y = 0;
+                else if (y < 0) break;
+                else if (y > screen.Ethheight) break;
                 double segmentHeight = middlePoint[1] - topPoint[1] + 1;
                 double alpha = (double)(y - topPoint[1]) / totalHeight;
                 double alpha2 = (double)(y - topPoint[1]) / segmentHeight;
@@ -481,6 +484,9 @@ public class Camera : Proportie
         {
             for (int y = middlePoint[1] + 1; y <= bottomPoint[1]; y++)
             {
+                if (y < 0 && middlePoint[1] > 0) y = 0;
+                else if (y < 0) break;
+                else if (y > screen.Ethheight) break;
                 double segmentHeight = bottomPoint[1] - middlePoint[1] + 1;
                 double alpha = (double)(y - topPoint[1]) / totalHeight;
                 double alpha2 = (double)(y - middlePoint[1]) / segmentHeight;
@@ -501,6 +507,9 @@ public class Camera : Proportie
         }
         for (int x = x1; x <= x2; x++)
         {
+            if (x < 0 && x2 > 0) x = 0;
+            else if (x < 0) break;
+            else if(x > screen.Ethwidth) break;
             screen.PlaceColor(x, y, rgb[0], rgb[1], rgb[2]);
         }
     }
