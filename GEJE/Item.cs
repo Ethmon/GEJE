@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace GEJE
 {
@@ -13,6 +14,9 @@ namespace GEJE
     {
         public double x, y, z, w;
         public static bool rotatei = false;
+        public static bool floatingyay = false;
+        private float momentumU = 1f;
+        public static bool NAH = false;
         public double xrot, yrot, zrot , wrot;
         public List<Proportie> properties = new List<Proportie>();
         public bool state = true;
@@ -77,12 +81,20 @@ namespace GEJE
                 }
                 if(propertie is Mesh)
                 {
+                    if (NAH) continue;
                     if (rotatei)
                     {
                         propertie.zrot += 5;
                         propertie.yrot += 2.4;
                         propertie.xrot += 3;
                     }
+                    else if (floatingyay)
+                    {
+                        propertie.yrot += 1.2;
+                        momentumU += (float)Math.Asin((((double)(System.DateTime.Now.Millisecond))- 599.5)/10000);
+                        propertie.y += momentumU;
+                    }    
+                    
 
                     
                     //Console.WriteLine(propertie.nxrot);

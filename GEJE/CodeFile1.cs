@@ -49,8 +49,8 @@ namespace GEJE
             // other files { @"C:\Users\ethan\3dassets\Box.json" , @"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON" }
             for (int i = 1; i < 2; i++)
             {
-                Item item = new Item(-240 + 240*i, 0, -10 + i* 20 , 90, 0, 0);
-                Mesh box2 = new Mesh("Models\\default.JSON", 0, 0, 0, 0, 0, 0);
+                Item item = new Item(-240 + 240*i, 0, -10 + i* 20 , 0, 0, 0);
+                Mesh box2 = new Mesh("Models\\FullBox.JSON", 0, 0, 0, 0, 0, 0);
                 //Mesh box3 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 0, 180);
                 //Mesh box4 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 180, 0);
                 //Mesh box5 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 180, 180);
@@ -63,13 +63,15 @@ namespace GEJE
 
             //}
 
-            Item.rotatei = false;
+            Item.rotatei = true;
+            Item.floatingyay = false;
             //Console.WriteLine(box2.ToString());
             Item camera = new Item(0, 0, -100, 0, 0, 0);
             Window win = new Window(600, 400,2,2);
             Camera cam = new Camera(0,0, 0, 0, 0, 0, sceen, win,1);
             cam.outline = false;
             cam.fillin = true;
+            
             Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera,5);
             camera.add_propertie(cam_movement);
             camera.add_propertie(cam);
