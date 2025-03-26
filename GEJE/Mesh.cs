@@ -38,14 +38,14 @@ namespace GEJE
             {
                 if (count == 2)
                 {
-                    oldpoints.Add(new Polygon(new Point((point[0] * 2), (point[1] * 2), (point[2] * 2), 1, (int)(point[3]), (int)(point[4]), (int)(point[5])), point1, point2));
+                    oldpoints.Add(new Polygon(new Point((point[0] * 1), (point[1] * 1), (point[2] * 1), 1, (int)(point[3]), (int)(point[4]), (int)(point[5])), point1, point2));
                     count = 0;
                 }
                 else if (count == 0)
-                { point1 = new Point((point[0] * 2), (point[1] * 2), (point[2] * 2), 1, (int)(point[3]), (int)(point[4]), (int)(point[5])); count++; }
+                { point1 = new Point((point[0] * 1), (point[1] * 1), (point[2] * 1), 1, (int)(point[3]), (int)(point[4]), (int)(point[5])); count++; }
                 else
                 {
-                    point2 = new Point((point[0] * 2), (point[1] * 2), (point[2] * 2), 1, (int)(point[3]), (int)(point[4]), (int)(point[5]));
+                    point2 = new Point((point[0] * 1), (point[1] * 1), (point[2] * 1), 1, (int)(point[3]), (int)(point[4]), (int)(point[5]));
                     count++;
                 }
             }

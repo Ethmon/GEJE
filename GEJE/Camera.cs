@@ -464,25 +464,30 @@ public class Camera : Proportie
        
 
         int totalHeight = bottomPoint[1] - topPoint[1];
-
-        for (int y = topPoint[1]; y <= middlePoint[1]; y++)
+        if (totalHeight == 0) return;
+        if (middlePoint[1] - topPoint[1] + 1 != 0)
         {
-            double segmentHeight = middlePoint[1] - topPoint[1] + 1;
-            double alpha = (double)(y - topPoint[1]) / totalHeight;
-            double alpha2 = (double)(y - topPoint[1]) / segmentHeight;
-            int startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
-            int endX = (int)Math.Round((1 - alpha2) * topPoint[0] + alpha2 * middlePoint[0]);
-            DrawHorizontalLine(screen, startX, endX, y, rgb);
+            for (int y = topPoint[1]; y <= middlePoint[1]; y++)
+            {
+                double segmentHeight = middlePoint[1] - topPoint[1] + 1;
+                double alpha = (double)(y - topPoint[1]) / totalHeight;
+                double alpha2 = (double)(y - topPoint[1]) / segmentHeight;
+                int startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
+                int endX = (int)Math.Round((1 - alpha2) * topPoint[0] + alpha2 * middlePoint[0]);
+                DrawHorizontalLine(screen, startX, endX, y, rgb);
+            }
         }
-
-        for (int y = middlePoint[1] + 1; y <= bottomPoint[1]; y++)
+        if (bottomPoint[1] - middlePoint[1] + 1 != 0)
         {
-            double segmentHeight = bottomPoint[1] - middlePoint[1] + 1;
-            double alpha = (double)(y - topPoint[1]) / totalHeight;
-            double alpha2 = (double)(y - middlePoint[1]) / segmentHeight;
-            int startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
-            int endX = (int)Math.Round((1 - alpha2) * middlePoint[0] + alpha2 * bottomPoint[0]);
-            DrawHorizontalLine(screen, startX, endX, y, rgb);
+            for (int y = middlePoint[1] + 1; y <= bottomPoint[1]; y++)
+            {
+                double segmentHeight = bottomPoint[1] - middlePoint[1] + 1;
+                double alpha = (double)(y - topPoint[1]) / totalHeight;
+                double alpha2 = (double)(y - middlePoint[1]) / segmentHeight;
+                int startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
+                int endX = (int)Math.Round((1 - alpha2) * middlePoint[0] + alpha2 * bottomPoint[0]);
+                DrawHorizontalLine(screen, startX, endX, y, rgb);
+            }
         }
     }
 
