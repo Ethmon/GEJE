@@ -49,7 +49,7 @@ namespace GEJE
             // other files { @"C:\Users\ethan\3dassets\Box.json" , @"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON" }
             for (int i = 1; i < 2; i++)
             {
-                Item item = new Item(-240 + 240*i, 0, -10 + i* 20 , 0, 0, 0);
+                Item item = new Item(-240 + 240*i, 0, -10 + i* 20 , 45, 180, 0);
                 Mesh box2 = new Mesh("Models\\FullBox.JSON", 0, 0, 0, 0, 0, 0);
                 //Mesh box3 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 0, 180);
                 //Mesh box4 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 180, 0);
