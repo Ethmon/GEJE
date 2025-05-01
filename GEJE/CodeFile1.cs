@@ -48,9 +48,9 @@ namespace GEJE
             //{
             // other files { @"C:\Users\ethan\3dassets\Box.json" , @"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON" }
             Random random = new Random();
-            for (int i = 1; i < 10; i++)
+            for (int i = 0; i < 11; i++)
             {
-                for (int k = 1; k < 10; k++)
+                for (int k = 0; k < 11; k++)
                 {
                     for (int v = 1; v < 2; v++)
                     {
