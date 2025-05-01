@@ -51,6 +51,21 @@ namespace GEJE
             }
             
         }
+        public void hueit(int r, int g, int b)
+        {
+            foreach (Polygon point in oldpoints)
+            {
+                point.p1.r = (point.p1.r+r>255)?255:(point.p1.r+r<0)?0:point.p1.r+r;
+                point.p1.g = (point.p1.g + g > 255) ? 255 : (point.p1.g + g < 0) ? 0 : point.p1.g + g;
+                point.p1.b = (point.p1.b + b > 255) ? 255 : (point.p1.b + b < 0) ? 0 : point.p1.b + b;
+                point.p2.r = (point.p2.r + r > 255) ? 255 : (point.p2.r + r < 0) ? 0 : point.p2.r + r;
+                point.p2.g = (point.p2.g + g > 255) ? 255 : (point.p2.g + g < 0) ? 0 : point.p2.g + g;
+                point.p2.b = (point.p2.b + b > 255) ? 255 : (point.p2.b + b < 0) ? 0 : point.p2.b + b;
+                point.p3.r = (point.p3.r + r > 255) ? 255 : (point.p3.r + r < 0) ? 0 : point.p3.r + r;
+                point.p3.g = (point.p3.g + g > 255) ? 255 : (point.p3.g + g < 0) ? 0 : point.p3.g + g;
+                point.p3.b = (point.p3.b + b > 255) ? 255 : (point.p3.b + b < 0) ? 0 : point.p3.b + b;
+            }
+        }
         public override string ToString()
         {
             string answer = "";

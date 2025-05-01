@@ -47,23 +47,62 @@ namespace GEJE
             //for (int i = 0; i < 50; i++)
             //{
             // other files { @"C:\Users\ethan\3dassets\Box.json" , @"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON" }
-            for (int i = 1; i < 2; i++)
+            Random random = new Random();
+            for (int i = 1; i < 10; i++)
             {
-                Item item = new Item(-240 + 240*i, 0, -10 + i* 20 , 45, 180, 0);
-                Mesh box2 = new Mesh("Models\\FullBox.JSON", 0, 0, 0, 0, 0, 0);
-                //Mesh box3 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 0, 180);
-                //Mesh box4 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 180, 0);
-                //Mesh box5 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 180, 180);
-                //item.add_propertie(box3);
-                item.add_propertie(box2);
-                //item.add_propertie(box4);
-                //item.add_propertie(box5);
-                sceen.add_item(item);
+                for (int k = 1; k < 10; k++)
+                {
+                    for (int v = 1; v < 2; v++)
+                    {
+                        double d = random.NextDouble();
+                        Item item = new Item(-20 + 20 * i, -0 + v*40, -10 + k * 20, 90, (d > .75) ? 0 : (d>.5)?90:(d>.25)?180:270  , 0);
+                        Mesh box2 = new Mesh("Models\\Ground1.JSON", 0, 0, 0, 0, 0, 0);
+                        int greenchange = random.Next(-30, 30);
+                        box2.hueit(0, greenchange, 0);
+                        //Mesh box3 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 0, 180);
+                        //Mesh box4 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 180, 0);
+                        //Mesh box5 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 180, 180);
+                        //item.add_propertie(box3);
+                        item.add_propertie(box2);
+                        //item.add_propertie(box4);
+                        //item.add_propertie(box5);
+                        sceen.add_item(item);
+
+
+
+                        Item under = new Item(-20 + 20 * i, 50, -10 + k * 20, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, 0);
+                        Mesh box3 = new Mesh("Models\\BlackSlate.JSON", 0, 0, 0, 0, 0, 0);
+                        under.add_propertie(box3);
+                        sceen.add_item(under);
+                    }
+                }
+            }
+            for(int i = 1; i < 10 ; i++)
+            { 
+            
+                for (int k = 1; k < 10; k++)
+                {
+                    for (int ppp = 0; ppp < 5; ppp++)
+                    {
+                        if (((i ==1||i==9)&&ppp<4)||((i==5)&&ppp<2&&k>3&&k<6)||((k==9)))
+                        {
+                            double d = random.NextDouble();
+                            Item under = new Item(-20 + 20 * i, 30 - (ppp * 20), -10 + k * 20, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, 0);
+                            Mesh box3 = new Mesh("Models\\Wall1.JSON", 0, 0, 0, 0, 0, 0);
+                            int red = random.Next(-50, 50);
+                            int green = random.Next(-50, 50);
+                            int blue = random.Next(-50, 50);
+                            box3.hueit(red, green, blue);
+                            under.add_propertie(box3);
+                            sceen.add_item(under);
+                        }
+                    }
+                }
             }
 
             //}
 
-            Item.rotatei = true;
+            Item.rotatei = false;
             Item.floatingyay = false;
             //Console.WriteLine(box2.ToString());
             Item camera = new Item(0, 0, -100, 0, 0, 0);

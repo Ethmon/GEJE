@@ -84,9 +84,9 @@ namespace GEJE
                     if (NAH) continue;
                     if (rotatei)
                     {
-                        //propertie.zrot += 5;
+                        propertie.zrot += 5;
                         propertie.yrot += 2.4;
-                        //propertie.xrot += 3;
+                        propertie.xrot += 3;
                     }
                     else if (floatingyay)
                     {

@@ -130,7 +130,7 @@ namespace GEJE
                     //Thread.Sleep(4);
                     //if (d)
                         Clear();
-                    d = !d;
+                    //d = !d;
                     
                     //watch.Stop();
                     //Console.WriteLine(watch.ElapsedMilliseconds);
