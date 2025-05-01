@@ -17,10 +17,10 @@ namespace GEJE
         public static bool floatingyay = false;
         private float momentumU = 1f;
         public static bool NAH = false;
-        public double xrot, yrot, zrot , wrot;
+        public double xrot, yrot, zrot, wrot;
         public List<Proportie> properties = new List<Proportie>();
         public bool state = true;
-        public Item(double x, double y, double z,double xrot,double yrot, double zrot)
+        public Item(double x, double y, double z, double xrot, double yrot, double zrot)
         {
             this.x = x;
             this.y = y;
@@ -30,7 +30,7 @@ namespace GEJE
             this.zrot = zrot;
 
         }
-        
+
         public void add_propertie(Proportie propertie)
         {
             properties.Add(propertie);
@@ -71,41 +71,41 @@ namespace GEJE
             double[,] rotationMatrixZ = Rotation.GetRotationMatrixZ(zRotRad);
             // Combine rotation matrices
             double[,] combinedRotationMatrix = Rotation.CombineMatrices(rotationMatrixZ, Rotation.CombineMatrices(rotationMatrixY, rotationMatrixX));
-            
+
             foreach (Proportie propertie in properties)
             {
-                if(propertie is Movement)
+                if (propertie is Movement)
                 {
                     propertie.Update();
                     continue;
                 }
-                if(propertie is Mesh)
+                if (propertie is Mesh)
                 {
                     if (NAH) continue;
                     if (rotatei)
                     {
-                        propertie.zrot += 5;
+                        //propertie.zrot += 5;
                         propertie.yrot += 2.4;
-                        propertie.xrot += 3;
+                        //propertie.xrot += 3;
                     }
                     else if (floatingyay)
                     {
                         propertie.yrot += 1.2;
-                        momentumU += (float)Math.Asin((((double)(System.DateTime.Now.Millisecond))- 599.5)/10000);
+                        momentumU += (float)Math.Asin((((double)(System.DateTime.Now.Millisecond)) - 599.5) / 10000);
                         propertie.y += momentumU;
-                    }    
-                    
+                    }
 
-                    
+
+
                     //Console.WriteLine(propertie.nxrot);
                     //propertie.nxrot += 1;
                 }
-                if(propertie is Camera)
+                if (propertie is Camera)
                 {
                     //propertie.y += .1;
                     //propertie.yrot += .005;
                 }
-                
+
                 double x = propertie.x;
                 double y = propertie.y;
                 double z = propertie.z;
@@ -118,9 +118,9 @@ namespace GEJE
                 newY += this.y;
                 newZ += this.z;*/
                 propertie.move(newX, newY, newZ, 1);
-                propertie.nxrot = Rotation.WrapAngle(this.xrot+propertie.xrot);
-                propertie.nyrot = Rotation.WrapAngle(this.yrot+propertie.yrot);
-                propertie.nzrot = Rotation.WrapAngle(this.zrot+propertie.zrot);
+                propertie.nxrot = Rotation.WrapAngle(this.xrot + propertie.xrot);
+                propertie.nyrot = Rotation.WrapAngle(this.yrot + propertie.yrot);
+                propertie.nzrot = Rotation.WrapAngle(this.zrot + propertie.zrot);
                 //if(propertie is Camera)
                 //{
                 //    var watch = new Stopwatch();
@@ -139,7 +139,7 @@ namespace GEJE
                         {
                             Console.WriteLine(polygon.ToString());
                         }
-                        
+
                     }
                 }
             }
@@ -148,4 +148,24 @@ namespace GEJE
         }
 
     }
+
+
+
+    public class SwordDemo : Proportie
+    {
+        public Item sword;
+        public SwordDemo(double x, double y, double z, double xrot, double yrot, double zrot) : base(x, y, z, xrot, yrot, zrot)
+        {
+
+        }
+        public override void Start()
+        {
+            
+        }
+        public override void Update()
+        {
+            sword.yrot += 1.3;
+        }
+    }
+
 }
