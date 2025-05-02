@@ -92,9 +92,9 @@ namespace GEJE
                                 double d2 = random.NextDouble();
                                 Item under = new Item(-20 + 20 * i, 30 - (ppp * 20), -10 + k * 20, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, (d2 > .75) ? 0 : (d2 > .5) ? 90 : (d2 > .25) ? 180 : 270);
                                 Mesh box3 = new Mesh("Models\\Wall1.JSON", 0, 0, 0, 0, 0, 0);
-                                int red = random.Next(-50, 50);
-                                int green = random.Next(-50, 50);
-                                int blue = random.Next(-50, 50);
+                                int red = random.Next(0, 5) * i  ;
+                                int green = random.Next(0, 5) * k ;
+                                int blue = random.Next(0, 13) * ppp ;
                                 box3.hueit(red, green, blue);
                                 under.add_propertie(box3);
                                 sceen.add_item(under);

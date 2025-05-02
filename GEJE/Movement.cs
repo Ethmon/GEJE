@@ -98,7 +98,7 @@ namespace GEJE
                 {
                     moved.rotate(moved.xrot, moved.yrot-.5, moved.zrot, moved.w);
                 }
-                Console.WriteLine("x: " + moved.x + " y: " + moved.y + " z: " + moved.z + " xrot: " + moved.xrot + " yrot: " + moved.yrot + " zrot: " + moved.zrot);
+                //Console.WriteLine("x: " + moved.x + " y: " + moved.y + " z: " + moved.z + " xrot: " + moved.xrot + " yrot: " + moved.yrot + " zrot: " + moved.zrot);
             }
         }
     }

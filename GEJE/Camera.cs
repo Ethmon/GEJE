@@ -461,7 +461,7 @@ public class Camera : Proportie
         int[] topPoint = sortedPoints[0];
         int[] middlePoint = sortedPoints[1];
         int[] bottomPoint = sortedPoints[2];
-       
+
 
         int totalHeight = bottomPoint[1] - topPoint[1];
         if (totalHeight == 0) return;
