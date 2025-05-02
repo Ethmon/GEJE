@@ -104,7 +104,7 @@ namespace GEJE
                 }
             }
             Item sword = new Item(80, -15, 80, 90, 0, 0);
-            Mesh swordmesh = new Mesh("Models\\Sword.JSON", 0, 0, 0, 0, 0, 0);
+            Mesh swordmesh = new Mesh("Models\\apple.JSON", 0, 0, 0, 0, 0, 0);
             SwordDemo demo = new SwordDemo(0, 0, 0, 0, 0, 0);
             demo.sword = sword;
             sword.add_propertie(demo);
