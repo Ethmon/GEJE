@@ -9,9 +9,9 @@ namespace GEJE
     public class Point
     {
         public double x, y, z, w;
-        public int r, g, b;
+        public byte r, g, b;
 
-        public Point(double x, double y, double z, double w, int r, int g, int b)
+        public Point(double x, double y, double z, double w, byte r, byte g, byte b)
         {
             this.x = x;
             this.y = y;

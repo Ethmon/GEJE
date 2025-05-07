@@ -59,7 +59,7 @@ namespace GEJE
                             double d = random.NextDouble();
                             Item item = new Item(-20 + 20 * i, -0 + v * 40, -10 + k * 20, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, 0);
                             Mesh box2 = new Mesh("Models\\Ground1.JSON", 0, 0, 0, 0, 0, 0);
-                            int greenchange = random.Next(-30, 30);
+                            int greenchange = random.Next(-50, 0);
                             box2.hueit(0, greenchange, 0);
                             //Mesh box3 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 0, 180);
                             //Mesh box4 = new Mesh(@"C:\Users\ethan\Downloads\JEGE_images\Poly.JSON", 0, 0, 0, 0, 180, 0);
@@ -117,7 +117,7 @@ namespace GEJE
             Item.floatingyay = false;
             //Console.WriteLine(box2.ToString());
             Item camera = new Item(0, 0, -100, 0, 0, 0);
-            Window win = new Window(300, 200,2,2);
+            Window win = new Window(600, 400,2,2);
             Camera cam = new Camera(0,0, 0, 0, 0, 0, sceen, win,1);
             cam.outline = false;
             cam.fillin = true;

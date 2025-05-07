@@ -10,7 +10,7 @@ namespace GEJE
 {
     public class Window : Form
     {
-        private int[,,] tiles;
+        private byte[,,] tiles;
         private Bitmap[] buffers;
         
         private int currentBufferIndex;
@@ -36,7 +36,7 @@ namespace GEJE
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
 
-            tiles = new int[Ethwidth, Ethheight, 3];
+            tiles = new byte[Ethwidth, Ethheight, 3];
             buffers = new Bitmap[3];  // Triple buffering
             for (int i = 0; i < 3; i++)
             {
@@ -77,7 +77,7 @@ namespace GEJE
             //video_rendering.Start();
         }
 
-        public void PlaceColor(int x, int y, int r, int g, int b)
+        public void PlaceColor(int x, int y, byte r, byte g, byte b)
         {
             if (x < Ethwidth && x >= 0 && y < Ethheight && y >= 0)
             {
@@ -86,7 +86,7 @@ namespace GEJE
                 tiles[x, y, 2] = b;
             }
         }
-        public void QPlaceColor(int x, int y, int r, int g, int b)
+        public void QPlaceColor(int x, int y, byte r, byte g, byte b)
         {
             if (x < Ethwidth && x >= 0 && y < Ethheight && y >= 0 && tiles[x, y, 0] == 255 && tiles[x, y, 1] == 255 && tiles[x,y,2]==255)
             {
@@ -97,45 +97,27 @@ namespace GEJE
         }
 
 
-        public void Clear()
+        unsafe void Clear()
         {
-            for (int i = 0; i < Ethwidth; i++)
+            fixed (byte* ptr = &tiles[0, 0, 0])
             {
-                for (int j = 0; j < Ethheight; j++)
+                for (int i = 0; i < Ethwidth * Ethheight * 3; i++)
                 {
-                    tiles[i, j, 0] = 255;
-                    tiles[i, j, 1] = 255;
-                    tiles[i, j, 2] = 255;
+                    ptr[i] = 255;
                 }
             }
         }
         bool d = false;
+        private Graphics g;
         public void UpdateLoop()
         {
-            //while (true)
+            Draw();
+            if (g == null) g = this.CreateGraphics();
+            Invoke(new MethodInvoker(() =>
             {
-                
-                {
-                    //var watch = Stopwatch.StartNew();
-                    //watch.Start();
-                    Draw();
-                    this.Invoke(new MethodInvoker(() =>
-                    {
-                        using (Graphics g = this.CreateGraphics())
-                        {
-                            g.DrawImage(buffers[currentBufferIndex], 0, 0);
-                        }
-                    }));
-
-                    //Thread.Sleep(4);
-                    //if (d)
-                        Clear();
-                    //d = !d;
-                    
-                    //watch.Stop();
-                    //Console.WriteLine(watch.ElapsedMilliseconds);
-                }
-            }
+                g.DrawImage(buffers[currentBufferIndex], 0, 0);
+            }));
+            Clear();
         }
 
         public void Draw()
@@ -151,22 +133,24 @@ namespace GEJE
                 unsafe
                 {
                     byte* ptr = (byte*)bmpData.Scan0; // Get the pointer to the start of the bitmap data
-
+                    int index = 0;
+                    int tileX = 0;
+                    int tileY = 0;
                     // Iterate through the pixels and set their color directly in memory
                     for (int y = 0; y < bmpData.Height; y++)
                     {
                         for (int x = 0; x < bmpData.Width; x++)
                         {
-                            int index = y * bmpData.Stride + x * 4; // Calculate the index of the current pixel
+                             index = y * bmpData.Stride + x * 4; // Calculate the index of the current pixel
 
                             // Calculate the corresponding tile coordinates
-                            int tileX = x / PixelWidth;
-                            int tileY = y / PixelHeight;
+                            tileX = x / PixelWidth;
+                            tileY = y / PixelHeight;
 
                             // Set the pixel color based on your tiles array
-                            ptr[index + 2] = (byte)tiles[tileX, tileY, 0]; // Red component
-                            ptr[index + 1] = (byte)tiles[tileX, tileY, 1]; // Green component
-                            ptr[index] = (byte)tiles[tileX, tileY, 2];     // Blue component
+                            ptr[index + 2] = tiles[tileX, tileY, 0]; // Red component
+                            ptr[index + 1] = tiles[tileX, tileY, 1]; // Green component
+                            ptr[index] = tiles[tileX, tileY, 2];     // Blue component
                             ptr[index + 3] = 255; // Alpha (assuming 32-bit ARGB format)
                         }
                     }

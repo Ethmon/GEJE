@@ -38,14 +38,14 @@ namespace GEJE
             {
                 if (count == 2)
                 {
-                    oldpoints.Add(new Polygon(new Point((point[0] * 1), (point[1] * 1), (point[2] * 1), 1, (int)(point[3]), (int)(point[4]), (int)(point[5])), point1, point2));
+                    oldpoints.Add(new Polygon(new Point((point[0] * 1), (point[1] * 1), (point[2] * 1), 1, (byte)(point[3]), (byte)(point[4]), (byte)(point[5])), point1, point2));
                     count = 0;
                 }
                 else if (count == 0)
-                { point1 = new Point((point[0] * 1), (point[1] * 1), (point[2] * 1), 1, (int)(point[3]), (int)(point[4]), (int)(point[5])); count++; }
+                { point1 = new Point((point[0] * 1), (point[1] * 1), (point[2] * 1), 1, (byte)(point[3]), (byte)(point[4]), (byte)(point[5])); count++; }
                 else
                 {
-                    point2 = new Point((point[0] * 1), (point[1] * 1), (point[2] * 1), 1, (int)(point[3]), (int)(point[4]), (int)(point[5]));
+                    point2 = new Point((point[0] * 1), (point[1] * 1), (point[2] * 1), 1, (byte)(point[3]), (byte)(point[4]), (byte)(point[5]));
                     count++;
                 }
             }
@@ -55,15 +55,15 @@ namespace GEJE
         {
             foreach (Polygon point in oldpoints)
             {
-                point.p1.r = (point.p1.r+r>255)?255:(point.p1.r+r<0)?0:point.p1.r+r;
-                point.p1.g = (point.p1.g + g > 255) ? 255 : (point.p1.g + g < 0) ? 0 : point.p1.g + g;
-                point.p1.b = (point.p1.b + b > 255) ? 255 : (point.p1.b + b < 0) ? 0 : point.p1.b + b;
-                point.p2.r = (point.p2.r + r > 255) ? 255 : (point.p2.r + r < 0) ? 0 : point.p2.r + r;
-                point.p2.g = (point.p2.g + g > 255) ? 255 : (point.p2.g + g < 0) ? 0 : point.p2.g + g;
-                point.p2.b = (point.p2.b + b > 255) ? 255 : (point.p2.b + b < 0) ? 0 : point.p2.b + b;
-                point.p3.r = (point.p3.r + r > 255) ? 255 : (point.p3.r + r < 0) ? 0 : point.p3.r + r;
-                point.p3.g = (point.p3.g + g > 255) ? 255 : (point.p3.g + g < 0) ? 0 : point.p3.g + g;
-                point.p3.b = (point.p3.b + b > 255) ? 255 : (point.p3.b + b < 0) ? 0 : point.p3.b + b;
+                point.p1.r = (byte)((point.p1.r+r>255)?255:(point.p1.r+r<0)?0:point.p1.r+r);
+                point.p1.g = (byte)((point.p1.g + g > 255) ? 255 : (point.p1.g + g < 0) ? 0 : point.p1.g + g);
+                point.p1.b = (byte)((point.p1.b + b > 255) ? 255 : (point.p1.b + b < 0) ? 0 : point.p1.b + b);
+                point.p2.r = (byte)((point.p2.r + r > 255) ? 255 : (point.p2.r + r < 0) ? 0 : point.p2.r + r);
+                point.p2.g = (byte)((point.p2.g + g > 255) ? 255 : (point.p2.g + g < 0) ? 0 : point.p2.g + g);
+                point.p2.b = (byte)((point.p2.b + b > 255) ? 255 : (point.p2.b + b < 0) ? 0 : point.p2.b + b);
+                point.p3.r = (byte)((point.p3.r + r > 255) ? 255 : (point.p3.r + r < 0) ? 0 : point.p3.r + r);
+                point.p3.g = (byte)((point.p3.g + g > 255) ? 255 : (point.p3.g + g < 0) ? 0 : point.p3.g + g);
+                point.p3.b = (byte)((point.p3.b + b > 255) ? 255 : (point.p3.b + b < 0) ? 0 : point.p3.b + b);
             }
         }
         public override string ToString()

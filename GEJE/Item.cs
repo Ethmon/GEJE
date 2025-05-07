@@ -130,6 +130,16 @@ namespace GEJE
                 //    continue;
 
                 //}
+                //if(propertie is Camera)
+                //{
+                //    var watch = new Stopwatch();
+                //    watch.Start();
+                //    propertie.Update();
+                //    watch.Stop();
+                //    Console.WriteLine(watch.ElapsedMilliseconds);
+                //    continue;
+                //}
+                //else
                 propertie.Update();
                 if (propertie is Mesh)
                 {

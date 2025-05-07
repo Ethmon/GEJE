@@ -20,6 +20,7 @@ public class Camera : Proportie
     private double[,] projectionMatrix;
     public bool outline = false;
     public bool fillin = true;
+    public bool new_meshes = true;
     public Camera(double x, double y, double z, double xrot, double yrot, double zrot, ThreeDSceen scene, Window screen, double aspectRatio) : base(x, y, z, xrot, yrot, zrot)
     {
         this.x = x;
@@ -39,58 +40,75 @@ public class Camera : Proportie
         this.aspectRatio = aspectRatio;
         this.projectionMatrix = CalculateProjectionMatrix(fov, aspectRatio, near, far);
     }
-     
+    List<Polygon> pointss = new List<Polygon>();
+    List<Polygon> orderedLines = new List<Polygon>();
+    double projectedPoint10 = 0;
+    double projectedPoint11 = 0;
+    double projectedPoint12 = 0;
+    double projectedPoint20 = 0;
+    double projectedPoint21 = 0;
+    double projectedPoint22 = 0;
+    double projectedPoint30 = 0;
+    double projectedPoint31 = 0;
+    double projectedPoint32 = 0;
+    double projectedPoint13 = 0;
+    double projectedPoint23 = 0;
+    double projectedPoint33 = 0;
     public override void Update()
     {
-        //DrawLineOnScreen(screen, new double[] { 0, 0, 10, 10, 10 }, new double[] { 100, 100, 10, 10, 10 }, new int[] { 0, 0, 0 });
-        // get all items in the scene that the camera can see
-        this.nxrot = Rotation.WrapAngle(this.nxrot);
-        this.nyrot = Rotation.WrapAngle(this.nyrot);
-        this.nzrot = Rotation.WrapAngle(this.nzrot);
-        double xRotRad = this.nxrot * (Math.PI / 180);
-        double yRotRad = this.nyrot * (Math.PI / 180);
-        double zRotRad = this.nzrot * (Math.PI / 180);
-        double[,] rotationMatrixX = Rotation.GetRotationMatrixX(xRotRad);
-        double[,] rotationMatrixY = Rotation.GetRotationMatrixY(yRotRad);
-        double[,] rotationMatrixZ = Rotation.GetRotationMatrixZ(zRotRad);
-        double[,] combinedRotationMatrix = Rotation.CombineMatrices(rotationMatrixZ, Rotation.CombineMatrices(rotationMatrixX, rotationMatrixY));
+        
+            //DrawLineOnScreen(screen, new double[] { 0, 0, 10, 10, 10 }, new double[] { 100, 100, 10, 10, 10 }, new int[] { 0, 0, 0 });
+            // get all items in the scene that the camera can see
+            this.nxrot = Rotation.WrapAngle(this.nxrot);
+            this.nyrot = Rotation.WrapAngle(this.nyrot);
+            this.nzrot = Rotation.WrapAngle(this.nzrot);
+            double xRotRad = this.nxrot * (Math.PI / 180);
+            double yRotRad = this.nyrot * (Math.PI / 180);
+            double zRotRad = this.nzrot * (Math.PI / 180);
+            double[,] rotationMatrixX = Rotation.GetRotationMatrixX(xRotRad);
+            double[,] rotationMatrixY = Rotation.GetRotationMatrixY(yRotRad);
+            double[,] rotationMatrixZ = Rotation.GetRotationMatrixZ(zRotRad);
+            double[,] combinedRotationMatrix = Rotation.CombineMatrices(rotationMatrixZ, Rotation.CombineMatrices(rotationMatrixX, rotationMatrixY));
 
-
-        List<Polygon> pointss = new List<Polygon>();
-
-        foreach (Item item in scene.items)
-        {
-            // check if the item is in range for the camera
-            double distance = (Math.Pow(item.x - nx, 2) + Math.Pow(item.y - ny, 2) + Math.Pow(item.z - nz, 2));
-            //Console.WriteLine(distance);
-            if (distance < far && distance > near)
+        if (new_meshes)
+        { 
+            pointss.Clear();
+            double distance = 0;
+            foreach (Item item in scene.items)
             {
-
-                /*double newx = item.x - this.x;
-                double newy = item.y - this.y;
-                double newz = item.z - this.z;
-                double screenX = newx * Math.Cos(yRotRad) - newz * Math.Sin(yRotRad);
-                double screenY = newx * Math.Sin(yRotRad) + newy * Math.Cos(xRotRad) + newz * Math.Sin(xRotRad);
-                double screenZ = newx * Math.Cos(yRotRad) + newy * Math.Sin(xRotRad) + newz * Math.Cos(xRotRad);*/
-
-                //if (screenX > -fovW && screenX < fovW && screenY > -fovH && screenY < fovH)
+                // check if the item is in range for the camera
+                distance = (Math.Pow(item.x - nx, 2) + Math.Pow(item.y - ny, 2) + Math.Pow(item.z - nz, 2));
+                //Console.WriteLine(distance);
+                if (distance < far && distance > near)
                 {
-                    foreach (Object propertie in item.properties)
-                    {
-                        if (propertie.GetType() == typeof(Mesh))
-                        {
-                            foreach (Polygon point in ((Mesh)propertie).points)
-                            {
 
-                                pointss.Add(point);
+                    /*double newx = item.x - this.x;
+                    double newy = item.y - this.y;
+                    double newz = item.z - this.z;
+                    double screenX = newx * Math.Cos(yRotRad) - newz * Math.Sin(yRotRad);
+                    double screenY = newx * Math.Sin(yRotRad) + newy * Math.Cos(xRotRad) + newz * Math.Sin(xRotRad);
+                    double screenZ = newx * Math.Cos(yRotRad) + newy * Math.Sin(xRotRad) + newz * Math.Cos(xRotRad);*/
+
+                    //if (screenX > -fovW && screenX < fovW && screenY > -fovH && screenY < fovH)
+                    {
+                        foreach (Object propertie in item.properties)
+                        {
+                            if (propertie.GetType() == typeof(Mesh))
+                            {
+                                foreach (Polygon point in ((Mesh)propertie).points)
+                                {
+
+                                    pointss.Add(point);
+                                }
                             }
                         }
                     }
                 }
             }
+            new_meshes = false;
         }
         // sort lines by the average of the two points
-        List<Polygon> orderedLines = pointss.OrderByDescending(p => (Math.Abs(((p.p1.x + p.p2.x + p.p3.x - (this.nx * 3)) /3)) + Math.Abs(((p.p1.y + p.p2.y+p.p3.y - (this.ny * 3)) /3)) + Math.Abs(((p.p1.z + p.p2.z+p.p3.z - (this.nz * 3))/3)))).ToList();
+        orderedLines = pointss.OrderByDescending(p => (Math.Abs(((p.p1.x + p.p2.x + p.p3.x - (this.nx * 3)) /3)) + Math.Abs(((p.p1.y + p.p2.y+p.p3.y - (this.ny * 3)) /3)) + Math.Abs(((p.p1.z + p.p2.z+p.p3.z - (this.nz * 3))/3)))).ToList();
         List<List<object>> group = new List<List<object>>();
         foreach (Polygon line in orderedLines)
         {
@@ -152,41 +170,53 @@ public class Camera : Proportie
             double[] projectedPoint1 = MatrixMultiply(projectionMatrix, transformedPoint1);
             double[] projectedPoint2 = MatrixMultiply(projectionMatrix, transformedPoint2);
             double[] projectedPoint3 = MatrixMultiply(projectionMatrix, transformedPoint3);
-            
+
+            projectedPoint10 = projectedPoint1[0];
+            projectedPoint11 = projectedPoint1[1];
+            projectedPoint12 = projectedPoint1[2];
+            projectedPoint20 = projectedPoint2[0];
+            projectedPoint21 = projectedPoint2[1];
+            projectedPoint23 = projectedPoint2[2];
+            projectedPoint30 = projectedPoint3[0];
+            projectedPoint31 = projectedPoint3[1];
+            projectedPoint32 = projectedPoint3[2];
+            projectedPoint13 = projectedPoint1[3];
+            projectedPoint23 = projectedPoint2[3];
+            projectedPoint33 = projectedPoint3[3];
             // Adjust for screen dimensions
+
+            projectedPoint10 /= projectedPoint13;
+            projectedPoint11 /= projectedPoint13;
+            projectedPoint12 /= projectedPoint13;
+            projectedPoint20 /= projectedPoint23;
+            projectedPoint21 /= projectedPoint23;
+            projectedPoint22 /= projectedPoint23;
+            projectedPoint30 /= projectedPoint33;
+            projectedPoint31 /= projectedPoint33;
+            projectedPoint32 /= projectedPoint33;
             
-            projectedPoint1[0] /= projectedPoint1[3];
-            projectedPoint1[1] /= projectedPoint1[3];
-            projectedPoint1[2] /= projectedPoint1[3];
-            projectedPoint2[0] /= projectedPoint2[3];
-            projectedPoint2[1] /= projectedPoint2[3];
-            projectedPoint2[2] /= projectedPoint2[3];
-            projectedPoint3[0] /= projectedPoint3[3];
-            projectedPoint3[1] /= projectedPoint3[3];
-            projectedPoint3[2] /= projectedPoint3[3];
             
-            
-            projectedPoint1[0] = (projectedPoint1[0] + 1) * (screen.Ethwidth / 2);
-            projectedPoint1[1] = (1 - projectedPoint1[1]) * (screen.Ethheight / 2);
-            projectedPoint2[0] = (projectedPoint2[0] + 1) * (screen.Ethwidth / 2);
-            projectedPoint2[1] = (1 - projectedPoint2[1]) * (screen.Ethheight / 2);
-            projectedPoint3[0] = (projectedPoint3[0] + 1) * (screen.Ethwidth / 2);
-            projectedPoint3[1] = (1 - projectedPoint3[1]) * (screen.Ethheight / 2);
+            projectedPoint10 = (projectedPoint10 + 1) * (screen.Ethwidth / 2);
+            projectedPoint11 = (1 - projectedPoint11) * (screen.Ethheight / 2);
+            projectedPoint20 = (projectedPoint20 + 1) * (screen.Ethwidth / 2);
+            projectedPoint21 = (1 - projectedPoint21) * (screen.Ethheight / 2);
+            projectedPoint30 = (projectedPoint30 + 1) * (screen.Ethwidth / 2);
+            projectedPoint31 = (1 - projectedPoint31) * (screen.Ethheight / 2);
             //if out of bounds, skip
             int outOfBoundsCount = 0;
 
             // Check each condition and count the number of true conditions
-            if (projectedPoint1[0] < 0 || projectedPoint1[0] > screen.Ethwidth || projectedPoint1[1] < 0 || projectedPoint1[1] > screen.Ethheight)
+            if (projectedPoint10 < 0 || projectedPoint10 > screen.Ethwidth || projectedPoint11 < 0 || projectedPoint11 > screen.Ethheight)
             {
                 outOfBoundsCount++;
             }
 
-            if (projectedPoint2[0] < 0 || projectedPoint2[0] > screen.Ethwidth || projectedPoint2[1] < 0 || projectedPoint2[1] > screen.Ethheight)
+            if (projectedPoint20 < 0 || projectedPoint20 > screen.Ethwidth || projectedPoint21 < 0 || projectedPoint21 > screen.Ethheight)
             {
                 outOfBoundsCount++;
             }
 
-            if (projectedPoint3[0] < 0 || projectedPoint3[0] > screen.Ethwidth || projectedPoint3[1] < 0 || projectedPoint3[1] > screen.Ethheight)
+            if (projectedPoint30 < 0 || projectedPoint30 > screen.Ethwidth || projectedPoint31 < 0 || projectedPoint31 > screen.Ethheight)
             {
                 outOfBoundsCount++;
             }
@@ -201,7 +231,7 @@ public class Camera : Proportie
             //Console.WriteLine(transformedPoint[0] + " " + transformedPoint[1] + " " + transformedPoint[2]);
             //Console.WriteLine(projectedPoint1[0] + " " + projectedPoint1[1] + " " + projectedPoint2[0]+ " " + projectedPoint2[1]);
             // Draw the line on the screen
-            group.Add(new List<object>() { projectedPoint1, projectedPoint2, projectedPoint3, new int[] { (int)line.p1.r, (int)line.p1.g, (int)line.p1.b } });
+            group.Add(new List<object>() { projectedPoint10,projectedPoint11, projectedPoint20,projectedPoint21, projectedPoint30,projectedPoint31, new byte[] { line.p1.r, line.p1.g, line.p1.b } });
             //if (fillin)
             //    DrawFilledPolygonOnScreen(screen, projectedPoint1, projectedPoint2, projectedPoint3,new int[] { (int)line.p1.r, (int)line.p1.g, (int)line.p1.b });
 
@@ -221,13 +251,13 @@ public class Camera : Proportie
         foreach(List<object> list in group)
         {
             if (fillin)
-                DrawFilledPolygonOnScreen(screen, (double[])list[0], (double[])list[1], (double[])list[2], (int[])list[3]);
+                DrawFilledPolygonOnScreen(screen, (double)list[0], (double)list[1], (double)list[2], (double)list[3],(double)list[4],(double)list[5], (byte[])list[6]);
 
             if (outline)
             {
-                DrawLineOnScreen(screen, (double[])list[0], (double[])list[1], new int[] { 0, 0, 0 });
-                DrawLineOnScreen(screen, (double[])list[1], (double[])list[2], new int[] { 0, 0, 0 });
-                DrawLineOnScreen(screen, (double[])list[2], (double[])list[0], new int[] { 0, 0, 0 });
+                DrawLineOnScreen(screen, (double)list[0], (double)list[1],(double)list[2],(double)list[3], new byte[] { 0, 0, 0 });
+                DrawLineOnScreen(screen, (double)list[2],(double)list[3], (double)list[4],(double)list[5], new byte[] { 0, 0, 0 });
+                DrawLineOnScreen(screen, (double)list[4],(double)list[5], (double)list[0],(double)list[1], new byte[] { 0, 0, 0 });
             }
         }
         screen.UpdateLoop();
@@ -421,12 +451,12 @@ public class Camera : Proportie
         //Console.WriteLine(this.nxrot + " " + this.nyrot + " " + this.nzrot);
 
     }
-    void DrawLineOnScreen(Window screen, double[] point1, double[] point2,int[] rgb)
+    void DrawLineOnScreen(Window screen, double point10, double point11, double point20, double point21, byte[] rgb)
     {
-        int x1 = (int)Math.Round(point1[0]);
-        int y1 = (int)Math.Round(point1[1]);
-        int x2 = (int)Math.Round(point2[0]);
-        int y2 = (int)Math.Round(point2[1]);
+        int x1 = (int)Math.Round(point10);
+        int y1 = (int)Math.Round(point11);
+        int x2 = (int)Math.Round(point20);
+        int y2 = (int)Math.Round(point21);
 
         int dx = Math.Abs(x2 - x1);
         int dy = Math.Abs(y2 - y1);
@@ -454,32 +484,39 @@ public class Camera : Proportie
         }
         
     }
-    public void DrawFilledPolygonOnScreen(Window screen, double[] point1, double[] point2, double[] point3, int[] rgb)
+    List<int[]> sortedPoints = new List<int[]>();
+    public void DrawFilledPolygonOnScreen(Window screen, double point10,double point11, double point20,double point21, double point30,double point31, byte[] rgb)
     {
-        List<int[]> sortedPoints = new List<int[]> { new int[] { (int)point1[0], (int)point1[1] }, new int[] { (int)point2[0], (int)point2[1] }, new int[] { (int)point3[0], (int)point3[1] } };
+        sortedPoints = new List<int[]> { new int[] { (int)point10, (int)point11 }, new int[] { (int)point20, (int)point21 }, new int[] { (int)point30, (int)point31 } };
         sortedPoints.Sort((p1, p2) => p1[1].CompareTo(p2[1]));
         int[] topPoint = sortedPoints[0];
         int[] middlePoint = sortedPoints[1];
         int[] bottomPoint = sortedPoints[2];
+        double segmentHeight = middlePoint[1] - topPoint[1] + 1;
 
-
-        int totalHeight = bottomPoint[1] - topPoint[1];
+        double totalHeight = bottomPoint[1] - topPoint[1];
+        double alpha;
+        double alpha2;
+        int startX;
+        int endX;
         if (totalHeight == 0) return;
         if (middlePoint[1] - topPoint[1] + 1 != 0)
         {
+
             for (int y = topPoint[1]; y <= middlePoint[1]; y++)
             {
                 if (y < 0 && middlePoint[1] > 0) y = 0;
                 else if (y < 0) break;
                 else if (y > screen.Ethheight) break;
-                double segmentHeight = middlePoint[1] - topPoint[1] + 1;
-                double alpha = (double)(y - topPoint[1]) / totalHeight;
-                double alpha2 = (double)(y - topPoint[1]) / segmentHeight;
-                int startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
-                int endX = (int)Math.Round((1 - alpha2) * topPoint[0] + alpha2 * middlePoint[0]);
+
+                alpha = (y - topPoint[1]) / totalHeight;
+                alpha2 = (y - topPoint[1]) / segmentHeight;
+                startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
+                endX = (int)Math.Round((1 - alpha2) * topPoint[0] + alpha2 * middlePoint[0]);
                 DrawHorizontalLine(screen, startX, endX, y, rgb);
             }
         }
+        segmentHeight = bottomPoint[1] - middlePoint[1] + 1;
         if (bottomPoint[1] - middlePoint[1] + 1 != 0)
         {
             for (int y = middlePoint[1] + 1; y <= bottomPoint[1]; y++)
@@ -487,17 +524,17 @@ public class Camera : Proportie
                 if (y < 0 && middlePoint[1] > 0) y = 0;
                 else if (y < 0) break;
                 else if (y > screen.Ethheight) break;
-                double segmentHeight = bottomPoint[1] - middlePoint[1] + 1;
-                double alpha = (double)(y - topPoint[1]) / totalHeight;
-                double alpha2 = (double)(y - middlePoint[1]) / segmentHeight;
-                int startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
-                int endX = (int)Math.Round((1 - alpha2) * middlePoint[0] + alpha2 * bottomPoint[0]);
+                alpha = (y - topPoint[1]) / totalHeight;
+                alpha2 = (y - middlePoint[1]) / segmentHeight;
+                startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
+                endX = (int)Math.Round((1 - alpha2) * middlePoint[0] + alpha2 * bottomPoint[0]);
                 DrawHorizontalLine(screen, startX, endX, y, rgb);
             }
         }
     }
 
-    private void DrawHorizontalLine(Window screen, int x1, int x2, int y, int[] rgb)
+
+    private void DrawHorizontalLine(Window screen, int x1, int x2, int y, byte[] rgb)
     {
         if (x1 > x2)
         {
