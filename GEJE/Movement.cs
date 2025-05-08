@@ -77,29 +77,29 @@ namespace GEJE
                 {
                     moved.move(moved.x + movementY* speed, moved.y , moved.z - movementX* speed, moved.w);
                 }
-                if(window.pressed.Contains(69))
+                if(window.pressed.Contains(81))
                 {
                     moved.move(moved.x, moved.y + speed, moved.z, moved.w);
                 }
-                if(window.pressed.Contains(81))
+                if(window.pressed.Contains(69))
                 {
                     moved.move(moved.x, moved.y - speed, moved.z, moved.w);
                 }
                 if (window.pressed.Contains(38))
                 {
-                    moved.rotate(moved.xrot-.5, moved.yrot, moved.zrot, moved.w);
+                    moved.rotate(moved.xrot-1, moved.yrot, moved.zrot, moved.w);
                 }
                 if (window.pressed.Contains(40))
                 {
-                    moved.rotate(moved.xrot+.5, moved.yrot, moved.zrot, moved.w);
+                    moved.rotate(moved.xrot+1, moved.yrot, moved.zrot, moved.w);
                 }
                 if (window.pressed.Contains(39))
                 {
-                    moved.rotate(moved.xrot, moved.yrot+.5, moved.zrot, moved.w);
+                    moved.rotate(moved.xrot, moved.yrot+1, moved.zrot, moved.w);
                 }
                 if (window.pressed.Contains(37))
                 {
-                    moved.rotate(moved.xrot, moved.yrot-.5, moved.zrot, moved.w);
+                    moved.rotate(moved.xrot, moved.yrot-1, moved.zrot, moved.w);
                 }
                 //Console.WriteLine("x: " + moved.x + " y: " + moved.y + " z: " + moved.z + " xrot: " + moved.xrot + " yrot: " + moved.yrot + " zrot: " + moved.zrot);
             }
