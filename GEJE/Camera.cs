@@ -54,6 +54,7 @@ public class Camera : Proportie
     double projectedPoint13 = 0;
     double projectedPoint23 = 0;
     double projectedPoint33 = 0;
+    List<Item> items = new List<Item>();
     public override void Update()
     {
         
@@ -76,20 +77,10 @@ public class Camera : Proportie
             double distance = 0;
             foreach (Item item in scene.items)
             {
-                // check if the item is in range for the camera
+                items.Add(item);
                 distance = (Math.Pow(item.x - nx, 2) + Math.Pow(item.y - ny, 2) + Math.Pow(item.z - nz, 2));
-                //Console.WriteLine(distance);
                 if (distance < far && distance > near)
                 {
-
-                    /*double newx = item.x - this.x;
-                    double newy = item.y - this.y;
-                    double newz = item.z - this.z;
-                    double screenX = newx * Math.Cos(yRotRad) - newz * Math.Sin(yRotRad);
-                    double screenY = newx * Math.Sin(yRotRad) + newy * Math.Cos(xRotRad) + newz * Math.Sin(xRotRad);
-                    double screenZ = newx * Math.Cos(yRotRad) + newy * Math.Sin(xRotRad) + newz * Math.Cos(xRotRad);*/
-
-                    //if (screenX > -fovW && screenX < fovW && screenY > -fovH && screenY < fovH)
                     {
                         foreach (Object propertie in item.properties)
                         {
@@ -106,6 +97,31 @@ public class Camera : Proportie
                 }
             }
             new_meshes = false;
+        }
+        else
+        {
+            pointss.Clear();
+            double distance = 0;
+            foreach (Item item in items)
+            {
+                distance = (Math.Pow(item.x - nx, 2) + Math.Pow(item.y - ny, 2) + Math.Pow(item.z - nz, 2));
+                if (distance < far && distance > near)
+                {
+                    {
+                        foreach (Object propertie in item.properties)
+                        {
+                            if (propertie.GetType() == typeof(Mesh))
+                            {
+                                foreach (Polygon point in ((Mesh)propertie).points)
+                                {
+
+                                    pointss.Add(point);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         // sort lines by the average of the two points
         orderedLines = pointss.OrderByDescending(p => (Math.Abs(((p.p1.x + p.p2.x + p.p3.x - (this.nx * 3)) /3)) + Math.Abs(((p.p1.y + p.p2.y+p.p3.y - (this.ny * 3)) /3)) + Math.Abs(((p.p1.z + p.p2.z+p.p3.z - (this.nz * 3))/3)))).ToList();
@@ -206,17 +222,17 @@ public class Camera : Proportie
             int outOfBoundsCount = 0;
 
             // Check each condition and count the number of true conditions
-            if (projectedPoint10 < 0 || projectedPoint10 > screen.Ethwidth || projectedPoint11 < 0 || projectedPoint11 > screen.Ethheight)
+            if (projectedPoint10 < -10 || projectedPoint10 > screen.Ethwidth + 10 || projectedPoint11 < -10 || projectedPoint11 > screen.Ethheight + 10)
             {
                 outOfBoundsCount++;
             }
 
-            if (projectedPoint20 < 0 || projectedPoint20 > screen.Ethwidth || projectedPoint21 < 0 || projectedPoint21 > screen.Ethheight)
+            if (projectedPoint20 < -10 || projectedPoint20 > screen.Ethwidth + 10 || projectedPoint21 < -10 || projectedPoint21 > screen.Ethheight + 10)
             {
                 outOfBoundsCount++;
             }
 
-            if (projectedPoint30 < 0 || projectedPoint30 > screen.Ethwidth || projectedPoint31 < 0 || projectedPoint31 > screen.Ethheight)
+            if (projectedPoint30 < -10 || projectedPoint30 > screen.Ethwidth + 10 || projectedPoint31 < -10 || projectedPoint31 > screen.Ethheight + 10)
             {
                 outOfBoundsCount++;
             }

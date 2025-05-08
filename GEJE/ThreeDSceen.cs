@@ -29,21 +29,30 @@ namespace GEJE
         {
             items.Remove(item);
         }
+        byte counter = 0;
+        int counter2 = 0;
         public void update()
         {
             //Thread.Sleep(10);
             while (true)
             {
                 //Thread.Sleep(3);
-                //var watch = new Stopwatch();
-                //watch.Start();
+                
+                var watch = new Stopwatch();
+                watch.Start();
                 foreach (Item item in items)
                 {
                    if(item.state)
                     item.Update();
                 }
-                //watch.Stop();
-                //Console.WriteLine(watch.ElapsedMilliseconds);
+                watch.Stop();
+                counter2 += (int)watch.ElapsedMilliseconds;
+                if(counter2 > 1000)
+                {
+                    counter2 = 0;
+                    Console.WriteLine("FPS: " + counter);
+                    counter = 0;
+                }else  counter++;
             }
         }
         public void Start_scene()

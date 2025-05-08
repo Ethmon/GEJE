@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Diagnostics.Contracts;
+using System.Collections.Generic;
 
 namespace GEJE
 {
@@ -22,6 +23,19 @@ namespace GEJE
         // New variables for controlling pixel size
         public int PixelWidth;
         public int PixelHeight;
+        public ISet<int> pressed = new HashSet<int>();
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            pressed.Add(e.KeyValue);
+        }
+
+        private void Form1_KeyUp(object sender, KeyEventArgs e)
+        {
+            pressed.Remove(e.KeyValue);
+        }
+
+
 
         public Window(int ewidth, int ehight, int pixelWidth, int pixelHeight)
         {
@@ -54,6 +68,8 @@ namespace GEJE
                     tiles[i, j, 2] = 255;
                 }
             }
+            this.KeyDown += Form1_KeyDown;
+            this.KeyUp += Form1_KeyUp;
         }
 
         public int Ethsize(bool worh)
@@ -163,7 +179,7 @@ namespace GEJE
             }
 
             // Switch to the next buffer for the next frame
-            currentBufferIndex = (currentBufferIndex + 1) % 3;
+            currentBufferIndex = (currentBufferIndex + 1) % 2;
         }
 
     }

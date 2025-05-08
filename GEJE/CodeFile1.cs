@@ -104,9 +104,10 @@ namespace GEJE
                 }
             }
             Item sword = new Item(80, -15, 80, 90, 0, 0);
-            Mesh swordmesh = new Mesh("Models\\apple.JSON", 0, 0, 0, 0, 0, 0);
+            Mesh swordmesh = new Mesh("Models\\Sword.JSON", 0, 0, 0, 0, 0, 0);
             SwordDemo demo = new SwordDemo(0, 0, 0, 0, 0, 0);
             demo.sword = sword;
+            
             sword.add_propertie(demo);
 
             sword.add_propertie(swordmesh);
@@ -121,8 +122,9 @@ namespace GEJE
             Camera cam = new Camera(0,0, 0, 0, 0, 0, sceen, win,1);
             cam.outline = false;
             cam.fillin = true;
-            
+            demo.win = win;
             Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera,5);
+            cam_movement.window = win;
             camera.add_propertie(cam_movement);
             camera.add_propertie(cam);
             //camera.add_propertie(cam_movement);

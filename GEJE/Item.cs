@@ -164,6 +164,7 @@ namespace GEJE
     public class SwordDemo : Proportie
     {
         public Item sword;
+        public Window win;
         public SwordDemo(double x, double y, double z, double xrot, double yrot, double zrot) : base(x, y, z, xrot, yrot, zrot)
         {
 
@@ -174,7 +175,18 @@ namespace GEJE
         }
         public override void Update()
         {
-            sword.yrot += 1.3;
+            sword.yrot += 2.3;
+            
+            if(win.pressed.Contains(80))
+            {
+                foreach(Proportie propertie in sword.properties)
+                {
+                    if (propertie is Mesh)
+                    {
+                        ((Mesh)propertie).hueit(1, 0, 0);
+                    }
+                }
+            }
         }
     }
 

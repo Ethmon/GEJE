@@ -11,6 +11,7 @@ namespace GEJE
     public class Movement : Proportie
     {
         private Item moved;
+        public Window window;
         float speed = 0.1f;
         public Movement(double x, double y, double z, double xrot, double yrot, double zrot,Item moved, float speed) : base(x, y, z, xrot, yrot, zrot)
         {
@@ -23,16 +24,18 @@ namespace GEJE
             this.moved = moved;
             this.speed = speed;
         }
+        double yRotRad = 0;
+        double movementX = 0;
+        double movementY = 0;
         public override void Update()
         {
-            if (Console.KeyAvailable)
+            if (window.pressed.Count()!=0)
             {
-                ConsoleKeyInfo keyInfo = Console.ReadKey();
-                double yRotRad = Math.PI * moved.yrot / 180.0;
+                yRotRad = Math.PI * moved.yrot / 180.0;
                 //Console.WriteLine(yRotRad);
                 // Calculate movement direction based on current rotation
-                double movementX = Math.Sin(-yRotRad);
-                double movementY = Math.Cos(-yRotRad);
+                movementX = Math.Sin(-yRotRad);
+                movementY = Math.Cos(-yRotRad);
                 //Console.WriteLine(moved.yrot);
                 //Console.WriteLine(yRotRad);
                 //Console.WriteLine((Math.PI * moved.yrot / 180.0 == yRotRad) ? "true" : "false");
@@ -58,43 +61,43 @@ namespace GEJE
                 }
 
 
-                if (keyInfo.Key == ConsoleKey.S)
+                if (window.pressed.Contains(83))
                 {
                     moved.move(moved.x - movementX* speed, moved.y , moved.z - movementY* speed, moved.w);
                 }
-                if (keyInfo.Key == ConsoleKey.W)
+                if (window.pressed.Contains(87))
                 {
                     moved.move(moved.x + movementX* speed, moved.y , moved.z + movementY* speed, moved.w);
                 }
-                if (keyInfo.Key == ConsoleKey.D)
+                if (window.pressed.Contains(68))
                 {
                     moved.move(moved.x - movementY* speed, moved.y , moved.z + movementX* speed, moved.w);
                 }
-                if (keyInfo.Key == ConsoleKey.A)
+                if (window.pressed.Contains(65))
                 {
                     moved.move(moved.x + movementY* speed, moved.y , moved.z - movementX* speed, moved.w);
                 }
-                if(keyInfo.Key == ConsoleKey.E)
+                if(window.pressed.Contains(69))
                 {
                     moved.move(moved.x, moved.y + speed, moved.z, moved.w);
                 }
-                if(keyInfo.Key == ConsoleKey.Q)
+                if(window.pressed.Contains(81))
                 {
                     moved.move(moved.x, moved.y - speed, moved.z, moved.w);
                 }
-                if (keyInfo.Key == ConsoleKey.UpArrow)
+                if (window.pressed.Contains(38))
                 {
                     moved.rotate(moved.xrot-.5, moved.yrot, moved.zrot, moved.w);
                 }
-                if (keyInfo.Key == ConsoleKey.DownArrow)
+                if (window.pressed.Contains(40))
                 {
                     moved.rotate(moved.xrot+.5, moved.yrot, moved.zrot, moved.w);
                 }
-                if (keyInfo.Key == ConsoleKey.RightArrow)
+                if (window.pressed.Contains(39))
                 {
                     moved.rotate(moved.xrot, moved.yrot+.5, moved.zrot, moved.w);
                 }
-                if (keyInfo.Key == ConsoleKey.LeftArrow)
+                if (window.pressed.Contains(37))
                 {
                     moved.rotate(moved.xrot, moved.yrot-.5, moved.zrot, moved.w);
                 }
