@@ -94,13 +94,13 @@ namespace GEJE
             //video_rendering.Start();
         }
 
-        public void PlaceColor(int x, int y, byte r, byte g, byte b,byte a)
+        public void PlaceColor(int x, int y, byte r, byte g, byte b)
         {
             if (x < Ethwidth && x >= 0 && y < Ethheight && y >= 0)
             {
-                    tiles[x, y, 0] = (byte)(a * r + (1 - a) * tiles[x,y,0]);
-                    tiles[x, y, 1] = (byte)(a * g + (1 - a) * tiles[x, y, 1]);
-                    tiles[x, y, 2] = (byte)(a * b + (1 - a) * tiles[x,y,2]);
+                tiles[x, y, 0] = r;//(byte)(a * r + (1 - a) * tiles[x,y,0]);
+                tiles[x, y, 1] = g;//(byte)(a * g + (1 - a) * tiles[x, y, 1]);
+                tiles[x, y, 2] = b;//(byte)(a * b + (1 - a) * tiles[x,y,2]);
 
             }
         }
