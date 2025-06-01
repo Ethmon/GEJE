@@ -24,11 +24,49 @@ namespace GEJE
         // New variables for controlling pixel size
         public int PixelWidth;
         public int PixelHeight;
-        public ISet<int> pressed = new HashSet<int>();
 
+        public int[] currsor_pos()
+        {
+            int[] pos = new int[2];
+            pos[0] = (int)(this.PointToClient(Cursor.Position).X / PixelWidth);
+            pos[1] = (int)(this.PointToClient(Cursor.Position).Y / PixelHeight);
+            if (pos[0] < 0) pos[0] = 0;
+                else if (pos[0] >= Ethwidth) pos[0] = Ethwidth - 1;
+            if (pos[1] < 0) pos[1] = 0;
+                else if (pos[1] >= Ethheight) pos[1] = Ethheight - 1;
+            return pos;
+        }
+        
+        public ISet<int> pressed = new HashSet<int>();
+        public bool right_click = false;
+        public bool left_click = false;
+        private void Form1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                right_click = true;
+            }
+            else if (e.Button == MouseButtons.Left)
+            {
+                left_click = true;
+            }
+           
+        }
+        private void Form1_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                right_click = false;
+            }
+            else if (e.Button == MouseButtons.Left)
+            {
+                left_click = false;
+            }
+        }
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             pressed.Add(e.KeyValue);
+            
         }
 
         private void Form1_KeyUp(object sender, KeyEventArgs e)
@@ -71,6 +109,8 @@ namespace GEJE
             }
             this.KeyDown += Form1_KeyDown;
             this.KeyUp += Form1_KeyUp;
+            this.MouseDown += Form1_MouseDown;
+            this.MouseUp += Form1_MouseUp;
         }
 
         public int Ethsize(bool worh)
