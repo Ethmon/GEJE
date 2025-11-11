@@ -57,7 +57,8 @@ public class Camera : Proportie
     List<Item> items = new List<Item>();
     public override void Update()
     {
-        
+        //Stopwatch sw = Stopwatch.StartNew();
+        //sw.Start();
             //DrawLineOnScreen(screen, new double[] { 0, 0, 10, 10, 10 }, new double[] { 100, 100, 10, 10, 10 }, new int[] { 0, 0, 0 });
             // get all items in the scene that the camera can see
             this.nxrot = Rotation.WrapAngle(this.nxrot);
@@ -97,6 +98,7 @@ public class Camera : Proportie
                 }
             }
             new_meshes = false;
+            //Console.WriteLine(pointss.Count());
         }
         else
         {
@@ -125,11 +127,13 @@ public class Camera : Proportie
         }
         // sort lines by the average of the two points
         orderedLines = pointss.OrderByDescending(p => (Math.Abs(((p.p1.x + p.p2.x + p.p3.x - (this.nx * 3)) /3)) + Math.Abs(((p.p1.y + p.p2.y+p.p3.y - (this.ny * 3)) /3)) + Math.Abs(((p.p1.z + p.p2.z+p.p3.z - (this.nz * 3))/3)))).ToList();
+        orderedLines.Reverse();
         List<List<object>> group = new List<List<object>>();
+        //object groupLock = new object();
         foreach (Polygon line in orderedLines)
         {
             
-            Point[] points = { line.p1, line.p2 };
+            //Point[] points = { line.p1, line.p2 };
             Point point1 = line.p1;
             Point point2 = line.p2;
             double[] point3D1 = { point1.x, point1.y, point1.z, point1.w };
@@ -222,17 +226,17 @@ public class Camera : Proportie
             int outOfBoundsCount = 0;
 
             // Check each condition and count the number of true conditions
-            if (projectedPoint10 < -10 || projectedPoint10 > screen.Ethwidth + 10 || projectedPoint11 < -10 || projectedPoint11 > screen.Ethheight + 10)
+            if (projectedPoint10 < -30 || projectedPoint10 > screen.Ethwidth + 30 || projectedPoint11 < -30 || projectedPoint11 > screen.Ethheight + 30)
             {
                 outOfBoundsCount++;
             }
 
-            if (projectedPoint20 < -10 || projectedPoint20 > screen.Ethwidth + 10 || projectedPoint21 < -10 || projectedPoint21 > screen.Ethheight + 10)
+            if (projectedPoint20 < -30 || projectedPoint20 > screen.Ethwidth + 30 || projectedPoint21 < -30 || projectedPoint21 > screen.Ethheight + 30)
             {
                 outOfBoundsCount++;
             }
 
-            if (projectedPoint30 < -10 || projectedPoint30 > screen.Ethwidth + 10 || projectedPoint31 < -10 || projectedPoint31 > screen.Ethheight + 10)
+            if (projectedPoint30 < -30 || projectedPoint30 > screen.Ethwidth + 30 || projectedPoint31 < -30 || projectedPoint31 > screen.Ethheight + 30)
             {
                 outOfBoundsCount++;
             }
@@ -276,8 +280,12 @@ public class Camera : Proportie
                 DrawLineOnScreen(screen, (double)list[4],(double)list[5], (double)list[0],(double)list[1], new byte[] { 0, 0, 0 });
             }
         }
+        //sw.Stop();
+        //Console.WriteLine(sw.Elapsed);
+        //sw.Start();
         screen.UpdateLoop();
-
+        //sw.Stop();
+        //Console.WriteLine(sw.Elapsed);
         //screen.Draw();
 
 
@@ -515,33 +523,36 @@ public class Camera : Proportie
         double alpha2;
         int startX;
         int endX;
+        int tp = topPoint[1];
+        int mp = middlePoint[1];
+        int bp = bottomPoint[1];
         if (totalHeight == 0) return;
-        if (middlePoint[1] - topPoint[1] + 1 != 0)
+        if (mp - tp + 1 != 0)
         {
 
-            for (int y = topPoint[1]; y <= middlePoint[1]; y++)
+            for (int y = tp; y <= mp; y++)
             {
-                if (y < 0 && middlePoint[1] > 0) y = 0;
+                if (y < 0 && mp > 0) y = 0;
                 else if (y < 0) break;
                 else if (y > screen.Ethheight) break;
 
-                alpha = (y - topPoint[1]) / totalHeight;
-                alpha2 = (y - topPoint[1]) / segmentHeight;
+                alpha = (y - tp) / totalHeight;
+                alpha2 = (y - tp) / segmentHeight;
                 startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
                 endX = (int)Math.Round((1 - alpha2) * topPoint[0] + alpha2 * middlePoint[0]);
                 DrawHorizontalLine(screen, startX, endX, y, rgb);
             }
         }
-        segmentHeight = bottomPoint[1] - middlePoint[1] + 1;
-        if (bottomPoint[1] - middlePoint[1] + 1 != 0)
+        segmentHeight = bp - mp + 1;
+        if (bp - mp + 1 != 0)
         {
-            for (int y = middlePoint[1] + 1; y <= bottomPoint[1]; y++)
+            for (int y = mp + 1; y <= bp; y++)
             {
-                if (y < 0 && middlePoint[1] > 0) y = 0;
+                if (y < 0 && mp > 0) y = 0;
                 else if (y < 0) break;
                 else if (y > screen.Ethheight) break;
-                alpha = (y - topPoint[1]) / totalHeight;
-                alpha2 = (y - middlePoint[1]) / segmentHeight;
+                alpha = (y - tp) / totalHeight;
+                alpha2 = (y - mp) / segmentHeight;
                 startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
                 endX = (int)Math.Round((1 - alpha2) * middlePoint[0] + alpha2 * bottomPoint[0]);
                 DrawHorizontalLine(screen, startX, endX, y, rgb);
@@ -563,7 +574,7 @@ public class Camera : Proportie
             if (x < 0 && x2 > 0) x = 0;
             else if (x < 0) break;
             else if(x > screen.Ethwidth) break;
-            screen.PlaceColor(x, y, rgb[0], rgb[1], rgb[2]);
+            screen.QPlaceColor(x, y, rgb[0], rgb[1], rgb[2]);
         }
     }
 

@@ -13,6 +13,7 @@ namespace GEJE
     public class Window : Form
     {
         private byte[,,] tiles;
+        private bool[,] bools;
         private Bitmap[] buffers;
         
         private int currentBufferIndex;
@@ -90,6 +91,7 @@ namespace GEJE
             this.MaximizeBox = false;
 
             tiles = new byte[Ethwidth, Ethheight, 3];
+            bools = new bool[Ethwidth, Ethheight];
             buffers = new Bitmap[3];  // Triple buffering
             for (int i = 0; i < 3; i++)
             {
@@ -105,6 +107,7 @@ namespace GEJE
                     tiles[i, j, 0] = 255;
                     tiles[i, j, 1] = 255;
                     tiles[i, j, 2] = 255;
+                    bools[i, j] = false;
                 }
             }
             this.KeyDown += Form1_KeyDown;
@@ -146,25 +149,38 @@ namespace GEJE
         }
         public void QPlaceColor(int x, int y, byte r, byte g, byte b)
         {
-            if (x < Ethwidth && x >= 0 && y < Ethheight && y >= 0 && tiles[x, y, 0] == 255 && tiles[x, y, 1] == 255 && tiles[x,y,2]==255)
+            if (x < Ethwidth && x >= 0 && y < Ethheight && y >= 0 && bools[x, y] == false)
             {
                 tiles[x, y, 0] = r;
                 tiles[x, y, 1] = g;
                 tiles[x, y, 2] = b;
+                bools[x, y] = true;
             }
         }
 
 
         unsafe void Clear()
         {
-            fixed (byte* ptr = &tiles[0, 0, 0])
+            int pixCount = Ethwidth * Ethheight;
+            fixed (byte* pTiles = &tiles[0, 0, 0])
             {
-                for (int i = 0; i < Ethwidth * Ethheight * 3; i++)
+                fixed (bool* ppp = &bools[0, 0])
                 {
-                    ptr[i] = 255;
+
+
+                    byte* px = pTiles;
+                    for (int i = 0; i < pixCount; i++)
+                    {
+                        px[0] = 255;
+                        px[1] = 255;
+                        px[2] = 255;
+                        px += 3;
+                        ppp[i] = false; // if bools is linearized; or write using pointer
+                    }
                 }
             }
         }
+
         bool d = false;
         private Graphics g;
         public void UpdateLoop()
@@ -176,6 +192,13 @@ namespace GEJE
                 g.DrawImage(buffers[currentBufferIndex], 0, 0);
             }));
             Clear();
+        }
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            lock (graphicsLock)
+            {
+                e.Graphics.DrawImageUnscaled(buffers[(currentBufferIndex + buffers.Length - 1) % buffers.Length], 0, 0);
+            }
         }
 
         public void Draw()
@@ -190,26 +213,41 @@ namespace GEJE
             {
                 unsafe
                 {
-                    byte* ptr = (byte*)bmpData.Scan0; // Get the pointer to the start of the bitmap data
-                    int index = 0;
-                    int tileX = 0;
-                    int tileY = 0;
-                    // Iterate through the pixels and set their color directly in memory
-                    for (int y = 0; y < bmpData.Height; y++)
+                    byte* ptr = (byte*)bmpData.Scan0;
+
+                    for (int tileY = 0; tileY < tiles.GetLength(1); tileY++)
                     {
-                        for (int x = 0; x < bmpData.Width; x++)
+                        int yStart = tileY * PixelHeight;
+                        int yEnd = Math.Min(yStart + PixelHeight, bmpData.Height);
+
+                        for (int tileX = 0; tileX < tiles.GetLength(0); tileX++)
                         {
-                             index = y * bmpData.Stride + x * 4; // Calculate the index of the current pixel
+                            int xStart = tileX * PixelWidth;
+                            int xEnd = Math.Min(xStart + PixelWidth, bmpData.Width);
 
-                            // Calculate the corresponding tile coordinates
-                            tileX = x / PixelWidth;
-                            tileY = y / PixelHeight;
+                            byte r = tiles[tileX, tileY, 0];
+                            byte g = tiles[tileX, tileY, 1];
+                            byte b = tiles[tileX, tileY, 2];
 
-                            // Set the pixel color based on your tiles array
-                            ptr[index + 2] = tiles[tileX, tileY, 0]; // Red component
-                            ptr[index + 1] = tiles[tileX, tileY, 1]; // Green component
-                            ptr[index] = tiles[tileX, tileY, 2];     // Blue component
-                            ptr[index + 3] = 255; // Alpha (assuming 32-bit ARGB format)
+                            unsafe
+                            {
+                                byte* basePtr = (byte*)bmpData.Scan0;
+                                int stride = bmpData.Stride;
+                                for (int y = yStart; y < yEnd; ++y)
+                                {
+                                    byte* row = basePtr + y * stride;
+                                    // compute xStart/xEnd once, then copy using pointer arithmetic
+                                    for (int x = xStart; x < xEnd; ++x)
+                                    {
+                                        int idx = x * 4;
+                                        row[idx + 2] = r; // R
+                                        row[idx + 1] = g;
+                                        row[idx] = b;
+                                        row[idx + 3] = 255;
+                                    }
+                                }
+                            }
+
                         }
                     }
                 }
@@ -221,7 +259,7 @@ namespace GEJE
             }
 
             // Switch to the next buffer for the next frame
-            currentBufferIndex = (currentBufferIndex + 1) % 2;
+            currentBufferIndex = (currentBufferIndex + 1) % 3;
         }
 
     }

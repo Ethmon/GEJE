@@ -50,9 +50,9 @@ namespace GEJE
             Random random = new Random();
             if (true)
             {
-                for (int i = -4; i < 15; i++)
+                for (int i = -11; i < 25; i++)
                 {
-                    for (int k = -4; k < 15; k++)
+                    for (int k = -11; k < 25; k++)
                     {
                         for (int v = 1; v < 2; v++)
                         {
@@ -72,10 +72,10 @@ namespace GEJE
 
 
 
-                            Item under = new Item(-20 + 20 * i, 50, -10 + k * 20, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, 0);
-                            Mesh box3 = new Mesh("Models\\BlackSlate.JSON", 0, 0, 0, 0, 0, 0);
-                            under.add_propertie(box3);
-                            sceen.add_item(under);
+                            //Item under = new Item(-20 + 20 * i, 50, -10 + k * 20, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, 0);
+                            Mesh box3 = new Mesh("Models\\BlackSlate.JSON", 0, 0, -10, 0, 0, 0);
+                            item.add_propertie(box3);
+                            //sceen.add_item(under);
                         }
                     }
                 }
@@ -118,7 +118,7 @@ namespace GEJE
             Item.floatingyay = false;
             //Console.WriteLine(box2.ToString());
             Item camera = new Item(0, 0, -100, 0, 0, 0);
-            Window win = new Window(600, 400,2,2);
+            Window win = new Window(300, 200,4,4);
             Camera cam = new Camera(0,0, 0, 0, 0, 0, sceen, win,1);
             cam.outline = false;
             cam.fillin = true;
