@@ -14,6 +14,7 @@ namespace GEJE
     {
         private byte[,,] tiles;
         private bool[,] bools;
+        public int[,] tag;
 
         private int textureId;
         public int Ethwidth, Ethheight;
@@ -46,6 +47,7 @@ namespace GEJE
 
             tiles = new byte[Ethwidth, Ethheight, 3];
             bools = new bool[Ethwidth, Ethheight];
+            tag = new int[Ethwidth, Ethheight];
 
             for (int i = 0; i < Ethwidth; i++)
                 for (int j = 0; j < Ethheight; j++)
@@ -54,6 +56,7 @@ namespace GEJE
                     tiles[i, j, 1] = 255;
                     tiles[i, j, 2] = 255;
                     bools[i, j] = false;
+                    tag[i, j] = 0;
                 }
         }
 
@@ -112,17 +115,18 @@ namespace GEJE
         }
 
 
-        public void PlaceColor(int x, int y, byte r, byte g, byte b)
+        public void PlaceColor(int x, int y, byte r, byte g, byte b,int tag)
         {
             if (x >= 0 && x < Ethwidth && y >= 0 && y < Ethheight)
             {
                 tiles[x, y, 0] = r;
                 tiles[x, y, 1] = g;
                 tiles[x, y, 2] = b;
+                this.tag[x,y] = tag;
             }
         }
 
-        public void QPlaceColor(int x, int y, byte r, byte g, byte b)
+        public void QPlaceColor(int x, int y, byte r, byte g, byte b,int tag)
         {
             if (x >= 0 && x < Ethwidth && y >= 0 && y < Ethheight && !bools[x, y])
             {
@@ -130,6 +134,7 @@ namespace GEJE
                 tiles[x, y, 1] = g;
                 tiles[x, y, 2] = b;
                 bools[x, y] = true;
+                this.tag[x, y] = tag;
             }
         }
 
@@ -169,27 +174,34 @@ namespace GEJE
         private unsafe void Clear()
         {
             int pixels = Ethwidth * Ethheight;
+            
             fixed (byte* pTiles = &tiles[0, 0, 0])
             fixed (bool* pBools = &bools[0, 0])
             {
                 byte* px = pTiles;
                 for (int i = 0; i < pixels; i++)
                 {
+                    
                     px[0] = 255; px[1] = 255; px[2] = 255;
                     px += 3;
                     pBools[i] = false;
+                    
+
                 }
             }
         }
-
-        protected override void OnUnload()
+        public unsafe void Cleartags()
         {
-            base.OnUnload();
-            if (quadVbo != 0) GL.DeleteBuffer(quadVbo);
-            if (quadVao != 0) GL.DeleteVertexArray(quadVao);
-            if (textureId != 0) GL.DeleteTexture(textureId);
-            if (shaderProgram != 0) GL.DeleteProgram(shaderProgram);
+            int pixels = Ethwidth * Ethheight;
+            fixed (int* pTags = &tag[0, 0])
+                for (int i = 0; i < pixels; i++)
+                    pTags[i] = 0;
         }
+        public int getTagOfPixle(int x, int y)
+        {
+            return tag[x, y];
+        }
+        
 
 
 
@@ -359,7 +371,9 @@ void main()
             base.OnUpdateFrame(args);
             if (IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Escape))
                 Close();
+            //Cleartags();
             scene.update();
+            
         }
 
         public void RunGame()

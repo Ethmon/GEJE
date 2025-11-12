@@ -38,10 +38,10 @@ namespace GEJE
             List<Item> terrain = FlatTriangleLayer.GenerateFlatLayer(
                     widthDivisions: 50,
                     depthDivisions: 50,
-                    cellSize: 50,
+                    cellSize: 100,
                     jitter: .5,   // 0 = perfect grid, 0.25 = some randomness
                     zLevel: 0,
-                        r: 80, g: 180, b: 255
+                        r: 80, g: 180, b: 40
                     );
 
             foreach (var t in terrain)
@@ -54,10 +54,13 @@ namespace GEJE
             Window win = new Window(600, 400, 4, 4);
             win.scene = sceen;
             Camera cam = new Camera(0, 0, 0, 90, 0, 0, sceen, win, 1);
-            cam.outline = true;
+            cam.outline = false;
             cam.fillin = true;
             Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera, 5);
             cam_movement.window = win;
+            HoverHighlight ffff = new HoverHighlight(camera, win, sceen);
+            ffff.camera = cam;
+            camera.add_propertie(ffff);
             camera.add_propertie(cam_movement);
             camera.add_propertie(cam);
             //camera.add_propertie(cam_movement);

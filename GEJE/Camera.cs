@@ -12,7 +12,7 @@ using System.Collections.Concurrent;
 public class Camera : Proportie
 {
     public double near = 0;
-    public double far = 9000000;
+    public double far = 900000000;
     public double constant = 10;
     private Window screen;
     private ThreeDSceen scene;
@@ -22,6 +22,12 @@ public class Camera : Proportie
     public bool outline = false;
     public bool fillin = true;
     public bool new_meshes = true;
+    public List<List<object>> group = new List<List<object>>();
+
+    private Dictionary<int, Mesh> tagToPolygon = new Dictionary<int, Mesh>();
+    private Dictionary<Mesh, int> PolygonToTag = new Dictionary<Mesh, int>();
+    private Dictionary<Polygon, Mesh> PolyToMesh = new Dictionary<Polygon, Mesh>();
+    public Dictionary<int, Mesh> TagMap => tagToPolygon;
     public Camera(double x, double y, double z, double xrot, double yrot, double zrot, ThreeDSceen scene, Window screen, double aspectRatio) : base(x, y, z, xrot, yrot, zrot)
     {
         this.x = x;
@@ -42,7 +48,7 @@ public class Camera : Proportie
         this.projectionMatrix = CalculateProjectionMatrix(fov, aspectRatio, near, far);
     }
     ConcurrentBag<Polygon> pointss = new ConcurrentBag<Polygon>();
-    List<Polygon> orderedLines = new List<Polygon>();
+    public List<Polygon> orderedLines = new List<Polygon>();
     double projectedPoint10 = 0;
     double projectedPoint11 = 0;
     double projectedPoint12 = 0;
@@ -60,9 +66,9 @@ public class Camera : Proportie
     {
         //Stopwatch sw = Stopwatch.StartNew();
         //sw.Start();
-            //DrawLineOnScreen(screen, new double[] { 0, 0, 10, 10, 10 }, new double[] { 100, 100, 10, 10, 10 }, new int[] { 0, 0, 0 });
-            // get all items in the scene that the camera can see
-            this.nxrot = Rotation.WrapAngle(this.nxrot);
+        //DrawLineOnScreen(screen, new double[] { 0, 0, 10, 10, 10 }, new double[] { 100, 100, 10, 10, 10 }, new int[] { 0, 0, 0 });
+        // get all items in the scene that the camera can see
+        this.nxrot = Rotation.WrapAngle(this.nxrot);
             this.nyrot = Rotation.WrapAngle(this.nyrot);
             this.nzrot = Rotation.WrapAngle(this.nzrot);
             double xRotRad = this.nxrot * (Math.PI / 180);
@@ -74,9 +80,12 @@ public class Camera : Proportie
             double[,] combinedRotationMatrix = Rotation.CombineMatrices(rotationMatrixZ, Rotation.CombineMatrices(rotationMatrixX, rotationMatrixY));
 
         if (new_meshes)
-        { 
+        {
+            tagToPolygon.Clear();
+            PolygonToTag.Clear();
             pointss.Clear();
             double distance = 0;
+            int d = 1;
             foreach (Item item in scene.items)
             {
                 items.Add(item);
@@ -84,15 +93,25 @@ public class Camera : Proportie
                 if (distance < far && distance > near)
                 {
                     {
+                        
                         foreach (Object propertie in item.properties)
                         {
+
                             if (propertie.GetType() == typeof(Mesh))
                             {
+                                tagToPolygon[d] = (Mesh)propertie;
+                                PolygonToTag[(Mesh)propertie] = d;
+                                d++;
                                 foreach (Polygon point in ((Mesh)propertie).points.ToList())
                                 {
-
+                                    
                                     pointss.Add(point);
+                                    PolyToMesh[point] = (Mesh)propertie;
+
+
+
                                 }
+                                
                             }
                         }
                     }
@@ -104,23 +123,36 @@ public class Camera : Proportie
         else
         {
             pointss.Clear();
+            tagToPolygon.Clear();
+            PolygonToTag.Clear();
             double distance = 0;
+            int d = 1;
             foreach (Item item in items)
             {
                 distance = (Math.Pow(item.x - nx, 2) + Math.Pow(item.y - ny, 2) + Math.Pow(item.z - nz, 2));
                 if (distance < far && distance > near)
                 {
                     {
+                        
                         foreach (Object propertie in item.properties)
                         {
                             if (propertie.GetType() == typeof(Mesh))
                             {
+                                tagToPolygon[d] = (Mesh)propertie;
+                                PolygonToTag[(Mesh)propertie] = d;
+                                d++;
                                 foreach (Polygon point in ((Mesh)propertie).points.ToList())
                                 {
-                                    if(point!=null)
-                                    pointss.Add(point);
+                                    if (point != null)
+                                    {
+                                        pointss.Add(point);
+                                        PolyToMesh[point] = (Mesh)propertie;
+                                        
+                                    }
                                 }
+                                
                             }
+                            
                         }
                     }
                 }
@@ -129,9 +161,10 @@ public class Camera : Proportie
         // sort lines by the average of the two points
         orderedLines = pointss.ToList().OrderByDescending(p => (Math.Abs(((p.p1.x + p.p2.x + p.p3.x - (this.nx * 3)) /3)) + Math.Abs(((p.p1.y + p.p2.y+p.p3.y - (this.ny * 3)) /3)) + Math.Abs(((p.p1.z + p.p2.z+p.p3.z - (this.nz * 3))/3)))).ToList();
         orderedLines.Reverse();
-        List<List<object>> group = new List<List<object>>();
+        group = new List<List<object>>();
         //object groupLock = new object();
         var snapshot = orderedLines.ToList(); // make a separate copy
+        int k = 0;
         foreach (Polygon line in snapshot)
         {
 
@@ -254,6 +287,8 @@ public class Camera : Proportie
             //Console.WriteLine(projectedPoint1[0] + " " + projectedPoint1[1] + " " + projectedPoint2[0]+ " " + projectedPoint2[1]);
             // Draw the line on the screen
             group.Add(new List<object>() { projectedPoint10,projectedPoint11, projectedPoint20,projectedPoint21, projectedPoint30,projectedPoint31, new byte[] { line.p1.r, line.p1.g, line.p1.b } });
+            //tagToPolygon[k] = line; // line = the polygon you just drew
+            //k++;
             //if (fillin)
             //    DrawFilledPolygonOnScreen(screen, projectedPoint1, projectedPoint2, projectedPoint3,new int[] { (int)line.p1.r, (int)line.p1.g, (int)line.p1.b });
 
@@ -265,16 +300,25 @@ public class Camera : Proportie
             //}
 
 
-            
+
             //Console.WriteLine(projectedPoint1[0] + " , " + projectedPoint1[1] + " | " + projectedPoint2[0] + " , " + projectedPoint2[1]);
 
         }
         //group.Reverse();
-        foreach(List<object> list in group)
+        for (int i = 0;i<group.Count;i++)
         {
+            List<object> list = group[i];
             if (fillin)
-                DrawFilledPolygonOnScreen(screen, (double)list[0], (double)list[1], (double)list[2], (double)list[3],(double)list[4],(double)list[5], (byte[])list[6]);
+            {
+                if (PolyToMesh.ContainsKey(snapshot[i]))
+                        {
+                            if ((PolygonToTag.ContainsKey(PolyToMesh[snapshot[i]])))
+                                DrawFilledPolygonOnScreen(screen, (double)list[0], (double)list[1], (double)list[2], (double)list[3], (double)list[4], (double)list[5], (byte[])list[6], PolygonToTag[PolyToMesh[snapshot[i]]]);
+                            else
+                                DrawFilledPolygonOnScreen(screen, (double)list[0], (double)list[1], (double)list[2], (double)list[3], (double)list[4], (double)list[5], (byte[])list[6], 0);
+                }
 
+            }
             if (outline)
             {
                 DrawLineOnScreen(screen, (double)list[0], (double)list[1],(double)list[2],(double)list[3], new byte[] { 0, 0, 0 });
@@ -492,7 +536,7 @@ public class Camera : Proportie
         //Console.WriteLine(x1 + " " + y1);
         while (true)
         {
-            screen.PlaceColor(x1, y1, rgb[0], rgb[1], rgb[2]);
+            screen.PlaceColor(x1, y1, rgb[0], rgb[1], rgb[2],0);
             if (x1 == x2 && y1 == y2)
                 break;
             int e2 = 2 * err;
@@ -511,7 +555,7 @@ public class Camera : Proportie
         
     }
     List<int[]> sortedPoints = new List<int[]>();
-    public void DrawFilledPolygonOnScreen(Window screen, double point10,double point11, double point20,double point21, double point30,double point31, byte[] rgb)
+    public void DrawFilledPolygonOnScreen(Window screen, double point10,double point11, double point20,double point21, double point30,double point31, byte[] rgb,int tag)
     {
         sortedPoints = new List<int[]> { new int[] { (int)point10, (int)point11 }, new int[] { (int)point20, (int)point21 }, new int[] { (int)point30, (int)point31 } };
         sortedPoints.Sort((p1, p2) => p1[1].CompareTo(p2[1]));
@@ -542,7 +586,7 @@ public class Camera : Proportie
                 alpha2 = (y - tp) / segmentHeight;
                 startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
                 endX = (int)Math.Round((1 - alpha2) * topPoint[0] + alpha2 * middlePoint[0]);
-                DrawHorizontalLine(screen, startX, endX, y, rgb);
+                DrawHorizontalLine(screen, startX, endX, y, rgb,tag);
             }
         }
         segmentHeight = bp - mp + 1;
@@ -557,13 +601,13 @@ public class Camera : Proportie
                 alpha2 = (y - mp) / segmentHeight;
                 startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
                 endX = (int)Math.Round((1 - alpha2) * middlePoint[0] + alpha2 * bottomPoint[0]);
-                DrawHorizontalLine(screen, startX, endX, y, rgb);
+                DrawHorizontalLine(screen, startX, endX, y, rgb,tag);
             }
         }
     }
 
 
-    private void DrawHorizontalLine(Window screen, int x1, int x2, int y, byte[] rgb)
+    private void DrawHorizontalLine(Window screen, int x1, int x2, int y, byte[] rgb,int tag)
     {
         if (x1 > x2)
         {
@@ -576,7 +620,7 @@ public class Camera : Proportie
             if (x < 0 && x2 > 0) x = 0;
             else if (x < 0) continue;
             else if(x > screen.Ethwidth) continue;
-            screen.QPlaceColor(x, y, rgb[0], rgb[1], rgb[2]);
+            screen.QPlaceColor(x, y, rgb[0], rgb[1], rgb[2],tag);
         }
     }
 
