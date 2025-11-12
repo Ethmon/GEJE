@@ -7,11 +7,12 @@ using System.Windows.Forms;
 using System.Reflection;
 using System.Diagnostics;
 using static System.Windows.Forms.LinkLabel;
+using System.Collections.Concurrent;
 
 public class Camera : Proportie
 {
     public double near = 0;
-    public double far = 900000;
+    public double far = 9000000;
     public double constant = 10;
     private Window screen;
     private ThreeDSceen scene;
@@ -26,7 +27,7 @@ public class Camera : Proportie
         this.x = x;
         this.y = y;
         this.z = z;
-        this.xrot = xrot;
+        this.xrot = xrot; 
         this.yrot = yrot;
         this.zrot = zrot;
         this.nx = x;
@@ -40,7 +41,7 @@ public class Camera : Proportie
         this.aspectRatio = aspectRatio;
         this.projectionMatrix = CalculateProjectionMatrix(fov, aspectRatio, near, far);
     }
-    List<Polygon> pointss = new List<Polygon>();
+    ConcurrentBag<Polygon> pointss = new ConcurrentBag<Polygon>();
     List<Polygon> orderedLines = new List<Polygon>();
     double projectedPoint10 = 0;
     double projectedPoint11 = 0;
@@ -87,7 +88,7 @@ public class Camera : Proportie
                         {
                             if (propertie.GetType() == typeof(Mesh))
                             {
-                                foreach (Polygon point in ((Mesh)propertie).points)
+                                foreach (Polygon point in ((Mesh)propertie).points.ToList())
                                 {
 
                                     pointss.Add(point);
@@ -98,7 +99,7 @@ public class Camera : Proportie
                 }
             }
             new_meshes = false;
-            //Console.WriteLine(pointss.Count());
+            Console.WriteLine(pointss.Count());
         }
         else
         {
@@ -114,9 +115,9 @@ public class Camera : Proportie
                         {
                             if (propertie.GetType() == typeof(Mesh))
                             {
-                                foreach (Polygon point in ((Mesh)propertie).points)
+                                foreach (Polygon point in ((Mesh)propertie).points.ToList())
                                 {
-
+                                    if(point!=null)
                                     pointss.Add(point);
                                 }
                             }
@@ -126,13 +127,14 @@ public class Camera : Proportie
             }
         }
         // sort lines by the average of the two points
-        orderedLines = pointss.OrderByDescending(p => (Math.Abs(((p.p1.x + p.p2.x + p.p3.x - (this.nx * 3)) /3)) + Math.Abs(((p.p1.y + p.p2.y+p.p3.y - (this.ny * 3)) /3)) + Math.Abs(((p.p1.z + p.p2.z+p.p3.z - (this.nz * 3))/3)))).ToList();
+        orderedLines = pointss.ToList().OrderByDescending(p => (Math.Abs(((p.p1.x + p.p2.x + p.p3.x - (this.nx * 3)) /3)) + Math.Abs(((p.p1.y + p.p2.y+p.p3.y - (this.ny * 3)) /3)) + Math.Abs(((p.p1.z + p.p2.z+p.p3.z - (this.nz * 3))/3)))).ToList();
         orderedLines.Reverse();
         List<List<object>> group = new List<List<object>>();
         //object groupLock = new object();
-        foreach (Polygon line in orderedLines)
+        var snapshot = orderedLines.ToList(); // make a separate copy
+        foreach (Polygon line in snapshot)
         {
-            
+
             //Point[] points = { line.p1, line.p2 };
             Point point1 = line.p1;
             Point point2 = line.p2;
@@ -165,9 +167,9 @@ public class Camera : Proportie
             // check if the dot product of the two points is less than 0
             if (transformedPoint1[0] * transformedPoint2[0] * transformedPoint3[0] + transformedPoint1[1] * transformedPoint2[1] * transformedPoint3[1] + transformedPoint1[2] * transformedPoint2[2] * transformedPoint3[2] < 0)
             {
-                continue;
+                //continue;
             }
-            if (transformedPoint1[2] < 0 || transformedPoint2[2] < 0 || transformedPoint3[2] < 0)
+            if (transformedPoint1[2] < 0 && transformedPoint2[2] < 0 && transformedPoint3[2] < 0)
             {
                 continue;
             }
@@ -283,7 +285,7 @@ public class Camera : Proportie
         //sw.Stop();
         //Console.WriteLine(sw.Elapsed);
         //sw.Start();
-        screen.UpdateLoop();
+        //screen.UpdateLoop();
         //sw.Stop();
         //Console.WriteLine(sw.Elapsed);
         //screen.Draw();
@@ -526,15 +528,15 @@ public class Camera : Proportie
         int tp = topPoint[1];
         int mp = middlePoint[1];
         int bp = bottomPoint[1];
-        if (totalHeight == 0) return;
+        if (totalHeight == 0) { return; }
         if (mp - tp + 1 != 0)
         {
 
             for (int y = tp; y <= mp; y++)
             {
                 if (y < 0 && mp > 0) y = 0;
-                else if (y < 0) break;
-                else if (y > screen.Ethheight) break;
+                else if (y < 0) continue;
+                else if (y > screen.Ethheight) continue;
 
                 alpha = (y - tp) / totalHeight;
                 alpha2 = (y - tp) / segmentHeight;
@@ -549,8 +551,8 @@ public class Camera : Proportie
             for (int y = mp + 1; y <= bp; y++)
             {
                 if (y < 0 && mp > 0) y = 0;
-                else if (y < 0) break;
-                else if (y > screen.Ethheight) break;
+                else if (y < 0) continue;
+                else if (y > screen.Ethheight) continue;
                 alpha = (y - tp) / totalHeight;
                 alpha2 = (y - mp) / segmentHeight;
                 startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
@@ -572,8 +574,8 @@ public class Camera : Proportie
         for (int x = x1; x <= x2; x++)
         {
             if (x < 0 && x2 > 0) x = 0;
-            else if (x < 0) break;
-            else if(x > screen.Ethwidth) break;
+            else if (x < 0) continue;
+            else if(x > screen.Ethwidth) continue;
             screen.QPlaceColor(x, y, rgb[0], rgb[1], rgb[2]);
         }
     }

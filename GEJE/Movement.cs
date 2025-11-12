@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Configuration;
+//using System.Net.Configuration;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -85,23 +85,15 @@ namespace GEJE
                 {
                     moved.move(moved.x, moved.y - speed, moved.z, moved.w);
                 }
-                if (window.pressed.Contains(38))
-                {
-                    moved.rotate(moved.xrot-1, moved.yrot, moved.zrot, moved.w);
-                }
-                if (window.pressed.Contains(40))
-                {
-                    moved.rotate(moved.xrot+1, moved.yrot, moved.zrot, moved.w);
-                }
-                if (window.pressed.Contains(39))
-                {
-                    moved.rotate(moved.xrot, moved.yrot+1, moved.zrot, moved.w);
-                }
-                if (window.pressed.Contains(37))
-                {
+                if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Up))
+                    moved.rotate(moved.xrot - 1, moved.yrot, moved.zrot, moved.w);
+                if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Down))
+                    moved.rotate(moved.xrot + 1, moved.yrot, moved.zrot, moved.w);
+                if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Right))
+                    moved.rotate(moved.xrot, moved.yrot + 1, moved.zrot, moved.w);
+                if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Left))
                     moved.rotate(moved.xrot, moved.yrot-1, moved.zrot, moved.w);
-                }
-                //Console.WriteLine("x: " + moved.x + " y: " + moved.y + " z: " + moved.z + " xrot: " + moved.xrot + " yrot: " + moved.yrot + " zrot: " + moved.zrot);
+                
             }
         }
     }

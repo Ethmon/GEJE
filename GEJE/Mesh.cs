@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.IO;
+using System.Security.Cryptography.Pkcs;
 using System.Text.Json;
 
 namespace GEJE
@@ -51,6 +52,17 @@ namespace GEJE
             }
             
         }
+        public Mesh(List<Polygon> polys, double x, double y, double z, double xrot, double yrot, double zrot) : base(x, y, z, xrot, yrot, zrot)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.xrot = xrot;
+            this.yrot = yrot;
+            this.zrot = zrot;
+            oldpoints = polys;
+
+        }
         public void hueit(int r, int g, int b)
         {
             foreach (Polygon point in oldpoints)
@@ -64,6 +76,16 @@ namespace GEJE
                 point.p3.r = (byte)((point.p3.r + r > 255) ? 255 : (point.p3.r + r < 0) ? 0 : point.p3.r + r);
                 point.p3.g = (byte)((point.p3.g + g > 255) ? 255 : (point.p3.g + g < 0) ? 0 : point.p3.g + g);
                 point.p3.b = (byte)((point.p3.b + b > 255) ? 255 : (point.p3.b + b < 0) ? 0 : point.p3.b + b);
+            }
+        }
+        public void scale(double x, double y, double z)
+        {
+
+            foreach(Polygon point in oldpoints)
+            {
+                point.p1.x*=x; point.p1.y*=y; point.p1.z*=z;
+                point.p2.x *= x; point.p2.y *= y; point.p2.z *= z;
+                point.p3.x *= x; point.p3.y *= y; point.p3.z *= z;
             }
         }
         public override string ToString()
@@ -93,9 +115,11 @@ namespace GEJE
             double[,] rotationMatrixZ = Rotation.GetRotationMatrixZ(zRotRad);
             // Combine rotation matrices
             double[,] combinedRotationMatrix = Rotation.CombineMatrices(rotationMatrixZ, Rotation.CombineMatrices(rotationMatrixY, rotationMatrixX));
-
-            points.ForEach(p => { p = null; });
-            points.Clear();
+            lock (points)
+            {
+                //points.ForEach(p => { p = null; });
+                points.Clear();
+            }
 
             foreach (Polygon Lines in oldpoints)
             {

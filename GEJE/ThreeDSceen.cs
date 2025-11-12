@@ -34,7 +34,7 @@ namespace GEJE
         public void update()
         {
             //Thread.Sleep(10);
-            while (true)
+            //while (true)
             {
                 //Thread.Sleep(3);
                 

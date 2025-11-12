@@ -28,7 +28,7 @@ namespace GEJE
             this.xrot = xrot;
             this.yrot = yrot;
             this.zrot = zrot;
-
+            
         }
 
         public void add_propertie(Proportie propertie)
@@ -141,17 +141,19 @@ namespace GEJE
                 //}
                 //else
                 propertie.Update();
+                /*
                 if (propertie is Mesh)
                 {
                     if (dddd)
                     {
-                        foreach (Polygon polygon in ((Mesh)propertie).points)
+                        foreach (Polygon polygon in ((Mesh)propertie).points.ToList())
                         {
-                            Console.WriteLine(polygon.ToString());
+                            //Console.WriteLine(polygon.ToString());
                         }
 
                     }
                 }
+                */
             }
             dddd = false;
             //Thread.Sleep(3);
