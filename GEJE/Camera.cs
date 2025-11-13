@@ -78,11 +78,13 @@ public class Camera : Proportie
             double[,] rotationMatrixY = Rotation.GetRotationMatrixY(yRotRad);
             double[,] rotationMatrixZ = Rotation.GetRotationMatrixZ(zRotRad);
             double[,] combinedRotationMatrix = Rotation.CombineMatrices(rotationMatrixZ, Rotation.CombineMatrices(rotationMatrixX, rotationMatrixY));
-
+        TagMap.Clear();
+        screen.Cleartags();
         if (new_meshes)
         {
             tagToPolygon.Clear();
             PolygonToTag.Clear();
+            
             pointss.Clear();
             double distance = 0;
             int d = 1;
@@ -310,6 +312,7 @@ public class Camera : Proportie
             List<object> list = group[i];
             if (fillin)
             {
+                if(i < snapshot.Count)
                 if (PolyToMesh.ContainsKey(snapshot[i]))
                         {
                             if ((PolygonToTag.ContainsKey(PolyToMesh[snapshot[i]])))
@@ -326,6 +329,7 @@ public class Camera : Proportie
                 DrawLineOnScreen(screen, (double)list[4],(double)list[5], (double)list[0],(double)list[1], new byte[] { 0, 0, 0 });
             }
         }
+
         //sw.Stop();
         //Console.WriteLine(sw.Elapsed);
         //sw.Start();

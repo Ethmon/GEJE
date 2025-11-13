@@ -14,7 +14,7 @@ namespace GEJE
         public Camera camera;
         ThreeDSceen scene;
         
-        Mesh lastOne;
+        public Mesh lastOne;
 
         public HoverHighlight(Item parent, Window window, ThreeDSceen scene,double hueShift = 0.08)
         {
@@ -73,7 +73,7 @@ namespace GEJE
                 }
             }
 
-            window.Cleartags();
+            //window.Cleartags();
             
         }
 

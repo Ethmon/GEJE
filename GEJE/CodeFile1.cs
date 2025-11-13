@@ -38,10 +38,10 @@ namespace GEJE
             List<Item> terrain = FlatTriangleLayer.GenerateFlatLayer(
                     widthDivisions: 50,
                     depthDivisions: 50,
-                    cellSize: 100,
+                    cellSize: 15,
                     jitter: .5,   // 0 = perfect grid, 0.25 = some randomness
                     zLevel: 0,
-                        r: 80, g: 180, b: 40
+                        r: 0, g: 0, b: 0
                     );
 
             foreach (var t in terrain)
@@ -51,7 +51,7 @@ namespace GEJE
             Item.floatingyay = false;
             //Console.WriteLine(box2.ToString());
             Item camera = new Item(0, -500, 0, 0, 0, 0);
-            Window win = new Window(600, 400, 4, 4);
+            Window win = new Window(300, 200, 4, 4);
             win.scene = sceen;
             Camera cam = new Camera(0, 0, 0, 90, 0, 0, sceen, win, 1);
             cam.outline = false;
@@ -72,8 +72,54 @@ namespace GEJE
         }
     }
 
+    public enum GroundType
+    {
+        None = 0,
+        Grass = 1,
+        Water = 2,
+        Hill = 3,
+        Mountain = 4,
+        FarmLand = 5,
+        Ocean = 6
+
+    }
 
 
+
+
+    public class Tile : Proportie
+    {
+        public static Dictionary<GroundType, byte[]> tile_colors = new Dictionary<GroundType, byte[]>()
+        {
+            [GroundType.None] = new byte[] { 0, 0, 0 },
+            [GroundType.Grass] = new byte[] { 68, 125, 47 },
+            [GroundType.Water] = new byte[] { 73, 151, 184 },
+            [GroundType.Hill] = new byte[] { 43, 87, 27 },
+            [GroundType.Mountain] = new byte[] { 97, 97, 97 },
+            [GroundType.FarmLand] = new byte[] { 55, 97, 7 },
+            [GroundType.Ocean] = new byte[] { 22, 105, 140 }
+        };
+        public Mesh tileMesh;
+        public GroundType type;
+        public override void Start()
+        {
+            base.Start();
+            tileMesh.hueit(-255, -255, -255);
+            byte[] a = tile_colors[type];
+            tileMesh.hueit(a[0], a[1], a[2]);
+        }
+        public void Randomiza(Random p)
+        {
+            //Random p = new Random();
+            int a = (int)p.Next() % 6;
+            if (a == 0) type = GroundType.Grass;
+            else if (a == 1) type = GroundType.Water;
+            else if (a == 2) type = GroundType.Hill;
+            else if (a == 3) type = GroundType.Mountain;
+            else if (a == 4) type = GroundType.FarmLand;
+            else if (a == 5) type = GroundType.Ocean;
+        }
+    }
     public static class FlatTriangleLayer
     {
         public static List<Item> GenerateFlatLayer(
@@ -123,6 +169,10 @@ namespace GEJE
                         }, 0, 0, 0, 0, 0, 0);
 
                         Item triItem1 = new Item(0, 0, 0, 0, 0, 0);
+                        Tile t = new Tile();
+                        t.tileMesh = tri1;
+                        t.Randomiza(rand);
+                        triItem1.add_propertie(t);
                         triItem1.add_propertie(tri1);
                         terrainItems.Add(triItem1);
                     }
@@ -139,6 +189,10 @@ namespace GEJE
                         }, 0, 0, 0, 0, 0, 0);
 
                         Item triItem2 = new Item(0, 0, 0, 0, 0, 0);
+                        Tile t2 = new Tile();
+                        t2.tileMesh = tri2;
+                        t2.Randomiza(rand);
+                        triItem2.add_propertie(t2);
                         triItem2.add_propertie(tri2);
                         terrainItems.Add(triItem2);
                     }
