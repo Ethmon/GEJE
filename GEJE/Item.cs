@@ -159,6 +159,18 @@ namespace GEJE
             //Thread.Sleep(3);
         }
 
+        public override String ToString()
+        {
+            String a = "";
+            a += x + " " + y + " " + z + " " + "/n";
+            a += xrot + " " + yrot + " " + zrot + " " + "\n";
+            foreach(Proportie p in properties)
+            {
+                a += p.ToString() + "\n";
+            }
+            return a;
+        }
+
     }
 
 

@@ -13,6 +13,7 @@ namespace GEJE
         public Window window;
         public Camera camera;
         ThreeDSceen scene;
+        bool clicked = false;
         
         public Mesh lastOne;
 
@@ -29,28 +30,50 @@ namespace GEJE
         {
             int[] mouse = window.currsor_pos();
             int a = window.getTagOfPixle(mouse[0], mouse[1]);
-
+            
             Mesh hovered = null;
             if (camera.TagMap.TryGetValue(a, out hovered))
             {
 
-
+                //Console.WriteLine(mouse[0] + " : " + mouse[1] + " -:- " + a);
                 //Console.WriteLine(a);
                 if (a != 0)
                 {
                     //Console.WriteLine(a.ToString());
-                    Mesh b = camera.TagMap[a];
+                    Mesh b = hovered;
+
                     if (b != null)
                     {
 
                         if (lastOne != b)
                         {
                             //Console.WriteLine("OK");
-                            b.hueit(50, 50, 50);
+                            //b.hueit(20, 20, 20);
+
+                            Item zz = camera.ItemMap[hovered];
+
+                            foreach (Proportie proportie in zz.properties)
+                            {
+                                if (proportie is Mesh)
+                                {
+                                   ((Mesh) proportie).hueit(20, 20, 20);
+
+                                }
+                            }
 
                             if (lastOne != null)
                             {
-                                lastOne.hueit(-50, -50, -50);
+                                //lastOne.hueit(-20, -20, -20);
+                                Item zza = camera.ItemMap[lastOne];
+
+                                foreach (Proportie proportie in zza.properties)
+                                {
+                                    if (proportie is Mesh)
+                                    {
+                                        ((Mesh)proportie).hueit(-20, -20, -20);
+
+                                    }
+                                }
                             }
                             lastOne = b;
                         }
@@ -60,7 +83,17 @@ namespace GEJE
                         }
                         else if (lastOne == null)
                         {
-                            b.hueit(50, 50, 50);
+                            //b.hueit(20, 20, 20);
+                            Item zz = camera.ItemMap[hovered];
+
+                            foreach (Proportie proportie in zz.properties)
+                            {
+                                if (proportie is Mesh)
+                                {
+                                    ((Mesh)proportie).hueit(20, 20, 20);
+
+                                }
+                            }
                             lastOne = b;
 
                         }
@@ -68,6 +101,30 @@ namespace GEJE
                     }
                     if (b == null)
                         Console.WriteLine("WHY");
+
+
+                    if(window.left_click)
+                    {
+                        if(clicked == false)
+                        {
+                            clicked = true;
+                            Item zz = camera.ItemMap[hovered];
+                            
+                            foreach (Proportie proportie in zz.properties)
+                            {
+                                if(proportie is Tile)
+                                {
+                                    Console.WriteLine(proportie.ToString());
+                                    break;
+                                }
+                            }
+                            
+                        }
+                    }
+                    else
+                    {
+                        clicked=false;
+                    }
 
 
                 }

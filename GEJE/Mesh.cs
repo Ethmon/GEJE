@@ -102,13 +102,13 @@ namespace GEJE
         public override string ToString()
         {
             string answer = "";
-            if (oldpoints != null) { return answer; }
+            if (oldpoints == null) { return answer; }
             else
             {
                 foreach (Polygon point in oldpoints)
                 {
                     answer += point.ToString() + "\n";
-                    Console.WriteLine("hello");
+                    //Console.WriteLine("hello");
                 }
             }
             return answer;

@@ -38,10 +38,9 @@ namespace GEJE
             List<Item> terrain = FlatTriangleLayer.GenerateFlatLayer(
                     widthDivisions: 50,
                     depthDivisions: 50,
-                    cellSize: 15,
-                    jitter: .5,   // 0 = perfect grid, 0.25 = some randomness
-                    zLevel: 0,
-                        r: 0, g: 0, b: 0
+                    cellSize: 20,
+                    jitter: .6,   // 0 = perfect grid, 0.25 = some randomness
+                    zLevel: 0
                     );
 
             foreach (var t in terrain)
@@ -51,7 +50,7 @@ namespace GEJE
             Item.floatingyay = false;
             //Console.WriteLine(box2.ToString());
             Item camera = new Item(0, -500, 0, 0, 0, 0);
-            Window win = new Window(300, 200, 4, 4);
+            Window win = new Window(600, 400, 2, 2);
             win.scene = sceen;
             Camera cam = new Camera(0, 0, 0, 90, 0, 0, sceen, win, 1);
             cam.outline = false;
@@ -80,12 +79,38 @@ namespace GEJE
         Hill = 3,
         Mountain = 4,
         FarmLand = 5,
-        Ocean = 6
+        Ocean = 6,
+        DeepOcean = 7,
+        Plateau = 8
 
     }
 
 
 
+    public static class TileRules
+    {
+        public static Dictionary<GroundType, double> clusterBias = new Dictionary<GroundType, double>
+        {
+            [GroundType.Grass] = 6.0,
+            [GroundType.Water] = 10.0,
+            [GroundType.Hill] = 5.0,
+            [GroundType.Mountain] = 5.0,
+            [GroundType.FarmLand] = 1.5,
+            [GroundType.Ocean] = 6.0,
+            [GroundType.DeepOcean] = 4.0,
+            [GroundType.Plateau] = 1.0
+        };
+
+        public static Dictionary<GroundType, HashSet<GroundType>> forbiddenNeighbors = new Dictionary<GroundType, HashSet<GroundType>>
+        {
+            [GroundType.Mountain] = new HashSet<GroundType> { GroundType.Water, GroundType.Ocean,GroundType.DeepOcean },
+            [GroundType.Water] = new HashSet<GroundType> { GroundType.Mountain, GroundType.Plateau }, 
+            [GroundType.Ocean] = new HashSet<GroundType> { GroundType.FarmLand,GroundType.Hill,GroundType.Mountain,GroundType.Plateau,GroundType.Grass },
+            [GroundType.DeepOcean] = new HashSet<GroundType> { GroundType.Water,GroundType.Grass,GroundType.Hill,GroundType.Mountain, GroundType.FarmLand,GroundType.Plateau },
+            [GroundType.Plateau] = new HashSet<GroundType> { GroundType.Mountain,GroundType.Water,GroundType.Ocean,GroundType.DeepOcean,GroundType.Hill,GroundType.Plateau},
+            [GroundType.Grass] = new HashSet<GroundType> { GroundType.DeepOcean, GroundType.Ocean }
+        };
+    }
 
     public class Tile : Proportie
     {
@@ -97,41 +122,120 @@ namespace GEJE
             [GroundType.Hill] = new byte[] { 43, 87, 27 },
             [GroundType.Mountain] = new byte[] { 97, 97, 97 },
             [GroundType.FarmLand] = new byte[] { 55, 97, 7 },
-            [GroundType.Ocean] = new byte[] { 22, 105, 140 }
+            [GroundType.Ocean] = new byte[] { 22, 105, 140 },
+            [GroundType.DeepOcean] = new byte[] { 20, 22, 107 },
+            [GroundType.Plateau] = new byte[] { 232, 191, 138 }
+
         };
         public Mesh tileMesh;
         public GroundType type;
+        public List<Tile> Neighbors = new List<Tile>();
         public override void Start()
         {
             base.Start();
-            tileMesh.hueit(-255, -255, -255);
-            byte[] a = tile_colors[type];
-            tileMesh.hueit(a[0], a[1], a[2]);
+            //tileMesh.hueit(-255, -255, -255);
+            //byte[] a = tile_colors[type];
+            //tileMesh.hueit(a[0], a[1], a[2]);
         }
-        public void Randomiza(Random p)
+        public static List<Tile> GetNeighbors(Tile[,] tiles, int x, int y, bool includeDiagonals = false)
         {
-            //Random p = new Random();
-            int a = (int)p.Next() % 6;
-            if (a == 0) type = GroundType.Grass;
-            else if (a == 1) type = GroundType.Water;
-            else if (a == 2) type = GroundType.Hill;
-            else if (a == 3) type = GroundType.Mountain;
-            else if (a == 4) type = GroundType.FarmLand;
-            else if (a == 5) type = GroundType.Ocean;
+            var neighbors = new List<Tile>();
+
+            var offsets = new List<(int dx, int dy)>
+            {
+                (-1, 0), (1, 0), (0, -1), (0, 1)
+            };
+
+            if (includeDiagonals)
+            {
+                offsets.AddRange(new[] { (-1, -1), (1, -1), (-1, 1), (1, 1) });
+            }
+
+            foreach (var (dx, dy) in offsets)
+            {
+                int nx = x + dx;
+                int ny = y + dy;
+
+                if (nx >= 0 && nx < tiles.GetLength(0) &&
+                    ny >= 0 && ny < tiles.GetLength(1))
+                {
+                    if (tiles[nx,ny] != null)
+                        neighbors.Add(tiles[nx, ny]);
+                }
+            }
+
+            return neighbors;
         }
+
+        public void Randomiza(Random rand, List<Tile> neighbors)
+        {
+            var allTypes = Enum.GetValues(typeof(GroundType))
+                .Cast<GroundType>()
+                .Where(t => t != GroundType.None).ToList();
+
+            Dictionary<GroundType, double> weights = new Dictionary<GroundType, double>();
+
+            foreach (var typeCandidate in allTypes)
+            {
+                double weight = 1.0;
+
+
+
+                if (neighbors.Any(n => n != null && n.type == typeCandidate) &&
+                TileRules.clusterBias.TryGetValue(typeCandidate, out double bias))
+                {
+                    weight += bias;
+                }
+
+
+                if (neighbors.Any(n => n != null &&
+                       TileRules.forbiddenNeighbors.TryGetValue(n.type, out var forbidden) &&
+                       forbidden.Contains(typeCandidate)))
+                {
+                    weight = 0;
+                }
+
+
+                weights[typeCandidate] = weight;
+            }
+
+            // Weighted random selection
+            double total = weights.Values.Sum();
+            double pick = rand.NextDouble() * total;
+            foreach (var kv in weights)
+            {
+                pick -= kv.Value;
+                if (pick <= 0)
+                {
+                    type = kv.Key;
+                    return;
+                }
+            }
+
+            type = allTypes[0]; // fallback
+        }
+
+
+        public override string ToString()
+        {
+            return type.ToString() + "\n" ;
+        }
+
     }
     public static class FlatTriangleLayer
     {
         public static List<Item> GenerateFlatLayer(
-            int widthDivisions,
-            int depthDivisions,
-            double cellSize,
-            double jitter,
-            double zLevel,
-            byte r, byte g, byte b)
+    int widthDivisions,
+    int depthDivisions,
+    double cellSize,
+    double jitter,
+    double zLevel)
         {
             Random rand = new Random();
             List<Item> terrainItems = new List<Item>();
+
+            // Store tiles in a 2D array for neighbor lookup
+            Tile[,] tiles = new Tile[widthDivisions, depthDivisions];
 
             // Generate grid points
             (double x, double y)[,] points = new (double, double)[widthDivisions + 1, depthDivisions + 1];
@@ -157,50 +261,64 @@ namespace GEJE
                     var p3 = points[x, y + 1];
                     var p4 = points[x + 1, y + 1];
 
-                    // Triangle 1 (p1, p2, p3)
-                    {
-                        Mesh tri1 = new Mesh(new List<Polygon>
-                        {
-                            new Polygon(
-                                new Point(p1.x, zLevel, p1.y, 1, r, g, b),
-                                new Point(p2.x, zLevel, p2.y, 1, r, g, b),
-                                new Point(p3.x, zLevel, p3.y, 1, r, g, b)
-                            )
-                        }, 0, 0, 0, 0, 0, 0);
+                    // --- Get neighbors for this cell ---
+                    List<Tile> neighbors = new List<Tile>();
+                    if (x > 0) neighbors.Add(tiles[x - 1, y]);       // left
+                    if (y > 0) neighbors.Add(tiles[x, y - 1]);       // top
+                    if (x > 0 && y > 0) neighbors.Add(tiles[x - 1, y - 1]); // top-left
+                    if (x > 0 && y < depthDivisions - 1) neighbors.Add(tiles[x - 1, y + 1]); // bottom-left
+                    if (x < widthDivisions - 1 && y > 0) neighbors.Add(tiles[x + 1, y - 1]); // top-right
 
-                        Item triItem1 = new Item(0, 0, 0, 0, 0, 0);
-                        Tile t = new Tile();
-                        t.tileMesh = tri1;
-                        t.Randomiza(rand);
-                        triItem1.add_propertie(t);
-                        triItem1.add_propertie(tri1);
-                        terrainItems.Add(triItem1);
-                    }
+                    // --- Create tile and assign type based on neighbors ---
+                    Tile t = new Tile();
+                    t.Randomiza(rand, neighbors);
+                    t.Neighbors =  neighbors;
+
+                    tiles[x, y] = t; // store in grid
+
+                    byte[] color = Tile.tile_colors[t.type];
+                    byte cr = color[0], cg = color[1], cb = color[2];
+
+                    // Triangle 1 (p1, p2, p3)
+                    Mesh tri1 = new Mesh(new List<Polygon>
+            {
+                new Polygon(
+                    new Point(p1.x, zLevel, p1.y, 1, cr, cg, cb),
+                    new Point(p2.x, zLevel, p2.y, 1, cr, cg, cb),
+                    new Point(p3.x, zLevel, p3.y, 1, cr, cg, cb)
+                )
+            }, 0, 0, 0, 0, 0, 0);
+
+                    Item triItem1 = new Item(0, 0, 0, 0, 0, 0);
+                    t.tileMesh = tri1;
+                    triItem1.add_propertie(t);
+                    triItem1.add_propertie(tri1);
+                    terrainItems.Add(triItem1);
 
                     // Triangle 2 (p2, p4, p3)
-                    {
-                        Mesh tri2 = new Mesh(new List<Polygon>
-                        {
-                            new Polygon(
-                                new Point(p2.x, zLevel, p2.y, 1, r, g, b),
-                                new Point(p4.x, zLevel, p4.y, 1, r, g, b),
-                                new Point(p3.x, zLevel, p3.y, 1, r, g, b)
-                            )
-                        }, 0, 0, 0, 0, 0, 0);
+                    Mesh tri2 = new Mesh(new List<Polygon>
+            {
+                new Polygon(
+                    new Point(p2.x, zLevel, p2.y, 1, cr, cg, cb),
+                    new Point(p4.x, zLevel, p4.y, 1, cr, cg, cb),
+                    new Point(p3.x, zLevel, p3.y, 1, cr, cg, cb)
+                )
+            }, 0, 0, 0, 0, 0, 0);
 
-                        Item triItem2 = new Item(0, 0, 0, 0, 0, 0);
-                        Tile t2 = new Tile();
-                        t2.tileMesh = tri2;
-                        t2.Randomiza(rand);
-                        triItem2.add_propertie(t2);
-                        triItem2.add_propertie(tri2);
-                        terrainItems.Add(triItem2);
-                    }
+                    //Item triItem2 = new Item(0, 0, 0, 0, 0, 0);
+                    //Tile t2 = new Tile();
+                    //t2.tileMesh = tri2;
+                    //t2.type = t.type; // same type for both triangles in cell
+                    //triItem2.add_propertie(t2);
+                    triItem1.add_propertie(tri2);
+                    //terrainItems.Add(triItem2);
                 }
             }
 
             return terrainItems;
         }
+
+
     }
 
 }

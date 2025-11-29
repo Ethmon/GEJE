@@ -27,6 +27,8 @@ public class Camera : Proportie
     private Dictionary<int, Mesh> tagToPolygon = new Dictionary<int, Mesh>();
     private Dictionary<Mesh, int> PolygonToTag = new Dictionary<Mesh, int>();
     private Dictionary<Polygon, Mesh> PolyToMesh = new Dictionary<Polygon, Mesh>();
+    private Dictionary<Mesh,Item> MeshToItem = new Dictionary<Mesh,Item>();
+    public Dictionary<Mesh, Item> ItemMap => MeshToItem;
     public Dictionary<int, Mesh> TagMap => tagToPolygon;
     public Camera(double x, double y, double z, double xrot, double yrot, double zrot, ThreeDSceen scene, Window screen, double aspectRatio) : base(x, y, z, xrot, yrot, zrot)
     {
@@ -102,6 +104,7 @@ public class Camera : Proportie
                             if (propertie.GetType() == typeof(Mesh))
                             {
                                 tagToPolygon[d] = (Mesh)propertie;
+                                MeshToItem[(Mesh)propertie] = item;
                                 PolygonToTag[(Mesh)propertie] = d;
                                 d++;
                                 foreach (Polygon point in ((Mesh)propertie).points.ToList())
@@ -166,6 +169,7 @@ public class Camera : Proportie
         group = new List<List<object>>();
         //object groupLock = new object();
         var snapshot = orderedLines.ToList(); // make a separate copy
+        List<Polygon> polygons = new List<Polygon>();
         int k = 0;
         foreach (Polygon line in snapshot)
         {
@@ -230,13 +234,13 @@ public class Camera : Proportie
 
             projectedPoint10 = projectedPoint1[0];
             projectedPoint11 = projectedPoint1[1];
-            projectedPoint12 = projectedPoint1[2];
+            //projectedPoint12 = projectedPoint1[2];
             projectedPoint20 = projectedPoint2[0];
             projectedPoint21 = projectedPoint2[1];
             projectedPoint23 = projectedPoint2[2];
             projectedPoint30 = projectedPoint3[0];
             projectedPoint31 = projectedPoint3[1];
-            projectedPoint32 = projectedPoint3[2];
+            //projectedPoint32 = projectedPoint3[2];
             projectedPoint13 = projectedPoint1[3];
             projectedPoint23 = projectedPoint2[3];
             projectedPoint33 = projectedPoint3[3];
@@ -244,13 +248,13 @@ public class Camera : Proportie
 
             projectedPoint10 /= projectedPoint13;
             projectedPoint11 /= projectedPoint13;
-            projectedPoint12 /= projectedPoint13;
+            //projectedPoint12 /= projectedPoint13;
             projectedPoint20 /= projectedPoint23;
             projectedPoint21 /= projectedPoint23;
-            projectedPoint22 /= projectedPoint23;
+            //projectedPoint22 /= projectedPoint23;
             projectedPoint30 /= projectedPoint33;
             projectedPoint31 /= projectedPoint33;
-            projectedPoint32 /= projectedPoint33;
+            //projectedPoint32 /= projectedPoint33;
             
             
             projectedPoint10 = (projectedPoint10 + 1) * (screen.Ethwidth / 2);
@@ -260,6 +264,7 @@ public class Camera : Proportie
             projectedPoint30 = (projectedPoint30 + 1) * (screen.Ethwidth / 2);
             projectedPoint31 = (1 - projectedPoint31) * (screen.Ethheight / 2);
             //if out of bounds, skip
+
             int outOfBoundsCount = 0;
 
             // Check each condition and count the number of true conditions
@@ -284,6 +289,7 @@ public class Camera : Proportie
                 continue;
             }
 
+            polygons.Add(line);
             // 
             //Console.WriteLine(transformedPoint[0] + " " + transformedPoint[1] + " " + transformedPoint[2]);
             //Console.WriteLine(projectedPoint1[0] + " " + projectedPoint1[1] + " " + projectedPoint2[0]+ " " + projectedPoint2[1]);
@@ -312,11 +318,11 @@ public class Camera : Proportie
             List<object> list = group[i];
             if (fillin)
             {
-                if(i < snapshot.Count)
-                if (PolyToMesh.ContainsKey(snapshot[i]))
+                if(i < polygons.Count)
+                if (PolyToMesh.ContainsKey(polygons[i]))
                         {
-                            if ((PolygonToTag.ContainsKey(PolyToMesh[snapshot[i]])))
-                                DrawFilledPolygonOnScreen(screen, (double)list[0], (double)list[1], (double)list[2], (double)list[3], (double)list[4], (double)list[5], (byte[])list[6], PolygonToTag[PolyToMesh[snapshot[i]]]);
+                            if ((PolygonToTag.ContainsKey(PolyToMesh[polygons[i]])))
+                                DrawFilledPolygonOnScreen(screen, (double)list[0], (double)list[1], (double)list[2], (double)list[3], (double)list[4], (double)list[5], (byte[])list[6], PolygonToTag[PolyToMesh[polygons[i]]]);
                             else
                                 DrawFilledPolygonOnScreen(screen, (double)list[0], (double)list[1], (double)list[2], (double)list[3], (double)list[4], (double)list[5], (byte[])list[6], 0);
                 }
