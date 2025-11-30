@@ -91,24 +91,26 @@ namespace GEJE
     {
         public static Dictionary<GroundType, double> clusterBias = new Dictionary<GroundType, double>
         {
-            [GroundType.Grass] = 6.0,
-            [GroundType.Water] = 10.0,
+            [GroundType.Grass] = 14.0,
+            [GroundType.Water] = 4.0,
             [GroundType.Hill] = 5.0,
             [GroundType.Mountain] = 5.0,
             [GroundType.FarmLand] = 1.5,
             [GroundType.Ocean] = 6.0,
-            [GroundType.DeepOcean] = 4.0,
+            [GroundType.DeepOcean] = 10.0,
             [GroundType.Plateau] = 1.0
         };
 
         public static Dictionary<GroundType, HashSet<GroundType>> forbiddenNeighbors = new Dictionary<GroundType, HashSet<GroundType>>
         {
-            [GroundType.Mountain] = new HashSet<GroundType> { GroundType.Water, GroundType.Ocean,GroundType.DeepOcean },
-            [GroundType.Water] = new HashSet<GroundType> { GroundType.Mountain, GroundType.Plateau }, 
+            [GroundType.Mountain] = new HashSet<GroundType> { GroundType.Water, GroundType.Ocean,GroundType.DeepOcean, GroundType.Plateau },
+            [GroundType.Water] = new HashSet<GroundType> { GroundType.Mountain, GroundType.Plateau,GroundType.DeepOcean }, 
             [GroundType.Ocean] = new HashSet<GroundType> { GroundType.FarmLand,GroundType.Hill,GroundType.Mountain,GroundType.Plateau,GroundType.Grass },
-            [GroundType.DeepOcean] = new HashSet<GroundType> { GroundType.Water,GroundType.Grass,GroundType.Hill,GroundType.Mountain, GroundType.FarmLand,GroundType.Plateau },
+            [GroundType.DeepOcean] = new HashSet<GroundType> { GroundType.Water,GroundType.Grass,GroundType.Hill,GroundType.Mountain, GroundType.FarmLand,GroundType.Plateau},
             [GroundType.Plateau] = new HashSet<GroundType> { GroundType.Mountain,GroundType.Water,GroundType.Ocean,GroundType.DeepOcean,GroundType.Hill,GroundType.Plateau},
-            [GroundType.Grass] = new HashSet<GroundType> { GroundType.DeepOcean, GroundType.Ocean }
+            [GroundType.Grass] = new HashSet<GroundType> { GroundType.DeepOcean, GroundType.Ocean },
+            [GroundType.Hill] = new HashSet<GroundType> { GroundType.DeepOcean,GroundType.Ocean,GroundType.Plateau},
+            [GroundType.FarmLand] = new HashSet<GroundType> { GroundType.Ocean, GroundType.DeepOcean }
         };
     }
 
@@ -124,7 +126,7 @@ namespace GEJE
             [GroundType.FarmLand] = new byte[] { 55, 97, 7 },
             [GroundType.Ocean] = new byte[] { 22, 105, 140 },
             [GroundType.DeepOcean] = new byte[] { 20, 22, 107 },
-            [GroundType.Plateau] = new byte[] { 232, 191, 138 }
+            [GroundType.Plateau] = new byte[] { 230, 191, 138 }
 
         };
         public Mesh tileMesh;
@@ -218,7 +220,13 @@ namespace GEJE
 
         public override string ToString()
         {
-            return type.ToString() + "\n" ;
+            String a = type.ToString() + "\n";
+            foreach(Tile N in Neighbors)
+            {
+                if(N!=null)
+                    a += N.type.ToString() + " ";
+            }
+            return a;
         }
 
     }
@@ -263,16 +271,18 @@ namespace GEJE
 
                     // --- Get neighbors for this cell ---
                     List<Tile> neighbors = new List<Tile>();
+                    /*
                     if (x > 0) neighbors.Add(tiles[x - 1, y]);       // left
                     if (y > 0) neighbors.Add(tiles[x, y - 1]);       // top
                     if (x > 0 && y > 0) neighbors.Add(tiles[x - 1, y - 1]); // top-left
                     if (x > 0 && y < depthDivisions - 1) neighbors.Add(tiles[x - 1, y + 1]); // bottom-left
                     if (x < widthDivisions - 1 && y > 0) neighbors.Add(tiles[x + 1, y - 1]); // top-right
-
+                    */
+                    neighbors = Tile.GetNeighbors(tiles,x,y,true);
                     // --- Create tile and assign type based on neighbors ---
                     Tile t = new Tile();
                     t.Randomiza(rand, neighbors);
-                    t.Neighbors =  neighbors;
+                    
 
                     tiles[x, y] = t; // store in grid
 
@@ -314,9 +324,14 @@ namespace GEJE
                     //terrainItems.Add(triItem2);
                 }
             }
+            for (int i = 0; i < widthDivisions; i++)
+                for (int k = 0; k < depthDivisions; k++)
+                    tiles[i,k].Neighbors = Tile.GetNeighbors(tiles, i, k,true);
+
 
             return terrainItems;
         }
+       
 
 
     }

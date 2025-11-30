@@ -23,7 +23,7 @@ public class Camera : Proportie
     public bool fillin = true;
     public bool new_meshes = true;
     public List<List<object>> group = new List<List<object>>();
-
+    private List<Polygon> polygons = new List<Polygon>();
     private Dictionary<int, Mesh> tagToPolygon = new Dictionary<int, Mesh>();
     private Dictionary<Mesh, int> PolygonToTag = new Dictionary<Mesh, int>();
     private Dictionary<Polygon, Mesh> PolyToMesh = new Dictionary<Polygon, Mesh>();
@@ -81,18 +81,23 @@ public class Camera : Proportie
             double[,] rotationMatrixZ = Rotation.GetRotationMatrixZ(zRotRad);
             double[,] combinedRotationMatrix = Rotation.CombineMatrices(rotationMatrixZ, Rotation.CombineMatrices(rotationMatrixX, rotationMatrixY));
         TagMap.Clear();
+        ItemMap.Clear();
         screen.Cleartags();
         if (new_meshes)
         {
+            items.Clear();
             tagToPolygon.Clear();
             PolygonToTag.Clear();
-            
+            MeshToItem.Clear();
+            PolyToMesh.Clear();
+
+            items = scene.items.ToList();
             pointss.Clear();
             double distance = 0;
             int d = 1;
             foreach (Item item in scene.items)
             {
-                items.Add(item);
+                
                 distance = (Math.Pow(item.x - nx, 2) + Math.Pow(item.y - ny, 2) + Math.Pow(item.z - nz, 2));
                 if (distance < far && distance > near)
                 {
@@ -129,7 +134,9 @@ public class Camera : Proportie
         {
             pointss.Clear();
             tagToPolygon.Clear();
+            MeshToItem.Clear();
             PolygonToTag.Clear();
+            PolyToMesh.Clear();
             double distance = 0;
             int d = 1;
             foreach (Item item in items)
@@ -144,6 +151,7 @@ public class Camera : Proportie
                             if (propertie.GetType() == typeof(Mesh))
                             {
                                 tagToPolygon[d] = (Mesh)propertie;
+                                MeshToItem[(Mesh)propertie] = item;
                                 PolygonToTag[(Mesh)propertie] = d;
                                 d++;
                                 foreach (Polygon point in ((Mesh)propertie).points.ToList())
@@ -163,13 +171,16 @@ public class Camera : Proportie
                 }
             }
         }
+        /*Console.WriteLine($"PolyToMesh={PolyToMesh.Count} TagMap={tagToPolygon.Count} pointss={pointss.Count} items={items.Count}");
+        Console.WriteLine($"GC memory: {GC.GetTotalMemory(false)}");*/
+
         // sort lines by the average of the two points
         orderedLines = pointss.ToList().OrderByDescending(p => (Math.Abs(((p.p1.x + p.p2.x + p.p3.x - (this.nx * 3)) /3)) + Math.Abs(((p.p1.y + p.p2.y+p.p3.y - (this.ny * 3)) /3)) + Math.Abs(((p.p1.z + p.p2.z+p.p3.z - (this.nz * 3))/3)))).ToList();
         orderedLines.Reverse();
         group = new List<List<object>>();
         //object groupLock = new object();
         var snapshot = orderedLines.ToList(); // make a separate copy
-        List<Polygon> polygons = new List<Polygon>();
+        polygons.Clear();
         int k = 0;
         foreach (Polygon line in snapshot)
         {

@@ -38,13 +38,14 @@ namespace GEJE
             {
                 //Thread.Sleep(3);
                 
-                var watch = new Stopwatch();
-                watch.Start();
+                //var watch = new Stopwatch();
+                //watch.Start();
                 foreach (Item item in items)
                 {
                    if(item.state)
                     item.Update();
                 }
+                /*
                 watch.Stop();
                 counter2 += (int)watch.ElapsedMilliseconds;
                 if(counter2 > 1000)
@@ -53,6 +54,7 @@ namespace GEJE
                     Console.WriteLine("FPS: " + counter);
                     counter = 0;
                 }else  counter++;
+                */
             }
         }
         public void Start_scene()
