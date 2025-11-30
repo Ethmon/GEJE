@@ -36,9 +36,9 @@ namespace GEJE
             //}
 
             List<Item> terrain = FlatTriangleLayer.GenerateFlatLayer(
-                    widthDivisions: 75,
-                    depthDivisions: 75,
-                    cellSize: 25,
+                    widthDivisions: 65,
+                    depthDivisions: 65,
+                    cellSize: 100,
                     jitter: .6,   // 0 = perfect grid, 0.25 = some randomness
                     zLevel: 0
                     );
@@ -49,13 +49,13 @@ namespace GEJE
             Item.rotatei = false;
             Item.floatingyay = false;
             //Console.WriteLine(box2.ToString());
-            Item camera = new Item(0, -1000, 0, 0, 0, 0);
-            Window win = new Window(600, 400, 2, 2);
+            Item camera = new Item(0, 000100, 0, 0, 0, 0);
+            Window win = new Window(600, 400, 3, 3);
             win.scene = sceen;
             Camera cam = new Camera(0, 0, 0, 90, 0, 0, sceen, win, 1);
             cam.outline = false;
             cam.fillin = true;
-            Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera, 5);
+            Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera, 50);
             cam_movement.window = win;
             HoverHighlight ffff = new HoverHighlight(camera, win, sceen);
             ffff.camera = cam;
@@ -92,24 +92,24 @@ namespace GEJE
     {
         public static Dictionary<GroundType, double> clusterBias = new Dictionary<GroundType, double>
         {
-            [GroundType.Grass] = 14.0,
-            [GroundType.Water] = 6.0,
-            [GroundType.Hill] = 5.0,
-            [GroundType.Mountain] = 0.3,
-            [GroundType.FarmLand] = 1.5,
-            [GroundType.Ocean] = 16.0,
-            [GroundType.DeepOcean] = 15.0,
+            [GroundType.Grass] = 32.0,
+            [GroundType.Water] = 40.0,
+            [GroundType.Hill] = 20.0,
+            [GroundType.Mountain] = 0.7,
+            [GroundType.FarmLand] = 8.5,
+            [GroundType.Ocean] = 65.0,
+            [GroundType.DeepOcean] = 10.0,
             [GroundType.Plateau] = 1.0,
-            [GroundType.River] = 0.3
+            [GroundType.River] = 0.5
         };
 
         public static Dictionary<GroundType, HashSet<GroundType>> forbiddenNeighbors = new Dictionary<GroundType, HashSet<GroundType>>
         {
             [GroundType.Mountain] = new HashSet<GroundType> { GroundType.Water, GroundType.Ocean,GroundType.DeepOcean, GroundType.Plateau },
-            [GroundType.Water] = new HashSet<GroundType> { GroundType.Mountain, GroundType.Plateau,GroundType.DeepOcean }, 
+            [GroundType.Water] = new HashSet<GroundType> { GroundType.Mountain,GroundType.DeepOcean }, 
             [GroundType.Ocean] = new HashSet<GroundType> { GroundType.FarmLand,GroundType.Hill,GroundType.Mountain,GroundType.Plateau,GroundType.Grass, GroundType.River },
             [GroundType.DeepOcean] = new HashSet<GroundType> { GroundType.Water,GroundType.Grass,GroundType.Hill,GroundType.Mountain, GroundType.FarmLand,GroundType.Plateau, GroundType.River },
-            [GroundType.Plateau] = new HashSet<GroundType> { GroundType.Mountain,GroundType.Water,GroundType.Ocean,GroundType.DeepOcean,GroundType.Hill,GroundType.Plateau},
+            [GroundType.Plateau] = new HashSet<GroundType> { GroundType.Mountain,GroundType.Ocean,GroundType.DeepOcean,GroundType.Hill,GroundType.Plateau},
             [GroundType.Grass] = new HashSet<GroundType> { GroundType.DeepOcean, GroundType.Ocean },
             [GroundType.Hill] = new HashSet<GroundType> { GroundType.DeepOcean,GroundType.Ocean,GroundType.Plateau},
             [GroundType.FarmLand] = new HashSet<GroundType> { GroundType.Ocean, GroundType.DeepOcean },
@@ -119,7 +119,6 @@ namespace GEJE
         public static Dictionary<GroundType, int> globalLimits = new Dictionary<GroundType, int>
         {
 
-
         };
 
 
@@ -128,7 +127,8 @@ namespace GEJE
 
         public static Dictionary<GroundType, int> adjacencyLimits = new Dictionary<GroundType, int>
         {
-            [GroundType.River] = 3
+            [GroundType.River] = 2,
+            [GroundType.Mountain] = 3
         };
 
         public static Dictionary<GroundType, Dictionary<GroundType, double>> neighborInfluence =
@@ -136,42 +136,56 @@ namespace GEJE
         {
             [GroundType.Water] = new Dictionary<GroundType, double>
             {
-                [GroundType.Water] = 1.7,
-                [GroundType.Hill] = .5,
-                [GroundType.Grass] = .95,
+                [GroundType.Water] = 16,
+                [GroundType.Hill] = 2.5,
+                [GroundType.Grass] = 5.75,
+                [GroundType.Plateau] = .1,
                 [GroundType.River] = .2,
-                [GroundType.DeepOcean] = 1.4
+                [GroundType.Ocean] = 11.4
                 
             },
             [GroundType.Mountain] = new Dictionary<GroundType, double>
             {
-                [GroundType.Hill] = 1.5,    
+                [GroundType.Hill] = 2.5,    
                 [GroundType.FarmLand] = 0.7,
-                [GroundType.Mountain] = 3
+                [GroundType.Mountain] = 9.5
             },
             [GroundType.River] = new Dictionary<GroundType, double>
             {
-                [GroundType.River] = 5,
+                [GroundType.River] = 10,
                 [GroundType.Water] = .4,
                 [GroundType.Plateau] = .2
             },
             [GroundType.Grass]= new Dictionary<GroundType, double>
             {
-                [GroundType.Water] = .75
+                [GroundType.Water] = .15,
+                [GroundType.Grass] = 3.3,
+                [GroundType.FarmLand] = 5.2,
+                [GroundType.Hill] = 6,
+                [GroundType.Plateau] = 3,
+                [GroundType.River] = 4,
+                [GroundType.Mountain] = 4
+
+            },
+            [GroundType.FarmLand]= new Dictionary<GroundType, double>
+            {
+                [GroundType.Water] = .05,
+                [GroundType.FarmLand] = 1.7
             },
             [GroundType.DeepOcean]= new Dictionary<GroundType, double>
             {
-                [GroundType .DeepOcean] = 2.6,
-                [GroundType.Ocean] = 1.4
+                [GroundType .DeepOcean] = 4.6,
+                [GroundType.Ocean] = 2
             },
             [GroundType.Ocean] = new Dictionary<GroundType, double>
             {
-                [GroundType.DeepOcean] = .9,
-                [GroundType.Ocean] = 2,
-                [GroundType.Water] = 1.3
+                [GroundType.DeepOcean] = 1.8,
+                [GroundType.Ocean] = 2.2,
+                [GroundType.Water] = 2.3
             },
             [GroundType.Plateau] = new Dictionary<GroundType, double>
             {
+                [GroundType.Water] = .15,
                 [GroundType.River ] = .2
             }
             

@@ -329,6 +329,8 @@ public class Camera : Proportie
             List<object> list = group[i];
             if (fillin)
             {
+                if(list != null)
+                if(list.Count ==7)
                 if(i < polygons.Count)
                 if (polygons[i]!= null)
                 if (PolyToMesh.ContainsKey(polygons[i]))
