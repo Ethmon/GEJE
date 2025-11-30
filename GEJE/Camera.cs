@@ -24,12 +24,12 @@ public class Camera : Proportie
     public bool new_meshes = true;
     public List<List<object>> group = new List<List<object>>();
     private List<Polygon> polygons = new List<Polygon>();
-    private Dictionary<int, Mesh> tagToPolygon = new Dictionary<int, Mesh>();
-    private Dictionary<Mesh, int> PolygonToTag = new Dictionary<Mesh, int>();
-    private Dictionary<Polygon, Mesh> PolyToMesh = new Dictionary<Polygon, Mesh>();
-    private Dictionary<Mesh,Item> MeshToItem = new Dictionary<Mesh,Item>();
-    public Dictionary<Mesh, Item> ItemMap => MeshToItem;
-    public Dictionary<int, Mesh> TagMap => tagToPolygon;
+    private ConcurrentDictionary<int, Mesh> tagToPolygon = new ConcurrentDictionary<int, Mesh>();
+    private ConcurrentDictionary<Mesh, int> PolygonToTag = new ConcurrentDictionary<Mesh, int>();
+    private ConcurrentDictionary<Polygon, Mesh> PolyToMesh = new ConcurrentDictionary<Polygon, Mesh>();
+    private ConcurrentDictionary<Mesh,Item> MeshToItem = new ConcurrentDictionary<Mesh,Item>();
+    public ConcurrentDictionary<Mesh, Item> ItemMap => MeshToItem;
+    public ConcurrentDictionary<int, Mesh> TagMap => tagToPolygon;
     public Camera(double x, double y, double z, double xrot, double yrot, double zrot, ThreeDSceen scene, Window screen, double aspectRatio) : base(x, y, z, xrot, yrot, zrot)
     {
         this.x = x;
@@ -330,6 +330,7 @@ public class Camera : Proportie
             if (fillin)
             {
                 if(i < polygons.Count)
+                if (polygons[i]!= null)
                 if (PolyToMesh.ContainsKey(polygons[i]))
                         {
                             if ((PolygonToTag.ContainsKey(PolyToMesh[polygons[i]])))

@@ -36,9 +36,9 @@ namespace GEJE
             //}
 
             List<Item> terrain = FlatTriangleLayer.GenerateFlatLayer(
-                    widthDivisions: 50,
-                    depthDivisions: 50,
-                    cellSize: 20,
+                    widthDivisions: 75,
+                    depthDivisions: 75,
+                    cellSize: 25,
                     jitter: .6,   // 0 = perfect grid, 0.25 = some randomness
                     zLevel: 0
                     );
@@ -49,7 +49,7 @@ namespace GEJE
             Item.rotatei = false;
             Item.floatingyay = false;
             //Console.WriteLine(box2.ToString());
-            Item camera = new Item(0, -500, 0, 0, 0, 0);
+            Item camera = new Item(0, -1000, 0, 0, 0, 0);
             Window win = new Window(600, 400, 2, 2);
             win.scene = sceen;
             Camera cam = new Camera(0, 0, 0, 90, 0, 0, sceen, win, 1);
@@ -81,7 +81,8 @@ namespace GEJE
         FarmLand = 5,
         Ocean = 6,
         DeepOcean = 7,
-        Plateau = 8
+        Plateau = 8,
+        River = 9
 
     }
 
@@ -92,25 +93,88 @@ namespace GEJE
         public static Dictionary<GroundType, double> clusterBias = new Dictionary<GroundType, double>
         {
             [GroundType.Grass] = 14.0,
-            [GroundType.Water] = 4.0,
+            [GroundType.Water] = 6.0,
             [GroundType.Hill] = 5.0,
-            [GroundType.Mountain] = 5.0,
+            [GroundType.Mountain] = 0.3,
             [GroundType.FarmLand] = 1.5,
-            [GroundType.Ocean] = 6.0,
-            [GroundType.DeepOcean] = 10.0,
-            [GroundType.Plateau] = 1.0
+            [GroundType.Ocean] = 16.0,
+            [GroundType.DeepOcean] = 15.0,
+            [GroundType.Plateau] = 1.0,
+            [GroundType.River] = 0.3
         };
 
         public static Dictionary<GroundType, HashSet<GroundType>> forbiddenNeighbors = new Dictionary<GroundType, HashSet<GroundType>>
         {
             [GroundType.Mountain] = new HashSet<GroundType> { GroundType.Water, GroundType.Ocean,GroundType.DeepOcean, GroundType.Plateau },
             [GroundType.Water] = new HashSet<GroundType> { GroundType.Mountain, GroundType.Plateau,GroundType.DeepOcean }, 
-            [GroundType.Ocean] = new HashSet<GroundType> { GroundType.FarmLand,GroundType.Hill,GroundType.Mountain,GroundType.Plateau,GroundType.Grass },
-            [GroundType.DeepOcean] = new HashSet<GroundType> { GroundType.Water,GroundType.Grass,GroundType.Hill,GroundType.Mountain, GroundType.FarmLand,GroundType.Plateau},
+            [GroundType.Ocean] = new HashSet<GroundType> { GroundType.FarmLand,GroundType.Hill,GroundType.Mountain,GroundType.Plateau,GroundType.Grass, GroundType.River },
+            [GroundType.DeepOcean] = new HashSet<GroundType> { GroundType.Water,GroundType.Grass,GroundType.Hill,GroundType.Mountain, GroundType.FarmLand,GroundType.Plateau, GroundType.River },
             [GroundType.Plateau] = new HashSet<GroundType> { GroundType.Mountain,GroundType.Water,GroundType.Ocean,GroundType.DeepOcean,GroundType.Hill,GroundType.Plateau},
             [GroundType.Grass] = new HashSet<GroundType> { GroundType.DeepOcean, GroundType.Ocean },
             [GroundType.Hill] = new HashSet<GroundType> { GroundType.DeepOcean,GroundType.Ocean,GroundType.Plateau},
-            [GroundType.FarmLand] = new HashSet<GroundType> { GroundType.Ocean, GroundType.DeepOcean }
+            [GroundType.FarmLand] = new HashSet<GroundType> { GroundType.Ocean, GroundType.DeepOcean },
+            [GroundType.River] = new HashSet<GroundType> {GroundType.Ocean, GroundType.DeepOcean }
+        };
+
+        public static Dictionary<GroundType, int> globalLimits = new Dictionary<GroundType, int>
+        {
+
+
+        };
+
+
+        public static Dictionary<GroundType, int> globalCounts = new Dictionary<GroundType, int>();
+
+
+        public static Dictionary<GroundType, int> adjacencyLimits = new Dictionary<GroundType, int>
+        {
+            [GroundType.River] = 3
+        };
+
+        public static Dictionary<GroundType, Dictionary<GroundType, double>> neighborInfluence =
+        new Dictionary<GroundType, Dictionary<GroundType, double>>
+        {
+            [GroundType.Water] = new Dictionary<GroundType, double>
+            {
+                [GroundType.Water] = 1.7,
+                [GroundType.Hill] = .5,
+                [GroundType.Grass] = .95,
+                [GroundType.River] = .2,
+                [GroundType.DeepOcean] = 1.4
+                
+            },
+            [GroundType.Mountain] = new Dictionary<GroundType, double>
+            {
+                [GroundType.Hill] = 1.5,    
+                [GroundType.FarmLand] = 0.7,
+                [GroundType.Mountain] = 3
+            },
+            [GroundType.River] = new Dictionary<GroundType, double>
+            {
+                [GroundType.River] = 5,
+                [GroundType.Water] = .4,
+                [GroundType.Plateau] = .2
+            },
+            [GroundType.Grass]= new Dictionary<GroundType, double>
+            {
+                [GroundType.Water] = .75
+            },
+            [GroundType.DeepOcean]= new Dictionary<GroundType, double>
+            {
+                [GroundType .DeepOcean] = 2.6,
+                [GroundType.Ocean] = 1.4
+            },
+            [GroundType.Ocean] = new Dictionary<GroundType, double>
+            {
+                [GroundType.DeepOcean] = .9,
+                [GroundType.Ocean] = 2,
+                [GroundType.Water] = 1.3
+            },
+            [GroundType.Plateau] = new Dictionary<GroundType, double>
+            {
+                [GroundType.River ] = .2
+            }
+            
         };
     }
 
@@ -126,7 +190,8 @@ namespace GEJE
             [GroundType.FarmLand] = new byte[] { 55, 97, 7 },
             [GroundType.Ocean] = new byte[] { 22, 105, 140 },
             [GroundType.DeepOcean] = new byte[] { 20, 22, 107 },
-            [GroundType.Plateau] = new byte[] { 230, 191, 138 }
+            [GroundType.Plateau] = new byte[] { 230, 191, 138 },
+            [GroundType.River] = new byte[] { 44, 124, 204 },
 
         };
         public Mesh tileMesh;
@@ -181,28 +246,56 @@ namespace GEJE
             {
                 double weight = 1.0;
 
-
-
+                
                 if (neighbors.Any(n => n != null && n.type == typeCandidate) &&
-                TileRules.clusterBias.TryGetValue(typeCandidate, out double bias))
+                    TileRules.clusterBias.TryGetValue(typeCandidate, out double bias))
                 {
                     weight += bias;
                 }
 
-
+                
                 if (neighbors.Any(n => n != null &&
-                       TileRules.forbiddenNeighbors.TryGetValue(n.type, out var forbidden) &&
-                       forbidden.Contains(typeCandidate)))
+                                       TileRules.forbiddenNeighbors.TryGetValue(n.type, out var forbidden) &&
+                                       forbidden.Contains(typeCandidate)))
                 {
                     weight = 0;
                 }
 
+                
+                if (TileRules.globalLimits.TryGetValue(typeCandidate, out int limit) &&
+                    TileRules.globalCounts.TryGetValue(typeCandidate, out int count) &&
+                    count >= limit)
+                {
+                    weight = 0;
+                }
+
+                
+                int sameNeighborCount = neighbors.Count(n => n != null && n.type == typeCandidate);
+                if (TileRules.adjacencyLimits.TryGetValue(typeCandidate, out int maxAdj) &&
+                    sameNeighborCount >= maxAdj)
+                {
+                    weight = 0;
+                }
+
+                foreach (var n in neighbors.Where(n => n != null))
+                {
+                    if (TileRules.neighborInfluence.TryGetValue(n.type, out var influenceMap) &&
+                        influenceMap.TryGetValue(typeCandidate, out double influence))
+                    {
+                        weight *= influence;
+                    }
+                }
 
                 weights[typeCandidate] = weight;
             }
 
-            // Weighted random selection
             double total = weights.Values.Sum();
+            if (total <= 0)
+            {
+                type = allTypes[rand.Next(allTypes.Count)];
+                return;
+            }
+
             double pick = rand.NextDouble() * total;
             foreach (var kv in weights)
             {
@@ -210,12 +303,18 @@ namespace GEJE
                 if (pick <= 0)
                 {
                     type = kv.Key;
+
+                    
+                    if (!TileRules.globalCounts.ContainsKey(type))
+                        TileRules.globalCounts[type] = 0;
+                    TileRules.globalCounts[type]++;
                     return;
                 }
             }
 
-            type = allTypes[0]; // fallback
+            type = allTypes[0];
         }
+
 
 
         public override string ToString()
