@@ -58,6 +58,29 @@ namespace GEJE
             }
         }
         bool dddd = true;
+        public virtual void EnterHover()
+        {
+        }
+        public virtual void ExitHover()
+        {
+        }
+        public virtual void OnLeftClick_start()
+        {
+
+        }
+        public virtual void OnLeftClick_hold()
+        {
+
+        }
+        public virtual void OnLEftClick_end()
+        {
+
+        }
+        public virtual void OnRightClick()
+        {
+
+        }
+       
         public void Update()
         {
             this.xrot = Rotation.WrapAngle(this.xrot);

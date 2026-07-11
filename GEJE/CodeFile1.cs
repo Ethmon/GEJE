@@ -35,12 +35,12 @@ namespace GEJE
             */
             //}
 
-            List<Item> terrain = FlatTriangleLayer.GenerateFlatLayer(
-                    widthDivisions: 65,
-                    depthDivisions: 65,
-                    cellSize: 100,
+            List<terrainTile> terrain = FlatTriangleLayer.GenerateFlatLayer(
+                    widthDivisions: 100,
+                    depthDivisions: 75,
+                    cellSize: 50,
                     jitter: .6,   // 0 = perfect grid, 0.25 = some randomness
-                    zLevel: 0
+                    zLevel: -10
                     );
 
             foreach (var t in terrain)
@@ -136,12 +136,12 @@ namespace GEJE
         {
             [GroundType.Water] = new Dictionary<GroundType, double>
             {
-                [GroundType.Water] = 16,
-                [GroundType.Hill] = 2.5,
-                [GroundType.Grass] = 5.75,
+                [GroundType.Water] = 17,
+                [GroundType.Hill] = 1.5,
+                [GroundType.Grass] = 7,
                 [GroundType.Plateau] = .1,
                 [GroundType.River] = .2,
-                [GroundType.Ocean] = 11.4
+                [GroundType.Ocean] = 12.4
                 
             },
             [GroundType.Mountain] = new Dictionary<GroundType, double>
@@ -152,16 +152,16 @@ namespace GEJE
             },
             [GroundType.River] = new Dictionary<GroundType, double>
             {
-                [GroundType.River] = 10,
-                [GroundType.Water] = .4,
+                [GroundType.River] = 15,
+                [GroundType.Water] = 1.4,
                 [GroundType.Plateau] = .2
             },
             [GroundType.Grass]= new Dictionary<GroundType, double>
             {
-                [GroundType.Water] = .15,
-                [GroundType.Grass] = 3.3,
-                [GroundType.FarmLand] = 5.2,
-                [GroundType.Hill] = 6,
+                [GroundType.Water] = 1.25,
+                [GroundType.Grass] = 4.3,
+                [GroundType.FarmLand] = 3.2,
+                [GroundType.Hill] = 4,
                 [GroundType.Plateau] = 3,
                 [GroundType.River] = 4,
                 [GroundType.Mountain] = 4
@@ -170,7 +170,8 @@ namespace GEJE
             [GroundType.FarmLand]= new Dictionary<GroundType, double>
             {
                 [GroundType.Water] = .05,
-                [GroundType.FarmLand] = 1.7
+                [GroundType.FarmLand] = 1.4,
+                [GroundType.River] = 1.2
             },
             [GroundType.DeepOcean]= new Dictionary<GroundType, double>
             {
@@ -179,7 +180,7 @@ namespace GEJE
             },
             [GroundType.Ocean] = new Dictionary<GroundType, double>
             {
-                [GroundType.DeepOcean] = 1.8,
+                [GroundType.DeepOcean] = 2.8,
                 [GroundType.Ocean] = 2.2,
                 [GroundType.Water] = 2.3
             },
@@ -343,9 +344,51 @@ namespace GEJE
         }
 
     }
+    public class terrainTile : Item
+    {
+        byte[] color1;
+        byte[] color2;
+        public terrainTile(double x, double y, double z, double xrot, double yrot, double zrot, byte[] c1, byte[]c2) : base(x, y, z, xrot, yrot, zrot) {
+        this.color1 = c1;
+        this.color2 = c2;
+        }
+        public override void EnterHover()
+        {
+            foreach (Proportie proportie in this.properties)
+            {
+                if (proportie is Mesh)
+                {
+                    ((Mesh)proportie).hardsetcolor(color1[0], color1[1], color1[2]);
+
+                }
+            }
+        }
+        public override void ExitHover()
+        {
+            foreach (Proportie proportie in this.properties)
+            {
+                if (proportie is Mesh)
+                {
+                    ((Mesh)proportie).hardsetcolor(color2[0], color2[1], color2[2]);
+
+                }
+            }
+        }
+        public override void OnLeftClick_start()
+        {
+            foreach (Proportie proportie in this.properties)
+            {
+                if (proportie is Tile)
+                {
+                    Console.WriteLine(proportie.ToString());
+                    break;
+                }
+            }
+        }
+    }
     public static class FlatTriangleLayer
     {
-        public static List<Item> GenerateFlatLayer(
+        public static List<terrainTile> GenerateFlatLayer(
     int widthDivisions,
     int depthDivisions,
     double cellSize,
@@ -353,7 +396,7 @@ namespace GEJE
     double zLevel)
         {
             Random rand = new Random();
-            List<Item> terrainItems = new List<Item>();
+            List<terrainTile> terrainItems = new List<terrainTile>();
 
             // Store tiles in a 2D array for neighbor lookup
             Tile[,] tiles = new Tile[widthDivisions, depthDivisions];
@@ -394,7 +437,8 @@ namespace GEJE
                     neighbors = Tile.GetNeighbors(tiles,x,y,true);
                     // --- Create tile and assign type based on neighbors ---
                     Tile t = new Tile();
-                    t.Randomiza(rand, neighbors);
+                    if(x==0 && y==0) t.type = GroundType.Grass;
+                    else t.Randomiza(rand, neighbors);
                     
 
                     tiles[x, y] = t; // store in grid
@@ -412,7 +456,7 @@ namespace GEJE
                 )
             }, 0, 0, 0, 0, 0, 0);
 
-                    Item triItem1 = new Item(0, 0, 0, 0, 0, 0);
+                    terrainTile triItem1 = new terrainTile(0, 0, 0, 0, 0, 0,color, new byte[] { (byte)((int)cr +20)  , (byte)((int)cg+20), (byte)((int)cb+20) });
                     t.tileMesh = tri1;
                     triItem1.add_propertie(t);
                     triItem1.add_propertie(tri1);

@@ -123,7 +123,8 @@ namespace GEJE
                 tiles[x, y, 0] = r;
                 tiles[x, y, 1] = g;
                 tiles[x, y, 2] = b;
-                this.tag[x,y] = tag;
+                if(tag != -2)
+                    this.tag[x,y] = tag;
             }
         }
 

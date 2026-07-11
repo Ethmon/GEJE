@@ -89,6 +89,32 @@ namespace GEJE
                 point.p3.b = (byte)(point.p3.b + b % 256);
             }
         }
+        public void hardsetcolor (int r, int g, int b)
+        {
+            foreach (Polygon point in oldpoints)
+            {
+                /*
+                point.p1.r = (byte)((point.p1.r+r>255)?255:(point.p1.r+r<0)?0:point.p1.r+r);
+                point.p1.g = (byte)((point.p1.g + g > 255) ? 255 : (point.p1.g + g < 0) ? 0 : point.p1.g + g);
+                point.p1.b = (byte)((point.p1.b + b > 255) ? 255 : (point.p1.b + b < 0) ? 0 : point.p1.b + b);
+                point.p2.r = (byte)((point.p2.r + r > 255) ? 255 : (point.p2.r + r < 0) ? 0 : point.p2.r + r);
+                point.p2.g = (byte)((point.p2.g + g > 255) ? 255 : (point.p2.g + g < 0) ? 0 : point.p2.g + g);
+                point.p2.b = (byte)((point.p2.b + b > 255) ? 255 : (point.p2.b + b < 0) ? 0 : point.p2.b + b);
+                point.p3.r = (byte)((point.p3.r + r > 255) ? 255 : (point.p3.r + r < 0) ? 0 : point.p3.r + r);
+                point.p3.g = (byte)((point.p3.g + g > 255) ? 255 : (point.p3.g + g < 0) ? 0 : point.p3.g + g);
+                point.p3.b = (byte)((point.p3.b + b > 255) ? 255 : (point.p3.b + b < 0) ? 0 : point.p3.b + b);
+                */
+                point.p1.r = (byte)(r % 256);
+                point.p1.g = (byte)(g % 256);
+                point.p1.b = (byte)(b % 256);
+                point.p2.r = (byte)(r % 256);
+                point.p2.g = (byte)(g % 256);
+                point.p2.b = (byte)(b % 256);
+                point.p3.r = (byte)(r % 256);
+                point.p3.g = (byte)(g % 256);
+                point.p3.b = (byte)(b % 256);
+            }
+        }
         public void scale(double x, double y, double z)
         {
 

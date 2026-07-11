@@ -50,30 +50,14 @@ namespace GEJE
                             //Console.WriteLine("OK");
                             //b.hueit(20, 20, 20);
 
-                            Item zz = camera.ItemMap[hovered];
+                            camera.ItemMap[hovered].ExitHover();
 
-                            foreach (Proportie proportie in zz.properties)
-                            {
-                                if (proportie is Mesh)
-                                {
-                                   ((Mesh) proportie).hueit(20, 20, 20);
-
-                                }
-                            }
+                            
 
                             if (lastOne != null)
                             {
-                                //lastOne.hueit(-20, -20, -20);
-                                Item zza = camera.ItemMap[lastOne];
 
-                                foreach (Proportie proportie in zza.properties)
-                                {
-                                    if (proportie is Mesh)
-                                    {
-                                        ((Mesh)proportie).hueit(-20, -20, -20);
-
-                                    }
-                                }
+                                camera.ItemMap[lastOne].EnterHover();
                             }
                             lastOne = b;
                         }
@@ -83,18 +67,8 @@ namespace GEJE
                         }
                         else if (lastOne == null)
                         {
-                            //b.hueit(20, 20, 20);
-                            Item zz = camera.ItemMap[hovered];
 
-                            foreach (Proportie proportie in zz.properties)
-                            {
-                                if (proportie is Mesh)
-                                {
-                                    ((Mesh)proportie).hueit(20, 20, 20);
-
-                                }
-                            }
-                            lastOne = b;
+                            camera.ItemMap[hovered].ExitHover();
 
                         }
                         else { }
@@ -105,25 +79,25 @@ namespace GEJE
 
                     if(window.left_click)
                     {
-                        if(clicked == false)
+                        if (clicked == false)
                         {
                             clicked = true;
-                            Item zz = camera.ItemMap[hovered];
-                            
-                            foreach (Proportie proportie in zz.properties)
-                            {
-                                if(proportie is Tile)
-                                {
-                                    Console.WriteLine(proportie.ToString());
-                                    break;
-                                }
-                            }
-                            
+                            camera.ItemMap[hovered].OnLeftClick_start();
+
+
+
                         }
+                        else
+                            camera.ItemMap[hovered].OnLeftClick_hold();
                     }
                     else
                     {
-                        clicked=false;
+                        if (clicked == true)
+                        {
+                            clicked = false;
+                            camera.ItemMap[hovered].OnLEftClick_end();
+                        }
+
                     }
 
 
