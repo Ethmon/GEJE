@@ -603,8 +603,8 @@ public class Camera : Proportie
             for (int y = tp; y <= mp; y++)
             {
                 if (y < 0 && mp > 0) y = 0;
-                else if (y < 0) continue;
-                else if (y > screen.Ethheight) continue;
+                else if (y < 0) if (mp >= 0) y = 0; else break ;
+                else if (y > screen.Ethheight) break;
 
                 alpha = (y - tp) / totalHeight;
                 alpha2 = (y - tp) / segmentHeight;
@@ -619,8 +619,8 @@ public class Camera : Proportie
             for (int y = mp + 1; y <= bp; y++)
             {
                 if (y < 0 && mp > 0) y = 0;
-                else if (y < 0) continue;
-                else if (y > screen.Ethheight) continue;
+                else if (y < 0) if (bp >= 0) y = 0; else break;
+                else if (y > screen.Ethheight) break;
                 alpha = (y - tp) / totalHeight;
                 alpha2 = (y - mp) / segmentHeight;
                 startX = (int)Math.Round((1 - alpha) * topPoint[0] + alpha * bottomPoint[0]);
@@ -641,10 +641,14 @@ public class Camera : Proportie
         }
         for (int x = x1; x <= x2; x++)
         {
-            if (x < 0 && x2 > 0) x = 0;
-            else if (x < 0) continue;
-            else if(x > screen.Ethwidth) continue;
-            screen.QPlaceColor(x, y, rgb[0], rgb[1], rgb[2],tag);
+            if (y < 0 || y > screen.Ethheight)
+                break;
+            
+                if (x < 0 && x2 > 0) x = 0;
+                else if (x < 0) continue;
+                else if (x > screen.Ethwidth) continue;
+                screen.QPlaceColor(x, y, rgb[0], rgb[1], rgb[2], tag);
+            
         }
     }
 
