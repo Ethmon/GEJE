@@ -12,6 +12,7 @@ namespace GEJE
     {
         private Item moved;
         public Window window;
+        
         float speed = 0.1f;
         public Movement(double x, double y, double z, double xrot, double yrot, double zrot,Item moved, float speed) : base(x, y, z, xrot, yrot, zrot)
         {
@@ -29,6 +30,8 @@ namespace GEJE
         double movementY = 0;
         public override void Update()
         {
+            double time = ThreeDSceen.deltatime;
+            time = time / 10000;
             if (window.pressed.Count()!=0)
             {
                 //Console.WriteLine("notfrozen");
@@ -64,36 +67,36 @@ namespace GEJE
 
                 if (window.pressed.Contains(83))
                 {
-                    moved.move(moved.x + movementX* speed, moved.y , moved.z - movementY* speed, moved.w);
+                    moved.move(moved.x + movementX* speed * time, moved.y , moved.z - movementY* speed * time, moved.w);
                 }
                 if (window.pressed.Contains(87))
                 {
-                    moved.move(moved.x - movementX* speed, moved.y , moved.z + movementY* speed, moved.w);
+                    moved.move(moved.x - movementX* speed * time, moved.y , moved.z + movementY* speed * time, moved.w);
                 }
                 if (window.pressed.Contains(65))
                 {
-                    moved.move(moved.x - movementY* speed, moved.y , moved.z - movementX* speed, moved.w);
+                    moved.move(moved.x - movementY* speed * time, moved.y , moved.z - movementX* speed * time, moved.w);
                 }
                 if (window.pressed.Contains(68))
                 {
-                    moved.move(moved.x + movementY* speed, moved.y , moved.z + movementX* speed, moved.w);
+                    moved.move(moved.x + movementY* speed * time, moved.y , moved.z + movementX* speed * time, moved.w);
                 }
                 if(window.pressed.Contains(81))
                 {
-                    moved.move(moved.x, moved.y + speed, moved.z, moved.w);
+                    moved.move(moved.x, moved.y + speed * time, moved.z, moved.w);
                 }
                 if(window.pressed.Contains(69))
                 {
-                    moved.move(moved.x, moved.y - speed, moved.z, moved.w);
+                    moved.move(moved.x, moved.y - speed * time, moved.z, moved.w);
                 }
                 if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Up))
-                    moved.rotate(moved.xrot + .25, moved.yrot, moved.zrot, moved.w);
+                    moved.rotate(moved.xrot + 3 * time/10, moved.yrot, moved.zrot, moved.w);
                 if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Down))
-                    moved.rotate(moved.xrot - .25, moved.yrot, moved.zrot, moved.w);
+                    moved.rotate(moved.xrot - 3 * time/10, moved.yrot, moved.zrot, moved.w);
                 if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Right))
-                    moved.rotate(moved.xrot, moved.yrot + .25, moved.zrot, moved.w);
+                    moved.rotate(moved.xrot, moved.yrot + 3 * time/10, moved.zrot, moved.w);
                 if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Left))
-                    moved.rotate(moved.xrot, moved.yrot-.25 , moved.zrot, moved.w);
+                    moved.rotate(moved.xrot, moved.yrot- 3 * time/10, moved.zrot, moved.w);
                 
             }
         }

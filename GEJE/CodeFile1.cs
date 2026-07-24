@@ -57,6 +57,7 @@ namespace GEJE
             jjdsj.add_propertie(mm);
             sceen.add_item(jjdsj);
             */
+            /*
             Random random = new Random();
             for (int i = 1; i < 10; i++)
             {
@@ -82,39 +83,44 @@ namespace GEJE
                     }
                 }
             }
-            Item sword = new Item(80 *20, -15 *20, 80 * 20, 90, 0, 0);
-            Mesh swordmesh = new Mesh("Models\\Sword.JSON", 0, 0, 0, 0, 0, 0);
-            swordmesh.scale(20,20,20);
-            SwordDemo demo = new SwordDemo(0, 0, 0, 0, 0, 0);
-            demo.sword = sword;
+            */
+            //Item sword = new Item(80 *20, -15 *20, 80 * 20, 90, 0, 0);
+            //Mesh swordmesh = new Mesh("Models\\Sword.JSON", 0, 0, 0, 0, 0, 0);
+            //swordmesh.scale(20,20,20);
+            //SwordDemo demo = new SwordDemo(0, 0, 0, 0, 0, 0);
+            //demo.sword = sword;
+            Item Triangle = new Item(100, 00, 300, 90, 0, 0);
+            Mesh TriangleMesh = new Mesh("Models\\Pyramid.JSON", 0, 0, 0, 0, 0, 0);
+            TriangleMesh.scale(50,50,50);
+            Triangle.add_propertie(TriangleMesh);
+            sceen.add_item(Triangle);
+            //sword.add_propertie(demo);
 
-            sword.add_propertie(demo);
-
-            sword.add_propertie(swordmesh);
-            sceen.add_item(sword);
+            //sword.add_propertie(swordmesh);
+            //sceen.add_item(sword);
 
             Item.rotatei = false;
             Item.floatingyay = false;
             //Console.WriteLine(box2.ToString());
-            Item camera = new Item(0, 000100, 0, 0, 0, 0);
+            Item camera = new Item(0, 000100, 0, 90, 0, 0);
             Window win = new Window(600, 400, 3, 3);
-            demo.win = win;
+            //demo.win = win;
             win.scene = sceen;
             Camera cam = new Camera(0, 0, 10, 90, 0, 0, sceen, win, (double)win.Ethwidth / win.Ethheight);
             //cam.outline = false;
             //cam.fillin = true;
-            Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera, 15);
+            Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera, 5);
             cam_movement.window = win;
             HoverHighlight ffff = new HoverHighlight(camera, win, sceen);
             ffff.camera = cam;
             camera.add_propertie(ffff);
             camera.add_propertie(cam_movement);
             camera.add_propertie(cam);
-            ItemKeys itemKeys = new ItemKeys();
-            itemKeys.AddKey(83, lolgag.d);
-            KeysAndBinds keysAndBinds = new KeysAndBinds(0,0,0,0,0,0,win);
-            keysAndBinds.addItemKey(itemKeys);
-            camera.add_propertie(keysAndBinds);
+            //ItemKeys itemKeys = new ItemKeys();
+            //itemKeys.AddKey(83, lolgag.d);
+            //KeysAndBinds keysAndBinds = new KeysAndBinds(0,0,0,0,0,0,win);
+            //keysAndBinds.addItemKey(itemKeys);
+            //camera.add_propertie(keysAndBinds);
             //camera.add_propertie(cam_movement);
             sceen.add_item(camera);
             win.cam = cam;

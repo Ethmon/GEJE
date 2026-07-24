@@ -11,9 +11,10 @@ namespace GEJE
     public class TimeDeltaTime
     {
         Stopwatch clock = new Stopwatch();
-        public long DeltaTime()
+        public TimeSpan DeltaTime()
         {
-            long delta = clock.ElapsedMilliseconds;
+            TimeSpan delta = clock.Elapsed;
+            
             clock.Restart();
             return delta;
         }

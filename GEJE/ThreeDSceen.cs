@@ -13,6 +13,8 @@ namespace GEJE
     {
         public List<Item> items = new List<Item>();
         int xsize, ysize, zsize;
+        static TimeDeltaTime timer = new TimeDeltaTime();
+        public static int deltatime = 0;
         public ThreeDSceen(int xtotal, int ytotal, int ztotal)
         {
 
@@ -38,16 +40,16 @@ namespace GEJE
             {
                 //Thread.Sleep(3);
                 
-                var watch = new Stopwatch();
-                watch.Start();
+                //var watch = new Stopwatch();
+                //watch.Start();
                 foreach (Item item in items)
                 {
                    if(item.state)
                     item.Update();
                 }
-                
-                watch.Stop();
-                counter2 += (int)watch.ElapsedMilliseconds;
+                deltatime = (int)timer.DeltaTime().Nanoseconds;
+                //watch.Stop();
+                //counter2 += (int)watch.ElapsedMilliseconds;
                 if(counter2 > 1000)
                 {
                     counter2 = 0;
