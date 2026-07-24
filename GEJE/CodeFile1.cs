@@ -110,6 +110,11 @@ namespace GEJE
             camera.add_propertie(ffff);
             camera.add_propertie(cam_movement);
             camera.add_propertie(cam);
+            ItemKeys itemKeys = new ItemKeys();
+            itemKeys.AddKey(83, lolgag.d);
+            KeysAndBinds keysAndBinds = new KeysAndBinds(0,0,0,0,0,0,win);
+            keysAndBinds.addItemKey(itemKeys);
+            camera.add_propertie(keysAndBinds);
             //camera.add_propertie(cam_movement);
             sceen.add_item(camera);
             win.cam = cam;
@@ -134,6 +139,13 @@ namespace GEJE
 
     }
 
+    public class lolgag
+    {
+        public static void d()
+        {
+            Console.WriteLine("ItWorked");
+        }
+    }
 
 
     public static class TileRules
