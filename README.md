@@ -160,7 +160,7 @@ nuget restore GEJE.sln
 - Additional dependencies listed in packages.config
 
 ## License
-MIT License - See LICENSE file for details
+SPDX  License - See LICENSE file for details
 
 ## Contact
 Ethan
