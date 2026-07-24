@@ -27,6 +27,10 @@ namespace GEJE
             this.nzrot = zrot;
             this.nxrot = xrot;
         }
+        public Proportie()
+        {
+
+        }
         public void move(double x, double y, double z, double w) // Add w parameter
         {
             this.nx = x;

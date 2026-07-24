@@ -28,7 +28,7 @@ namespace GEJE
             this.xrot = xrot;
             this.yrot = yrot;
             this.zrot = zrot;
-
+            
         }
 
         public void add_propertie(Proportie propertie)
@@ -58,6 +58,29 @@ namespace GEJE
             }
         }
         bool dddd = true;
+        public virtual void EnterHover()
+        {
+        }
+        public virtual void ExitHover()
+        {
+        }
+        public virtual void OnLeftClick_start()
+        {
+
+        }
+        public virtual void OnLeftClick_hold()
+        {
+
+        }
+        public virtual void OnLEftClick_end()
+        {
+
+        }
+        public virtual void OnRightClick()
+        {
+
+        }
+       
         public void Update()
         {
             this.xrot = Rotation.WrapAngle(this.xrot);
@@ -141,20 +164,34 @@ namespace GEJE
                 //}
                 //else
                 propertie.Update();
+                /*
                 if (propertie is Mesh)
                 {
                     if (dddd)
                     {
-                        foreach (Polygon polygon in ((Mesh)propertie).points)
+                        foreach (Polygon polygon in ((Mesh)propertie).points.ToList())
                         {
-                            Console.WriteLine(polygon.ToString());
+                            //Console.WriteLine(polygon.ToString());
                         }
 
                     }
                 }
+                */
             }
             dddd = false;
             //Thread.Sleep(3);
+        }
+
+        public override String ToString()
+        {
+            String a = "";
+            a += x + " " + y + " " + z + " " + "/n";
+            a += xrot + " " + yrot + " " + zrot + " " + "\n";
+            foreach(Proportie p in properties)
+            {
+                a += p.ToString() + "\n";
+            }
+            return a;
         }
 
     }
@@ -176,14 +213,18 @@ namespace GEJE
         public override void Update()
         {
             sword.yrot += 2.3;
-            
-            if(win.pressed.Contains(80))
+            if (win.pressed.Count() != 0)
             {
-                foreach(Proportie propertie in sword.properties)
+
+
+                if (win.pressed.Contains(80))
                 {
-                    if (propertie is Mesh)
+                    foreach (Proportie propertie in sword.properties)
                     {
-                        ((Mesh)propertie).hueit(1, 0, 0);
+                        if (propertie is Mesh)
+                        {
+                            ((Mesh)propertie).hueit(1, 0, 0);
+                        }
                     }
                 }
             }

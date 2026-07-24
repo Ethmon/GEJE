@@ -1,266 +1,514 @@
 ﻿using System;
-using System.Drawing;
-using System.Threading;
-using System.Windows.Forms;
-using System.Diagnostics;
-using System.Drawing.Imaging;
-using System.Diagnostics.Contracts;
 using System.Collections.Generic;
-using System.Security.Cryptography;
+using OpenTK.Graphics.OpenGL4;
+using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Desktop;
+using OpenTK.Mathematics;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace GEJE
 {
-    public class Window : Form
+    public class MeshGpuData
+    {
+        public int Vao;
+        public int Vbo;
+        public int VertexCount;
+    }
+
+    public class Window : GameWindow
     {
         private byte[,,] tiles;
         private bool[,] bools;
-        private Bitmap[] buffers;
-        
-        private int currentBufferIndex;
-        private readonly object graphicsLock = new object();
-        private readonly object RenderLock = new object();
-        public int Ethwidth;
-        public int Ethheight;
-        public Camera cam;
-        // New variables for controlling pixel size
-        public int PixelWidth;
-        public int PixelHeight;
+        public int[,] tag;
 
-        public int[] currsor_pos()
-        {
-            int[] pos = new int[2];
-            pos[0] = (int)(this.PointToClient(Cursor.Position).X / PixelWidth);
-            pos[1] = (int)(this.PointToClient(Cursor.Position).Y / PixelHeight);
-            if (pos[0] < 0) pos[0] = 0;
-                else if (pos[0] >= Ethwidth) pos[0] = Ethwidth - 1;
-            if (pos[1] < 0) pos[1] = 0;
-                else if (pos[1] >= Ethheight) pos[1] = Ethheight - 1;
-            return pos;
-        }
-        
+        public int Ethwidth, Ethheight;
+        private int PixelWidth, PixelHeight;
+        public ThreeDSceen scene;
+        public Camera cam;
+
         public ISet<int> pressed = new HashSet<int>();
         public bool right_click = false;
         public bool left_click = false;
-        private void Form1_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Right)
-            {
-                right_click = true;
-            }
-            else if (e.Button == MouseButtons.Left)
-            {
-                left_click = true;
-            }
-           
-        }
-        private void Form1_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Right)
-            {
-                right_click = false;
-            }
-            else if (e.Button == MouseButtons.Left)
-            {
-                left_click = false;
-            }
-        }
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
-        {
-            pressed.Add(e.KeyValue);
-            
-        }
-
-        private void Form1_KeyUp(object sender, KeyEventArgs e)
-        {
-            pressed.Remove(e.KeyValue);
-        }
 
 
+        private int blitShaderProgram;
+        private int quadVao;
+        private int quadVbo;
 
-        public Window(int ewidth, int ehight, int pixelWidth, int pixelHeight)
+
+        private int sceneShaderProgram;
+        private int uView, uProj, uTag;
+        private Dictionary<Mesh, MeshGpuData> meshBuffers = new Dictionary<Mesh, MeshGpuData>();
+
+
+        private int sceneFbo;
+        private int sceneColorTex;
+        private int sceneTagTex;
+        private int sceneDepthRbo;
+
+        public Window(int ewidth, int eheight, int pixelWidth, int pixelHeight)
+            : base(GameWindowSettings.Default,
+                  new NativeWindowSettings()
+                  {
+                      Size = new Vector2i(ewidth * pixelWidth, eheight * pixelHeight),
+                      Title = "GEJE (GPU Window)"
+                  })
         {
-            this.Ethwidth = ewidth;
-            this.Ethheight = ehight;
-            this.PixelWidth = pixelWidth;
-            this.PixelHeight = pixelHeight;
-
-            // Calculate the actual window size based on Ethwidth, Ethheight, and pixel size
-            this.Text = "Game";
-            this.Size = new Size(Ethwidth * PixelWidth, Ethheight * PixelHeight);
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
+            Ethwidth = ewidth;
+            Ethheight = eheight;
+            PixelWidth = pixelWidth;
+            PixelHeight = pixelHeight;
 
             tiles = new byte[Ethwidth, Ethheight, 3];
             bools = new bool[Ethwidth, Ethheight];
-            buffers = new Bitmap[3];  // Triple buffering
-            for (int i = 0; i < 3; i++)
-            {
-                buffers[i] = new Bitmap(this.Width, this.Height);
-            }
-
-            currentBufferIndex = 0;
+            tag = new int[Ethwidth, Ethheight];
 
             for (int i = 0; i < Ethwidth; i++)
-            {
                 for (int j = 0; j < Ethheight; j++)
                 {
                     tiles[i, j, 0] = 255;
                     tiles[i, j, 1] = 255;
                     tiles[i, j, 2] = 255;
                     bools[i, j] = false;
+                    tag[i, j] = 0;
                 }
-            }
-            this.KeyDown += Form1_KeyDown;
-            this.KeyUp += Form1_KeyUp;
-            this.MouseDown += Form1_MouseDown;
-            this.MouseUp += Form1_MouseUp;
         }
 
-        public int Ethsize(bool worh)
+        protected override void OnLoad()
         {
-            if (worh)
-                return Ethwidth;
-            else
-                return Ethheight;
+            base.OnLoad();
+
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+            SetupBlitQuad();
+            SetupSceneShader();
+            SetupSceneFramebuffer();
         }
 
-        public void Run()
+        // ---------------- fullscreen blit quad (presents sceneColorTex to the window) ----------------
+        
+        
+        private int uBlitTex, uBlitTagTex, uBlitTexelSize, uBlitOutlineThickness;
+        public float OutlineThickness = 0.5f;
+        private void SetupBlitQuad()
         {
-            //Thread video_rendering = new Thread(new ThreadStart(UpdateLoop));
-            //video_rendering.Start();
-            Application.Run(this);
-        }
-        public void update()
-        {
-
-            //Thread video_rendering = new Thread(new ThreadStart(UpdateLoop));
-            //video_rendering.Start();
-        }
-
-        public void PlaceColor(int x, int y, byte r, byte g, byte b)
-        {
-            if (x < Ethwidth && x >= 0 && y < Ethheight && y >= 0)
+            blitShaderProgram = CreateProgram(fullscreenVertexShaderSource, fullscreenFragmentShaderSource);
+            
+            uBlitTex = GL.GetUniformLocation(blitShaderProgram, "uTex");
+            uBlitTagTex = GL.GetUniformLocation(blitShaderProgram, "uTagTex");
+            uBlitTexelSize = GL.GetUniformLocation(blitShaderProgram, "uTexelSize");
+            uBlitOutlineThickness = GL.GetUniformLocation(blitShaderProgram, "uOutlineThickness");
+            float[] quadVerts = new float[]
             {
-                tiles[x, y, 0] = r;//(byte)(a * r + (1 - a) * tiles[x,y,0]);
-                tiles[x, y, 1] = g;//(byte)(a * g + (1 - a) * tiles[x, y, 1]);
-                tiles[x, y, 2] = b;//(byte)(a * b + (1 - a) * tiles[x,y,2]);
+                -1f, -1f,  0f, 0f,
+                 1f, -1f,  1f, 0f,
+                 1f,  1f,  1f, 1f,
+                -1f, -1f,  0f, 0f,
+                 1f,  1f,  1f, 1f,
+                -1f,  1f,  0f, 1f
+            };
 
+            quadVao = GL.GenVertexArray();
+            quadVbo = GL.GenBuffer();
+            GL.BindVertexArray(quadVao);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, quadVbo);
+            GL.BufferData(BufferTarget.ArrayBuffer, quadVerts.Length * sizeof(float), quadVerts, BufferUsageHint.StaticDraw);
+
+            int stride = 4 * sizeof(float);
+            GL.EnableVertexAttribArray(0);
+            GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, stride, 0);
+            GL.EnableVertexAttribArray(1);
+            GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, 2 * sizeof(float));
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            GL.BindVertexArray(0);
+        }
+
+        // ---------------- 3D scene shader ----------------
+
+        private void SetupSceneShader()
+        {
+            sceneShaderProgram = CreateProgram(sceneVertexShaderSource, sceneFragmentShaderSource);
+            uView = GL.GetUniformLocation(sceneShaderProgram, "uView");
+            uProj = GL.GetUniformLocation(sceneShaderProgram, "uProj");
+            uTag = GL.GetUniformLocation(sceneShaderProgram, "uTag");
+        }
+
+        private void SetupSceneFramebuffer()
+        {
+            sceneFbo = GL.GenFramebuffer();
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, sceneFbo);
+
+            sceneColorTex = CreateAttachmentTexture();
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
+                TextureTarget.Texture2D, sceneColorTex, 0);
+
+            sceneTagTex = CreateAttachmentTexture();
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment1,
+                TextureTarget.Texture2D, sceneTagTex, 0);
+
+            sceneDepthRbo = GL.GenRenderbuffer();
+            GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, sceneDepthRbo);
+            GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.DepthComponent24, Ethwidth, Ethheight);
+            GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment,
+                RenderbufferTarget.Renderbuffer, sceneDepthRbo);
+
+            GL.DrawBuffers(2, new DrawBuffersEnum[] { DrawBuffersEnum.ColorAttachment0, DrawBuffersEnum.ColorAttachment1 });
+
+            var status = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
+            if (status != FramebufferErrorCode.FramebufferComplete)
+                throw new Exception("Scene framebuffer incomplete: " + status);
+
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        }
+
+        private int CreateAttachmentTexture()
+        {
+            int tex = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, tex);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba8, Ethwidth, Ethheight, 0,
+                PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            return tex;
+        }
+
+        // ---------------- per-mesh GPU buffers ----------------
+
+        public MeshGpuData GetOrUpdateMeshBuffer(Mesh mesh)
+        {
+            if (!meshBuffers.TryGetValue(mesh, out MeshGpuData data))
+            {
+                data = new MeshGpuData
+                {
+                    Vao = GL.GenVertexArray(),
+                    Vbo = GL.GenBuffer()
+                };
+                meshBuffers[mesh] = data;
+                mesh.Dirty = true;
+            }
+
+            if (mesh.Dirty)
+            {
+                List<Polygon> pointsSnapshot = mesh.points;
+
+                int triCount = pointsSnapshot.Count;
+                float[] verts = new float[triCount * 3 * 6]; // 3 verts/tri * (pos3 + color3)
+                int i = 0;
+                foreach (Polygon poly in pointsSnapshot)
+                {
+                    WriteVertex(verts, ref i, poly.p1);
+                    WriteVertex(verts, ref i, poly.p2);
+                    WriteVertex(verts, ref i, poly.p3);
+                }
+
+                GL.BindVertexArray(data.Vao);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, data.Vbo);
+                GL.BufferData(BufferTarget.ArrayBuffer, verts.Length * sizeof(float), verts, BufferUsageHint.DynamicDraw);
+
+                int stride = 6 * sizeof(float);
+                GL.EnableVertexAttribArray(0);
+                GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
+                GL.EnableVertexAttribArray(1);
+                GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
+                GL.BindVertexArray(0);
+
+                data.VertexCount = triCount * 3;
+                mesh.Dirty = false;
+            }
+
+            return data;
+        }
+
+        private static void WriteVertex(float[] arr, ref int i, Point p)
+        {
+            arr[i++] = (float)p.x;
+            arr[i++] = (float)p.y;
+            arr[i++] = (float)p.z;
+            arr[i++] = p.r / 255f;
+            arr[i++] = p.g / 255f;
+            arr[i++] = p.b / 255f;
+        }
+
+        /// <summary>Issues one draw call for this mesh's buffer. Must be called with the scene FBO bound.</summary>
+        public void DrawMesh(MeshGpuData data, Matrix4 view, Matrix4 proj, int tag)
+        {
+            GL.UseProgram(sceneShaderProgram);
+            GL.UniformMatrix4(uView, false, ref view);
+            GL.UniformMatrix4(uProj, false, ref proj);
+            GL.Uniform1(uTag, tag);
+
+            GL.BindVertexArray(data.Vao);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, data.VertexCount);
+        }
+
+        public void ReleaseMeshBuffer(Mesh mesh)
+        {
+            if (meshBuffers.TryGetValue(mesh, out MeshGpuData data))
+            {
+                GL.DeleteBuffer(data.Vbo);
+                GL.DeleteVertexArray(data.Vao);
+                meshBuffers.Remove(mesh);
             }
         }
-        public void QPlaceColor(int x, int y, byte r, byte g, byte b)
+
+        // ---------------- picking ----------------
+
+        public int GetTagAt(int x, int y)
         {
-            if (x < Ethwidth && x >= 0 && y < Ethheight && y >= 0 && bools[x, y] == false)
+            if (x < 0 || x >= Ethwidth || y < 0 || y >= Ethheight)
+                return 0;
+
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, sceneFbo);
+            GL.ReadBuffer(ReadBufferMode.ColorAttachment1);
+            byte[] pixel = new byte[4];
+            GL.ReadPixels(x, Ethheight - 1 - y, 1, 1, PixelFormat.Rgba, PixelType.UnsignedByte, pixel);
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+
+            return pixel[0] | (pixel[1] << 8);
+        }
+
+        // ---------------- legacy CPU tile API (unused by Camera now; kept for other callers) ----------------
+
+        public void PlaceColor(int x, int y, byte r, byte g, byte b, int tag)
+        {
+            if (x >= 0 && x < Ethwidth && y >= 0 && y < Ethheight)
+            {
+                tiles[x, y, 0] = r;
+                tiles[x, y, 1] = g;
+                tiles[x, y, 2] = b;
+                if (tag != -2)
+                    this.tag[x, y] = tag;
+            }
+        }
+
+        public void QPlaceColor(int x, int y, byte r, byte g, byte b, int tag)
+        {
+            if (x >= 0 && x < Ethwidth && y >= 0 && y < Ethheight && !bools[x, y])
             {
                 tiles[x, y, 0] = r;
                 tiles[x, y, 1] = g;
                 tiles[x, y, 2] = b;
                 bools[x, y] = true;
+                this.tag[x, y] = tag;
             }
         }
 
-
-        unsafe void Clear()
+        public void Cleartags()
         {
-            int pixCount = Ethwidth * Ethheight;
-            fixed (byte* pTiles = &tiles[0, 0, 0])
-            {
-                fixed (bool* ppp = &bools[0, 0])
-                {
-
-
-                    byte* px = pTiles;
-                    for (int i = 0; i < pixCount; i++)
-                    {
-                        px[0] = 255;
-                        px[1] = 255;
-                        px[2] = 255;
-                        px += 3;
-                        ppp[i] = false; // if bools is linearized; or write using pointer
-                    }
-                }
-            }
+            Array.Clear(tag, 0, tag.Length);
         }
 
-        bool d = false;
-        private Graphics g;
-        public void UpdateLoop()
+        public int getTagOfPixle(int x, int y) => GetTagAt(x, y);
+
+        // ---------------- render loop ----------------
+
+        protected override void OnRenderFrame(FrameEventArgs args)
         {
-            Draw();
-            if (g == null) g = this.CreateGraphics();
-            Invoke(new MethodInvoker(() =>
-            {
-                g.DrawImage(buffers[currentBufferIndex], 0, 0);
-            }));
-            Clear();
+            base.OnRenderFrame(args);
+
+            
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, sceneFbo);
+            GL.Viewport(0, 0, Ethwidth, Ethheight);
+            GL.Enable(EnableCap.DepthTest);
+            GL.DepthFunc(DepthFunction.Less);
+
+            GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 1f, 1f, 1f, 1f });
+            GL.ClearBuffer(ClearBuffer.Color, 1, new float[] { 0f, 0f, 0f, 1f });
+            GL.Clear(ClearBufferMask.DepthBufferBit);
+
+            cam.Render(); 
+
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+
+            
+            GL.Disable(EnableCap.DepthTest);
+            GL.Viewport(0, 0, ClientSize.X, ClientSize.Y);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+
+            GL.UseProgram(blitShaderProgram);
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, sceneColorTex);
+            GL.ActiveTexture(TextureUnit.Texture1);
+            GL.BindTexture(TextureTarget.Texture2D, sceneTagTex);
+
+            if (uBlitTex >= 0) GL.Uniform1(uBlitTex, 0);
+            if (uBlitTagTex >= 0) GL.Uniform1(uBlitTagTex, 1);
+            if (uBlitTexelSize >= 0) GL.Uniform2(uBlitTexelSize, 1f / Ethwidth, 1f / Ethheight);
+            if (uBlitOutlineThickness >= 0) GL.Uniform1(uBlitOutlineThickness, OutlineThickness);
+
+            GL.BindVertexArray(quadVao);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
+            GL.BindVertexArray(0);
+
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.UseProgram(0);
+
+            SwapBuffers();
         }
-        protected override void OnPaint(PaintEventArgs e)
+
+        protected override void OnUpdateFrame(FrameEventArgs args)
         {
-            lock (graphicsLock)
-            {
-                e.Graphics.DrawImageUnscaled(buffers[(currentBufferIndex + buffers.Length - 1) % buffers.Length], 0, 0);
-            }
+            base.OnUpdateFrame(args);
+            if (IsKeyDown(Keys.Escape))
+                Close();
+
+            scene.update();  
         }
 
-        public void Draw()
+        // ---------------- shaders ----------------
+
+        private const string sceneVertexShaderSource = @"
+#version 330 core
+layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec3 aColor;
+out vec3 vColor;
+uniform mat4 uView;
+uniform mat4 uProj;
+void main()
+{
+    vColor = aColor;
+    gl_Position = uProj * uView * vec4(aPos, 1.0);
+}
+";
+
+        private const string sceneFragmentShaderSource = @"
+#version 330 core
+in vec3 vColor;
+layout(location = 0) out vec4 outColor;
+layout(location = 1) out vec4 outTag;
+uniform int uTag;
+void main()
+{
+    outColor = vec4(vColor, 1.0);
+    float r = float(uTag & 0xFF) / 255.0;
+    float g = float((uTag >> 8) & 0xFF) / 255.0;
+    outTag = vec4(r, g, 0.0, 1.0);
+}
+";
+
+        private const string fullscreenVertexShaderSource = @"
+#version 330 core
+layout(location = 0) in vec2 aPos;
+layout(location = 1) in vec2 aUV;
+out vec2 vUV;
+void main()
+{
+    vUV = aUV;
+    gl_Position = vec4(aPos.xy, 0.0, 1.0);
+}
+";
+
+        private const string fullscreenFragmentShaderSource = @"
+#version 330 core
+in vec2 vUV;
+out vec4 FragColor;
+uniform sampler2D uTex;
+uniform sampler2D uTagTex;
+uniform vec2 uTexelSize;        // 1.0 / Ethwidth, 1.0 / Ethheight
+uniform float uOutlineThickness; // in texels — try 1.0 to start
+
+int decodeTag(vec2 uv)
+{
+    vec4 t = texture(uTagTex, uv);
+    int r = int(round(t.r * 255.0));
+    int g = int(round(t.g * 255.0));
+    return r | (g << 8);
+}
+
+void main()
+{
+    int centerTag = decodeTag(vUV);
+    vec2 o = uTexelSize * uOutlineThickness;
+
+    bool edge =
+        decodeTag(vUV + vec2( o.x,  0.0)) != centerTag ||
+        decodeTag(vUV + vec2(-o.x,  0.0)) != centerTag ||
+        decodeTag(vUV + vec2( 0.0,  o.y)) != centerTag ||
+        decodeTag(vUV + vec2( 0.0, -o.y)) != centerTag ||
+        decodeTag(vUV + vec2( o.x,  o.y)) != centerTag ||
+        decodeTag(vUV + vec2(-o.x,  o.y)) != centerTag ||
+        decodeTag(vUV + vec2( o.x, -o.y)) != centerTag ||
+        decodeTag(vUV + vec2(-o.x, -o.y)) != centerTag;
+
+    if (edge)
+        FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    else
+        FragColor = vec4(texture(uTex, vUV).rgb, 1.0);
+}
+";
+
+        private int CreateProgram(string vsSource, string fsSource)
         {
-            Bitmap buffer = buffers[currentBufferIndex]; // Get the current buffer
+            int vs = GL.CreateShader(ShaderType.VertexShader);
+            GL.ShaderSource(vs, vsSource);
+            GL.CompileShader(vs);
+            GL.GetShader(vs, ShaderParameter.CompileStatus, out int success);
+            if (success == 0) throw new Exception("Vertex shader compile error: " + GL.GetShaderInfoLog(vs));
 
-            // Lock the bitmap's bits to allow direct access
-            Rectangle rect = new Rectangle(0, 0, buffer.Width, buffer.Height);
-            BitmapData bmpData = buffer.LockBits(rect, ImageLockMode.ReadWrite, buffer.PixelFormat);
+            int fs = GL.CreateShader(ShaderType.FragmentShader);
+            GL.ShaderSource(fs, fsSource);
+            GL.CompileShader(fs);
+            GL.GetShader(fs, ShaderParameter.CompileStatus, out success);
+            if (success == 0) throw new Exception("Fragment shader compile error: " + GL.GetShaderInfoLog(fs));
 
-            try
-            {
-                unsafe
-                {
-                    byte* ptr = (byte*)bmpData.Scan0;
+            int prog = GL.CreateProgram();
+            GL.AttachShader(prog, vs);
+            GL.AttachShader(prog, fs);
+            GL.LinkProgram(prog);
+            GL.GetProgram(prog, GetProgramParameterName.LinkStatus, out success);
+            if (success == 0) throw new Exception("Program link error: " + GL.GetProgramInfoLog(prog));
 
-                    for (int tileY = 0; tileY < tiles.GetLength(1); tileY++)
-                    {
-                        int yStart = tileY * PixelHeight;
-                        int yEnd = Math.Min(yStart + PixelHeight, bmpData.Height);
+            GL.DetachShader(prog, vs);
+            GL.DetachShader(prog, fs);
+            GL.DeleteShader(vs);
+            GL.DeleteShader(fs);
 
-                        for (int tileX = 0; tileX < tiles.GetLength(0); tileX++)
-                        {
-                            int xStart = tileX * PixelWidth;
-                            int xEnd = Math.Min(xStart + PixelWidth, bmpData.Width);
-
-                            byte r = tiles[tileX, tileY, 0];
-                            byte g = tiles[tileX, tileY, 1];
-                            byte b = tiles[tileX, tileY, 2];
-
-                            unsafe
-                            {
-                                byte* basePtr = (byte*)bmpData.Scan0;
-                                int stride = bmpData.Stride;
-                                for (int y = yStart; y < yEnd; ++y)
-                                {
-                                    byte* row = basePtr + y * stride;
-                                    // compute xStart/xEnd once, then copy using pointer arithmetic
-                                    for (int x = xStart; x < xEnd; ++x)
-                                    {
-                                        int idx = x * 4;
-                                        row[idx + 2] = r; // R
-                                        row[idx + 1] = g;
-                                        row[idx] = b;
-                                        row[idx + 3] = 255;
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-            finally
-            {
-                // Unlock the bitmap's bits when done
-                buffer.UnlockBits(bmpData);
-            }
-
-            // Switch to the next buffer for the next frame
-            currentBufferIndex = (currentBufferIndex + 1) % 3;
+            return prog;
         }
 
+        // ---------------- input ----------------
+
+        public int[] currsor_pos()
+        {
+            var mouse = MouseState;
+            int localX = (int)(mouse.X / PixelWidth);
+            int localY = (int)(mouse.Y / PixelHeight);
+            localX = Math.Clamp(localX, 0, Ethwidth - 1);
+            localY = Math.Clamp(localY, 0, Ethheight - 1);
+            return new int[] { localX, localY };
+        }
+
+        protected override void OnMouseDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseDown(e);
+            if (e.Button == MouseButton.Left) left_click = true;
+            if (e.Button == MouseButton.Right) right_click = true;
+        }
+
+        protected override void OnMouseUp(MouseButtonEventArgs e)
+        {
+            base.OnMouseUp(e);
+            if (e.Button == MouseButton.Left) left_click = false;
+            if (e.Button == MouseButton.Right) right_click = false;
+        }
+
+        protected override void OnKeyDown(KeyboardKeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            pressed.Add((int)e.Key);
+        }
+
+        protected override void OnKeyUp(KeyboardKeyEventArgs e)
+        {
+            base.OnKeyUp(e);
+            pressed.Remove((int)e.Key);
+        }
+
+        public void RunGame() => Run();
     }
 }

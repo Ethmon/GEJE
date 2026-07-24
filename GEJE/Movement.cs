@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Configuration;
+//using System.Net.Configuration;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,6 +31,7 @@ namespace GEJE
         {
             if (window.pressed.Count()!=0)
             {
+                //Console.WriteLine("notfrozen");
                 yRotRad = Math.PI * moved.yrot / 180.0;
                 //Console.WriteLine(yRotRad);
                 // Calculate movement direction based on current rotation
@@ -63,19 +64,19 @@ namespace GEJE
 
                 if (window.pressed.Contains(83))
                 {
-                    moved.move(moved.x - movementX* speed, moved.y , moved.z - movementY* speed, moved.w);
+                    moved.move(moved.x + movementX* speed, moved.y , moved.z - movementY* speed, moved.w);
                 }
                 if (window.pressed.Contains(87))
                 {
-                    moved.move(moved.x + movementX* speed, moved.y , moved.z + movementY* speed, moved.w);
-                }
-                if (window.pressed.Contains(68))
-                {
-                    moved.move(moved.x - movementY* speed, moved.y , moved.z + movementX* speed, moved.w);
+                    moved.move(moved.x - movementX* speed, moved.y , moved.z + movementY* speed, moved.w);
                 }
                 if (window.pressed.Contains(65))
                 {
-                    moved.move(moved.x + movementY* speed, moved.y , moved.z - movementX* speed, moved.w);
+                    moved.move(moved.x - movementY* speed, moved.y , moved.z - movementX* speed, moved.w);
+                }
+                if (window.pressed.Contains(68))
+                {
+                    moved.move(moved.x + movementY* speed, moved.y , moved.z + movementX* speed, moved.w);
                 }
                 if(window.pressed.Contains(81))
                 {
@@ -85,23 +86,15 @@ namespace GEJE
                 {
                     moved.move(moved.x, moved.y - speed, moved.z, moved.w);
                 }
-                if (window.pressed.Contains(38))
-                {
-                    moved.rotate(moved.xrot-1, moved.yrot, moved.zrot, moved.w);
-                }
-                if (window.pressed.Contains(40))
-                {
-                    moved.rotate(moved.xrot+1, moved.yrot, moved.zrot, moved.w);
-                }
-                if (window.pressed.Contains(39))
-                {
-                    moved.rotate(moved.xrot, moved.yrot+1, moved.zrot, moved.w);
-                }
-                if (window.pressed.Contains(37))
-                {
-                    moved.rotate(moved.xrot, moved.yrot-1, moved.zrot, moved.w);
-                }
-                //Console.WriteLine("x: " + moved.x + " y: " + moved.y + " z: " + moved.z + " xrot: " + moved.xrot + " yrot: " + moved.yrot + " zrot: " + moved.zrot);
+                if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Up))
+                    moved.rotate(moved.xrot + .25, moved.yrot, moved.zrot, moved.w);
+                if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Down))
+                    moved.rotate(moved.xrot - .25, moved.yrot, moved.zrot, moved.w);
+                if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Right))
+                    moved.rotate(moved.xrot, moved.yrot + .25, moved.zrot, moved.w);
+                if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Left))
+                    moved.rotate(moved.xrot, moved.yrot-.25 , moved.zrot, moved.w);
+                
             }
         }
     }
