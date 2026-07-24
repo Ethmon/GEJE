@@ -13,10 +13,18 @@ namespace GEJE
     {
         public List<Polygon> points = new List<Polygon>();
         public List<Polygon> oldpoints = new List<Polygon>();
+
+
+        public bool Dirty = true;
+
+        private double _lastX, _lastY, _lastZ, _lastXRot, _lastYRot, _lastZRot;
+        private bool _hasLastTransform = false;
+
         public string getPath()
         {
             string aa = System.IO.Directory.GetCurrentDirectory();
-            aa = aa.Replace("GEJE\\bin\\Debug", "GEJE\\");
+            //aa = aa.Replace("GEJE\\bin\\Debug", "GEJE\\");
+            aa = aa.Substring(0, aa.IndexOf("GEJE") + 4);
             Console.Write(aa);
             return aa;
         }
@@ -30,7 +38,7 @@ namespace GEJE
             this.zrot = zrot;
 
             // Read a json file with a list of lists with 3 doubles and 3 ints
-            string jsonString = File.ReadAllText(getPath()+"\\"+filename);
+            string jsonString = File.ReadAllText(getPath() + "\\" + filename);
             List<List<double>> data = JsonSerializer.Deserialize<List<List<double>>>(jsonString);
             int count = 0;
             Point point1 = null;
@@ -50,7 +58,7 @@ namespace GEJE
                     count++;
                 }
             }
-            
+
         }
         public Mesh(List<Polygon> polys, double x, double y, double z, double xrot, double yrot, double zrot) : base(x, y, z, xrot, yrot, zrot)
         {
@@ -67,17 +75,6 @@ namespace GEJE
         {
             foreach (Polygon point in oldpoints)
             {
-                /*
-                point.p1.r = (byte)((point.p1.r+r>255)?255:(point.p1.r+r<0)?0:point.p1.r+r);
-                point.p1.g = (byte)((point.p1.g + g > 255) ? 255 : (point.p1.g + g < 0) ? 0 : point.p1.g + g);
-                point.p1.b = (byte)((point.p1.b + b > 255) ? 255 : (point.p1.b + b < 0) ? 0 : point.p1.b + b);
-                point.p2.r = (byte)((point.p2.r + r > 255) ? 255 : (point.p2.r + r < 0) ? 0 : point.p2.r + r);
-                point.p2.g = (byte)((point.p2.g + g > 255) ? 255 : (point.p2.g + g < 0) ? 0 : point.p2.g + g);
-                point.p2.b = (byte)((point.p2.b + b > 255) ? 255 : (point.p2.b + b < 0) ? 0 : point.p2.b + b);
-                point.p3.r = (byte)((point.p3.r + r > 255) ? 255 : (point.p3.r + r < 0) ? 0 : point.p3.r + r);
-                point.p3.g = (byte)((point.p3.g + g > 255) ? 255 : (point.p3.g + g < 0) ? 0 : point.p3.g + g);
-                point.p3.b = (byte)((point.p3.b + b > 255) ? 255 : (point.p3.b + b < 0) ? 0 : point.p3.b + b);
-                */
                 point.p1.r = (byte)(point.p1.r + r % 256);
                 point.p1.g = (byte)(point.p1.g + g % 256);
                 point.p1.b = (byte)(point.p1.b + b % 256);
@@ -88,22 +85,13 @@ namespace GEJE
                 point.p3.g = (byte)(point.p3.g + g % 256);
                 point.p3.b = (byte)(point.p3.b + b % 256);
             }
+
+            Dirty = true;
         }
-        public void hardsetcolor (int r, int g, int b)
+        public void hardsetcolor(int r, int g, int b)
         {
             foreach (Polygon point in oldpoints)
             {
-                /*
-                point.p1.r = (byte)((point.p1.r+r>255)?255:(point.p1.r+r<0)?0:point.p1.r+r);
-                point.p1.g = (byte)((point.p1.g + g > 255) ? 255 : (point.p1.g + g < 0) ? 0 : point.p1.g + g);
-                point.p1.b = (byte)((point.p1.b + b > 255) ? 255 : (point.p1.b + b < 0) ? 0 : point.p1.b + b);
-                point.p2.r = (byte)((point.p2.r + r > 255) ? 255 : (point.p2.r + r < 0) ? 0 : point.p2.r + r);
-                point.p2.g = (byte)((point.p2.g + g > 255) ? 255 : (point.p2.g + g < 0) ? 0 : point.p2.g + g);
-                point.p2.b = (byte)((point.p2.b + b > 255) ? 255 : (point.p2.b + b < 0) ? 0 : point.p2.b + b);
-                point.p3.r = (byte)((point.p3.r + r > 255) ? 255 : (point.p3.r + r < 0) ? 0 : point.p3.r + r);
-                point.p3.g = (byte)((point.p3.g + g > 255) ? 255 : (point.p3.g + g < 0) ? 0 : point.p3.g + g);
-                point.p3.b = (byte)((point.p3.b + b > 255) ? 255 : (point.p3.b + b < 0) ? 0 : point.p3.b + b);
-                */
                 point.p1.r = (byte)(r % 256);
                 point.p1.g = (byte)(g % 256);
                 point.p1.b = (byte)(b % 256);
@@ -114,16 +102,18 @@ namespace GEJE
                 point.p3.g = (byte)(g % 256);
                 point.p3.b = (byte)(b % 256);
             }
+            Dirty = true;
         }
         public void scale(double x, double y, double z)
         {
 
-            foreach(Polygon point in oldpoints)
+            foreach (Polygon point in oldpoints)
             {
-                point.p1.x*=x; point.p1.y*=y; point.p1.z*=z;
+                point.p1.x *= x; point.p1.y *= y; point.p1.z *= z;
                 point.p2.x *= x; point.p2.y *= y; point.p2.z *= z;
                 point.p3.x *= x; point.p3.y *= y; point.p3.z *= z;
             }
+            Dirty = true;
         }
         public override string ToString()
         {
@@ -144,19 +134,20 @@ namespace GEJE
             this.nxrot = Rotation.WrapAngle(this.nxrot);
             this.nyrot = Rotation.WrapAngle(this.nyrot);
             this.nzrot = Rotation.WrapAngle(this.nzrot);
+
+
+            bool transformChanged = !_hasLastTransform
+                || this.nx != _lastX || this.ny != _lastY || this.nz != _lastZ
+                || this.nxrot != _lastXRot || this.nyrot != _lastYRot || this.nzrot != _lastZRot;
+
             double xRotRad = this.nxrot * (Math.PI / 180);
             double yRotRad = this.nyrot * (Math.PI / 180);
             double zRotRad = this.nzrot * (Math.PI / 180);
             double[,] rotationMatrixX = Rotation.GetRotationMatrixX(xRotRad);
             double[,] rotationMatrixY = Rotation.GetRotationMatrixY(yRotRad);
             double[,] rotationMatrixZ = Rotation.GetRotationMatrixZ(zRotRad);
-            // Combine rotation matrices
             double[,] combinedRotationMatrix = Rotation.CombineMatrices(rotationMatrixZ, Rotation.CombineMatrices(rotationMatrixY, rotationMatrixX));
-            lock (points)
-            {
-                //points.ForEach(p => { p = null; });
-                points.Clear();
-            }
+            List<Polygon> newPoints = new List<Polygon>(oldpoints.Count);
 
             foreach (Polygon Lines in oldpoints)
             {
@@ -165,7 +156,7 @@ namespace GEJE
                 for (int i = 0; i <= 2; i++)
                 {
                     Point point = null;
-                    if (i == 0) { point = Lines.p1; } else if(i==1) { point = Lines.p2; } else { point = Lines.p3; }
+                    if (i == 0) { point = Lines.p1; } else if (i == 1) { point = Lines.p2; } else { point = Lines.p3; }
                     double x = point.x;
                     double y = point.y;
                     double z = point.z;
@@ -176,20 +167,29 @@ namespace GEJE
                     double newY = rotatedPoint[1] + this.ny;
                     double newZ = rotatedPoint[2] + this.nz;
 
-                    // Translate back to the original position
+
                     /*newX += this.nx;
                     newY += this.ny;
                     newZ += this.nz;*/
-                    if(i==0) point1 = new Point(newX, newY, newZ, 1, point.r, point.g, point.b);
+                    if (i == 0) point1 = new Point(newX, newY, newZ, 1, point.r, point.g, point.b);
                     else if (i == 1)
                         point2 = new Point(newX, newY, newZ, 1, point.r, point.g, point.b);
                     else
-                        points.Add(new Polygon(point1, point2, new Point(newX, newY, newZ, 1, point.r, point.g, point.b)));
+                        newPoints.Add(new Polygon(point1, point2, new Point(newX, newY, newZ, 1, point.r, point.g, point.b)));
 
                 }
 
 
             }
+
+            points = newPoints;
+
+            _lastX = this.nx; _lastY = this.ny; _lastZ = this.nz;
+            _lastXRot = this.nxrot; _lastYRot = this.nyrot; _lastZRot = this.nzrot;
+            _hasLastTransform = true;
+
+            if (transformChanged)
+                Dirty = true;
         }
     }
 }

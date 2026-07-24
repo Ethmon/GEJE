@@ -213,14 +213,18 @@ namespace GEJE
         public override void Update()
         {
             sword.yrot += 2.3;
-            
-            if(win.pressed.Contains(80))
+            if (win.pressed.Count() != 0)
             {
-                foreach(Proportie propertie in sword.properties)
+
+
+                if (win.pressed.Contains(80))
                 {
-                    if (propertie is Mesh)
+                    foreach (Proportie propertie in sword.properties)
                     {
-                        ((Mesh)propertie).hueit(1, 0, 0);
+                        if (propertie is Mesh)
+                        {
+                            ((Mesh)propertie).hueit(1, 0, 0);
+                        }
                     }
                 }
             }

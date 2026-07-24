@@ -34,28 +34,76 @@ namespace GEJE
             }
             */
             //}
-
+            /*
             List<terrainTile> terrain = FlatTriangleLayer.GenerateFlatLayer(
                     widthDivisions: 100,
-                    depthDivisions: 75,
-                    cellSize: 50,
+                    depthDivisions: 100,
+                    cellSize: 100,
                     jitter: .6,   // 0 = perfect grid, 0.25 = some randomness
-                    zLevel: -10
+                    zLevel: -100
                     );
 
             foreach (var t in terrain)
                 sceen.add_item(t);
+            
+            Item d = new Item(0,20,0,90,0,0);
+            Mesh m = new Mesh("Models\\apple.json", 0, 0, 0, 0, 0, 0);
+            m.scale(100, 100, 100);
+            d.add_propertie(m);
+            sceen.add_item(d);
+            Item jjdsj = new Item(10000, -150, 0, 90, 0, 0);
+            Mesh mm = new Mesh("Models\\Wall1.json", 0, 0, 0, 0, 0, 0);
+            mm.scale(100, 100, 100);
+            jjdsj.add_propertie(mm);
+            sceen.add_item(jjdsj);
+            */
+            Random random = new Random();
+            for (int i = 1; i < 10; i++)
+            {
+
+                for (int k = 1; k < 10; k++)
+                {
+                    for (int ppp = 0; ppp < 5; ppp++)
+                    {
+                        if (((i == 1 || i == 9) && ppp < 4) || ((i == 5) && ppp < 2 && k > 3 && k < 6) || ((k == 9)))
+                        {
+                            double d = random.NextDouble();
+                            double d2 = random.NextDouble();
+                            Item under = new Item((-20 + 20 * i) * 20, (30 - (ppp * 20))*20 , (-10 + k * 20) *20, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, (d2 > .75) ? 0 : (d2 > .5) ? 90 : (d2 > .25) ? 180 : 270);
+                            Mesh box3 = new Mesh("Models\\Wall1.JSON", 0, 0, 0, 0, 0, 0);
+                            box3.scale(20,20,20);
+                            int red = random.Next(0, 10) * i;
+                            int green = random.Next(0, 10) * k;
+                            int blue = random.Next(0, 10) * ppp;
+                            box3.hueit(red, green, blue);
+                            under.add_propertie(box3);
+                            sceen.add_item(under);
+                        }
+                    }
+                }
+            }
+            Item sword = new Item(80 *20, -15 *20, 80 * 20, 90, 0, 0);
+            Mesh swordmesh = new Mesh("Models\\Sword.JSON", 0, 0, 0, 0, 0, 0);
+            swordmesh.scale(20,20,20);
+            SwordDemo demo = new SwordDemo(0, 0, 0, 0, 0, 0);
+            demo.sword = sword;
+
+            sword.add_propertie(demo);
+
+            sword.add_propertie(swordmesh);
+            sceen.add_item(sword);
 
             Item.rotatei = false;
             Item.floatingyay = false;
             //Console.WriteLine(box2.ToString());
             Item camera = new Item(0, 000100, 0, 0, 0, 0);
             Window win = new Window(600, 400, 3, 3);
+            demo.win = win;
             win.scene = sceen;
-            Camera cam = new Camera(0, 0, 0, 90, 0, 0, sceen, win, 1);
-            cam.outline = false;
-            cam.fillin = true;
-            Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera, 50);
+            Camera cam = new Camera(0, 0, 10, 90, 0, 0, sceen, win, (double)win.Ethwidth / win.Ethheight);
+            //cam.outline = false;
+            //cam.fillin = true;
+            Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera, 15);
             cam_movement.window = win;
             HoverHighlight ffff = new HoverHighlight(camera, win, sceen);
             ffff.camera = cam;
@@ -358,7 +406,8 @@ namespace GEJE
             {
                 if (proportie is Mesh)
                 {
-                    ((Mesh)proportie).hardsetcolor(color1[0], color1[1], color1[2]);
+                    //((Mesh)proportie).hardsetcolor(color1[0], color1[1], color1[2]);
+                    
 
                 }
             }
@@ -369,7 +418,8 @@ namespace GEJE
             {
                 if (proportie is Mesh)
                 {
-                    ((Mesh)proportie).hardsetcolor(color2[0], color2[1], color2[2]);
+                    //((Mesh)proportie).hardsetcolor(color2[0], color2[1], color2[2]);
+                    
 
                 }
             }
