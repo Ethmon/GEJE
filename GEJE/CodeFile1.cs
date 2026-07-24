@@ -141,9 +141,10 @@ namespace GEJE
 
     public class lolgag
     {
+        public static TimeDeltaTime dd = new TimeDeltaTime();
         public static void d()
         {
-            Console.WriteLine("ItWorked");
+            Console.WriteLine(dd.DeltaTime());
         }
     }
 
