@@ -139,7 +139,8 @@ namespace GEJE
             bool transformChanged = !_hasLastTransform
                 || this.nx != _lastX || this.ny != _lastY || this.nz != _lastZ
                 || this.nxrot != _lastXRot || this.nyrot != _lastYRot || this.nzrot != _lastZRot;
-
+            if (!transformChanged)
+            { return; }
             double xRotRad = this.nxrot * (Math.PI / 180);
             double yRotRad = this.nyrot * (Math.PI / 180);
             double zRotRad = this.nzrot * (Math.PI / 180);

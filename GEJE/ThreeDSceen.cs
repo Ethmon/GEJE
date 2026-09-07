@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Threading;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 namespace GEJE
 {
     public class ThreeDSceen

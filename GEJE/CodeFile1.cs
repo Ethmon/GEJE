@@ -89,6 +89,39 @@ namespace GEJE
             //swordmesh.scale(20,20,20);
             //SwordDemo demo = new SwordDemo(0, 0, 0, 0, 0, 0);
             //demo.sword = sword;
+            Random random = new Random();
+            for (int i = -7; i <= 7; i++)
+            {
+                for(int k = -30; k <= 30; k++)
+                {
+                    {
+                        double d = random.NextDouble();
+                        double d2 = random.NextDouble();
+                        Item under = new Item(i * 400, -100, k * 400, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, (d2 > .75) ? 0 : (d2 > .5) ? 90 : (d2 > .25) ? 180 : 270);
+                        Mesh box3 = new Mesh("Models\\Wall1.JSON", 0, 0, 0, 0, 0, 0);
+                        box3.scale(20, 20, 20);
+                        int red = random.Next(0, 10) * i;
+                        int green = random.Next(0, 10) * k;
+                        int blue = random.Next(0, 10) * (i + k);
+                        box3.hueit(red, green, blue);
+                        under.add_propertie(box3);
+                        sceen.add_item(under);
+                    }
+                    if(k<-7||k>7){
+                        double d = random.NextDouble(); 
+                        double d2 = random.NextDouble();
+                        Item under = new Item(k * 400, -100, i * 400, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, (d2 > .75) ? 0 : (d2 > .5) ? 90 : (d2 > .25) ? 180 : 270);
+                        Mesh box3 = new Mesh("Models\\Wall1.JSON", 0, 0, 0, 0, 0, 0);
+                        box3.scale(20, 20, 20);
+                        int red = random.Next(0, 10) * k;
+                        int green = random.Next(0, 10) * i;
+                        int blue = random.Next(0, 10) * (i + k);
+                        box3.hueit(red, green, blue);
+                        under.add_propertie(box3);
+                        sceen.add_item(under);
+                    }
+                }
+            }
             Item Triangle = new Item(100, 00, 300, 90, 0, 0);
             Mesh TriangleMesh = new Mesh("Models\\Pyramid.JSON", 0, 0, 0, 0, 0, 0);
             TriangleMesh.scale(50,50,50);
@@ -98,18 +131,25 @@ namespace GEJE
 
             //sword.add_propertie(swordmesh);
             //sceen.add_item(sword);
+            Item Apple = new Item(150, 40, 500, 90, 0, 0);
+            Mesh AppleMesh = new Mesh("Models\\apple.json",0,0, 0, 0,0, 0);
+            AppleMesh.scale(50,50,50);
+            Apple.add_propertie(AppleMesh);
+            sceen.add_item(Apple);
+
+
 
             Item.rotatei = false;
             Item.floatingyay = false;
             //Console.WriteLine(box2.ToString());
-            Item camera = new Item(0, 000100, 0, 90, 0, 0);
-            Window win = new Window(300, 200, 6, 6);
+            Item camera = new Item(0, -0002000, 0, 90, 0, 0);
+            Window win = new Window(600, 225, 2, 3);
             //demo.win = win;
             win.scene = sceen;
             Camera cam = new Camera(0, 0, 10, 90, 0, 0, sceen, win, (double)win.Ethwidth / win.Ethheight);
             //cam.outline = false;
             //cam.fillin = true;
-            Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera, 10);
+            Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera, 120);
             cam_movement.window = win;
             HoverHighlight ffff = new HoverHighlight(camera, win, sceen);
             ffff.camera = cam;
