@@ -103,13 +103,13 @@ namespace GEJE
             Item.floatingyay = false;
             //Console.WriteLine(box2.ToString());
             Item camera = new Item(0, 000100, 0, 90, 0, 0);
-            Window win = new Window(600, 400, 3, 3);
+            Window win = new Window(300, 200, 6, 6);
             //demo.win = win;
             win.scene = sceen;
             Camera cam = new Camera(0, 0, 10, 90, 0, 0, sceen, win, (double)win.Ethwidth / win.Ethheight);
             //cam.outline = false;
             //cam.fillin = true;
-            Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera, 5);
+            Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera, 10);
             cam_movement.window = win;
             HoverHighlight ffff = new HoverHighlight(camera, win, sceen);
             ffff.camera = cam;

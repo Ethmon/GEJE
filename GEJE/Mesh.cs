@@ -24,7 +24,7 @@ namespace GEJE
         {
             string aa = System.IO.Directory.GetCurrentDirectory();
             //aa = aa.Replace("GEJE\\bin\\Debug", "GEJE\\");
-            aa = aa.Substring(0, aa.IndexOf("GEJE") + 4);
+            aa = aa.Substring(0, aa.LastIndexOf("GEJE") + 4);
             Console.Write(aa);
             return aa;
         }

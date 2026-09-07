@@ -90,13 +90,13 @@ namespace GEJE
                     moved.move(moved.x, moved.y - speed * time, moved.z, moved.w);
                 }
                 if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Up))
-                    moved.rotate(moved.xrot + 3 * time/10, moved.yrot, moved.zrot, moved.w);
+                    moved.rotate(moved.xrot + 3 * speed * time/10, moved.yrot, moved.zrot, moved.w);
                 if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Down))
-                    moved.rotate(moved.xrot - 3 * time/10, moved.yrot, moved.zrot, moved.w);
+                    moved.rotate(moved.xrot - 3 * speed * time/10, moved.yrot, moved.zrot, moved.w);
                 if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Right))
-                    moved.rotate(moved.xrot, moved.yrot + 3 * time/10, moved.zrot, moved.w);
+                    moved.rotate(moved.xrot, moved.yrot + 3 * speed * time/10, moved.zrot, moved.w);
                 if (window.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Left))
-                    moved.rotate(moved.xrot, moved.yrot- 3 * time/10, moved.zrot, moved.w);
+                    moved.rotate(moved.xrot, moved.yrot- 3 * speed * time/10, moved.zrot, moved.w);
                 
             }
         }
