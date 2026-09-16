@@ -90,14 +90,14 @@ namespace GEJE
             //SwordDemo demo = new SwordDemo(0, 0, 0, 0, 0, 0);
             //demo.sword = sword;
             Random random = new Random();
-            for (int i = -7; i <= 7; i++)
+            for (int i = -30; i <= 30; i++)
             {
                 for(int k = -30; k <= 30; k++)
                 {
-                    {
+                    if(Math.Abs(i)%2==1&&Math.Abs(k)%2==1){
                         double d = random.NextDouble();
                         double d2 = random.NextDouble();
-                        Item under = new Item(i * 400, -100, k * 400, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, (d2 > .75) ? 0 : (d2 > .5) ? 90 : (d2 > .25) ? 180 : 270);
+                        Box under = new Box(i * 400, -100, k * 400, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, (d2 > .75) ? 0 : (d2 > .5) ? 90 : (d2 > .25) ? 180 : 270);
                         Mesh box3 = new Mesh("Models\\Wall1.JSON", 0, 0, 0, 0, 0, 0);
                         box3.scale(20, 20, 20);
                         int red = random.Next(0, 10) * i;
@@ -107,10 +107,12 @@ namespace GEJE
                         under.add_propertie(box3);
                         sceen.add_item(under);
                     }
-                    if(k<-7||k>7){
-                        double d = random.NextDouble(); 
+                    
+                    if(k!=0&& Math.Abs(k)%2==1 && Math.Abs(i)%2==1)
+                    {
+                        double d = random.NextDouble();
                         double d2 = random.NextDouble();
-                        Item under = new Item(k * 400, -100, i * 400, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, (d2 > .75) ? 0 : (d2 > .5) ? 90 : (d2 > .25) ? 180 : 270);
+                        Box under = new Box(0, k *400 - 100, i * 400, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, (d2 > .75) ? 0 : (d2 > .5) ? 90 : (d2 > .25) ? 180 : 270);
                         Mesh box3 = new Mesh("Models\\Wall1.JSON", 0, 0, 0, 0, 0, 0);
                         box3.scale(20, 20, 20);
                         int red = random.Next(0, 10) * k;
@@ -143,7 +145,7 @@ namespace GEJE
             Item.floatingyay = false;
             //Console.WriteLine(box2.ToString());
             Item camera = new Item(0, -0002000, 0, 90, 0, 0);
-            Window win = new Window(600, 225, 2, 3);
+            Window win = new Window(300, 112, 4, 6);
             //demo.win = win;
             win.scene = sceen;
             Camera cam = new Camera(0, 0, 10, 90, 0, 0, sceen, win, (double)win.Ethwidth / win.Ethheight);
@@ -165,10 +167,44 @@ namespace GEJE
             sceen.add_item(camera);
             win.cam = cam;
             sceen.Start_scene();
-
+            
             win.RunGame();
         }
     }
+    public class Box : Item
+    {
+        public Box(double x, double y, double z, double xrot, double yrot, double zrot) : base(x, y, z, xrot, yrot, zrot)
+        {
+
+        }
+        public override void EnterHover()
+        {
+            foreach(Proportie item in this.properties) {
+            if(item is Mesh)
+                {
+                    Mesh a = (Mesh)item;
+                    a.hueit(-20, -20, -20);
+
+                }
+            }
+        }
+        public override void ExitHover()
+        {
+            foreach (Proportie item in this.properties)
+            {
+                if (item is Mesh)
+                {
+                    Mesh a = (Mesh)item;
+                    a.hueit(20, 20, 20);
+
+                }
+            }
+        }
+    }
+
+
+
+
 
     public enum GroundType
     {

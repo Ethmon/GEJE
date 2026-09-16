@@ -19,7 +19,7 @@ namespace GEJE
 
         private double _lastX, _lastY, _lastZ, _lastXRot, _lastYRot, _lastZRot;
         private bool _hasLastTransform = false;
-
+        public bool colorchanged = false;
         public string getPath()
         {
             string aa = System.IO.Directory.GetCurrentDirectory();
@@ -85,7 +85,7 @@ namespace GEJE
                 point.p3.g = (byte)(point.p3.g + g % 256);
                 point.p3.b = (byte)(point.p3.b + b % 256);
             }
-
+            colorchanged = true;
             Dirty = true;
         }
         public void hardsetcolor(int r, int g, int b)
@@ -102,6 +102,7 @@ namespace GEJE
                 point.p3.g = (byte)(g % 256);
                 point.p3.b = (byte)(b % 256);
             }
+            colorchanged = true;
             Dirty = true;
         }
         public void scale(double x, double y, double z)
@@ -138,9 +139,10 @@ namespace GEJE
 
             bool transformChanged = !_hasLastTransform
                 || this.nx != _lastX || this.ny != _lastY || this.nz != _lastZ
-                || this.nxrot != _lastXRot || this.nyrot != _lastYRot || this.nzrot != _lastZRot;
+                || this.nxrot != _lastXRot || this.nyrot != _lastYRot || this.nzrot != _lastZRot|| colorchanged;
             if (!transformChanged)
             { return; }
+            colorchanged = false;
             double xRotRad = this.nxrot * (Math.PI / 180);
             double yRotRad = this.nyrot * (Math.PI / 180);
             double zRotRad = this.nzrot * (Math.PI / 180);

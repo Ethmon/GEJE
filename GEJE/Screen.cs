@@ -317,7 +317,7 @@ namespace GEJE
             GL.Enable(EnableCap.DepthTest);
             GL.DepthFunc(DepthFunction.Less);
 
-            GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 1f, 1f, 1f, 1f });
+            GL.ClearBuffer(ClearBuffer.Color, 0, new float[] { 0.05f, 0.2f, 0.35f, 1f });
             GL.ClearBuffer(ClearBuffer.Color, 1, new float[] { 0f, 0f, 0f, 1f });
             GL.Clear(ClearBufferMask.DepthBufferBit);
 
