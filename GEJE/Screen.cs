@@ -90,7 +90,7 @@ namespace GEJE
         
         
         private int uBlitTex, uBlitTagTex, uBlitTexelSize, uBlitOutlineThickness;
-        public float OutlineThickness = 0.5f;
+        public float OutlineThickness = 0.0f;
         private void SetupBlitQuad()
         {
             blitShaderProgram = CreateProgram(fullscreenVertexShaderSource, fullscreenFragmentShaderSource);

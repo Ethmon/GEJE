@@ -94,7 +94,8 @@ namespace GEJE
             {
                 for(int k = -30; k <= 30; k++)
                 {
-                    if(Math.Abs(i)%2==1&&Math.Abs(k)%2==1){
+                    if(Math.Abs(i)%2==1&&Math.Abs(k)%2==1)
+                    {
                         double d = random.NextDouble();
                         double d2 = random.NextDouble();
                         Box under = new Box(i * 400, -100, k * 400, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, (d2 > .75) ? 0 : (d2 > .5) ? 90 : (d2 > .25) ? 180 : 270);
@@ -145,13 +146,13 @@ namespace GEJE
             Item.floatingyay = false;
             //Console.WriteLine(box2.ToString());
             Item camera = new Item(0, -0002000, 0, 90, 0, 0);
-            Window win = new Window(300, 112, 4, 6);
+            Window win = new Window(1200, 600, 1, 1);
             //demo.win = win;
             win.scene = sceen;
             Camera cam = new Camera(0, 0, 10, 90, 0, 0, sceen, win, (double)win.Ethwidth / win.Ethheight);
             //cam.outline = false;
             //cam.fillin = true;
-            Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera, 120);
+            Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera, 240);
             cam_movement.window = win;
             HoverHighlight ffff = new HoverHighlight(camera, win, sceen);
             ffff.camera = cam;

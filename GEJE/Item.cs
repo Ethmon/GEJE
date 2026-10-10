@@ -42,7 +42,7 @@ namespace GEJE
             this.z = z;
             this.w = w; // Set w
         }
-
+        
         public void rotate(double x, double y, double z, double w) // Add w parameter
         {
             this.xrot = x;
@@ -97,11 +97,6 @@ namespace GEJE
 
             foreach (Proportie propertie in properties)
             {
-                if (propertie is Movement)
-                {
-                    propertie.Update();
-                    continue;
-                }
                 if (propertie is Mesh)
                 {
                     if (NAH) continue;
@@ -123,11 +118,7 @@ namespace GEJE
                     //Console.WriteLine(propertie.nxrot);
                     //propertie.nxrot += 1;
                 }
-                if (propertie is Camera)
-                {
-                    //propertie.y += .1;
-                    //propertie.yrot += .005;
-                }
+
 
                 double x = propertie.x;
                 double y = propertie.y;
@@ -136,7 +127,6 @@ namespace GEJE
                 double newX = rotatedPoint[0] + this.x;
                 double newY = rotatedPoint[1] + this.y;
                 double newZ = rotatedPoint[2] + this.z;
-                double newW = rotatedPoint[3] + this.w;
                 /*newX += this.x;
                 newY += this.y;
                 newZ += this.z;*/
