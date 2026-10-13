@@ -89,6 +89,7 @@ namespace GEJE
             //swordmesh.scale(20,20,20);
             //SwordDemo demo = new SwordDemo(0, 0, 0, 0, 0, 0);
             //demo.sword = sword;
+            /*
             Random random = new Random();
             for (int i = -30; i <= 30; i++)
             {
@@ -125,8 +126,9 @@ namespace GEJE
                     }
                 }
             }
-            Item Triangle = new Item(100, 00, 300, 90, 0, 0);
-            Mesh TriangleMesh = new Mesh("Models\\Pyramid.JSON", 0, 0, 0, 0, 0, 0);
+            */
+            Item Triangle = new Item(100, -300, 300, 90, 0, 0);
+            Mesh TriangleMesh = new Mesh("Models\\Pine_Tree.JSON", 0, 0, 0, 0, 0, 0);
             TriangleMesh.scale(50,50,50);
             Triangle.add_propertie(TriangleMesh);
             sceen.add_item(Triangle);
@@ -134,19 +136,22 @@ namespace GEJE
 
             //sword.add_propertie(swordmesh);
             //sceen.add_item(sword);
-            Item Apple = new Item(150, 40, 500, 90, 0, 0);
-            Mesh AppleMesh = new Mesh("Models\\apple.json",0,0, 0, 0,0, 0);
-            AppleMesh.scale(50,50,50);
-            Apple.add_propertie(AppleMesh);
-            sceen.add_item(Apple);
+            for (int jds = 0; jds < 10; jds++)
+            {
 
+                Item Apple = new Item(550 + (400 * jds), 540, 500, 90, 0, 0);
+                Mesh AppleMesh = new Mesh("Models\\Rock.json", 0, 0, 0, 0, 0, 0);
+                AppleMesh.scale(20, 20, 20);
+                Apple.add_propertie(AppleMesh);
+                sceen.add_item(Apple);
+            }
 
 
             Item.rotatei = false;
             Item.floatingyay = false;
             //Console.WriteLine(box2.ToString());
             Item camera = new Item(0, -0002000, 0, 90, 0, 0);
-            Window win = new Window(1200, 600, 1, 1);
+            Window win = new Window(600, 300, 2, 2);
             //demo.win = win;
             win.scene = sceen;
             Camera cam = new Camera(0, 0, 10, 90, 0, 0, sceen, win, (double)win.Ethwidth / win.Ethheight);
