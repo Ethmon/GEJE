@@ -10,14 +10,14 @@ namespace GEJE
 {
     public class TimeDeltaTime
     {
-        Stopwatch clock = new Stopwatch();
+        Stopwatch clock = Stopwatch.StartNew();   // must be running, or the first delta is 0
         public TimeSpan DeltaTime()
         {
             TimeSpan delta = clock.Elapsed;
-            
+
             clock.Restart();
             return delta;
         }
-        
+
     }
 }

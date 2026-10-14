@@ -14,166 +14,37 @@ namespace GEJE
         public static void Main()
         {
             ThreeDSceen sceen = new ThreeDSceen(100, 100, 100);
-            Random rnd = new Random();
-            /*
-            int i = 0;
-            int max = 1000;
-            {
-                Item place = new Item((int)rnd.Next() % 551 * (((int)rnd.Next() % 2 == 0) ? 1 : -1), 80, (int)rnd.Next() % 551 * (((int)rnd.Next() % 2 == 0) ? 1 : -1), 90, 0, 0);
-                byte r = (byte)(rnd.NextDouble() * 100 + 30);
-                Mesh places = new Mesh(new List<Polygon> {
-            new Polygon(
-                 new Point(10,0,0,1,r,r,r), new Point(10,10,0,1,r,r,r), new Point(0,10,0,1,r,r,r) )
 
+            // Ground: a big flat box that never moves
+            Item ground = new Item(0, 0, 0, 0, 0, 0);
+            Mesh groundMesh = new Mesh("Models\\Wall1.JSON", 0, 0, 0, 0, 0, 0);
+            groundMesh.scale(100, 2, 100);
+            ground.add_propertie(groundMesh);
+            new PhysicsBody(ground, sceen.physics) { isStatic = true };
+            sceen.add_item(ground);
 
-            }, 0, 0, 0, 0, 0, 0);
-                //places.scale(5, 5, 1);
+            // An apple that drops onto the ground (-Y is up in this engine)
+            Item apple = new Item(0, -1600, 0, 90, 0, 0);
+            Mesh appleMesh = new Mesh("Models\\apple.json", 0, 0, 0, 0, 0, 0);
+            appleMesh.scale(50, 50, 50);
+            apple.add_propertie(appleMesh);
+            new PhysicsBody(apple, sceen.physics) { bounciness = 2.5 };
+            sceen.add_item(apple);
 
-                place.add_propertie(places);
-                sceen.add_item(place);
-            }
-            */
-            //}
-            /*
-            List<terrainTile> terrain = FlatTriangleLayer.GenerateFlatLayer(
-                    widthDivisions: 100,
-                    depthDivisions: 100,
-                    cellSize: 100,
-                    jitter: .6,   // 0 = perfect grid, 0.25 = some randomness
-                    zLevel: -100
-                    );
-
-            foreach (var t in terrain)
-                sceen.add_item(t);
-            
-            Item d = new Item(0,20,0,90,0,0);
-            Mesh m = new Mesh("Models\\apple.json", 0, 0, 0, 0, 0, 0);
-            m.scale(100, 100, 100);
-            d.add_propertie(m);
-            sceen.add_item(d);
-            Item jjdsj = new Item(10000, -150, 0, 90, 0, 0);
-            Mesh mm = new Mesh("Models\\Wall1.json", 0, 0, 0, 0, 0, 0);
-            mm.scale(100, 100, 100);
-            jjdsj.add_propertie(mm);
-            sceen.add_item(jjdsj);
-            */
-            /*
-            Random random = new Random();
-            for (int i = 1; i < 10; i++)
-            {
-
-                for (int k = 1; k < 10; k++)
-                {
-                    for (int ppp = 0; ppp < 5; ppp++)
-                    {
-                        if (((i == 1 || i == 9) && ppp < 4) || ((i == 5) && ppp < 2 && k > 3 && k < 6) || ((k == 9)))
-                        {
-                            double d = random.NextDouble();
-                            double d2 = random.NextDouble();
-                            Item under = new Item((-20 + 20 * i) * 20, (30 - (ppp * 20))*20 , (-10 + k * 20) *20, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, (d2 > .75) ? 0 : (d2 > .5) ? 90 : (d2 > .25) ? 180 : 270);
-                            Mesh box3 = new Mesh("Models\\Wall1.JSON", 0, 0, 0, 0, 0, 0);
-                            box3.scale(20,20,20);
-                            int red = random.Next(0, 10) * i;
-                            int green = random.Next(0, 10) * k;
-                            int blue = random.Next(0, 10) * ppp;
-                            box3.hueit(red, green, blue);
-                            under.add_propertie(box3);
-                            sceen.add_item(under);
-                        }
-                    }
-                }
-            }
-            */
-            //Item sword = new Item(80 *20, -15 *20, 80 * 20, 90, 0, 0);
-            //Mesh swordmesh = new Mesh("Models\\Sword.JSON", 0, 0, 0, 0, 0, 0);
-            //swordmesh.scale(20,20,20);
-            //SwordDemo demo = new SwordDemo(0, 0, 0, 0, 0, 0);
-            //demo.sword = sword;
-            /*
-            Random random = new Random();
-            for (int i = -30; i <= 30; i++)
-            {
-                for(int k = -30; k <= 30; k++)
-                {
-                    if(Math.Abs(i)%2==1&&Math.Abs(k)%2==1)
-                    {
-                        double d = random.NextDouble();
-                        double d2 = random.NextDouble();
-                        Box under = new Box(i * 400, -100, k * 400, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, (d2 > .75) ? 0 : (d2 > .5) ? 90 : (d2 > .25) ? 180 : 270);
-                        Mesh box3 = new Mesh("Models\\Wall1.JSON", 0, 0, 0, 0, 0, 0);
-                        box3.scale(20, 20, 20);
-                        int red = random.Next(0, 10) * i;
-                        int green = random.Next(0, 10) * k;
-                        int blue = random.Next(0, 10) * (i + k);
-                        box3.hueit(red, green, blue);
-                        under.add_propertie(box3);
-                        sceen.add_item(under);
-                    }
-                    
-                    if(k!=0&& Math.Abs(k)%2==1 && Math.Abs(i)%2==1)
-                    {
-                        double d = random.NextDouble();
-                        double d2 = random.NextDouble();
-                        Box under = new Box(0, k *400 - 100, i * 400, 90, (d > .75) ? 0 : (d > .5) ? 90 : (d > .25) ? 180 : 270, (d2 > .75) ? 0 : (d2 > .5) ? 90 : (d2 > .25) ? 180 : 270);
-                        Mesh box3 = new Mesh("Models\\Wall1.JSON", 0, 0, 0, 0, 0, 0);
-                        box3.scale(20, 20, 20);
-                        int red = random.Next(0, 10) * k;
-                        int green = random.Next(0, 10) * i;
-                        int blue = random.Next(0, 10) * (i + k);
-                        box3.hueit(red, green, blue);
-                        under.add_propertie(box3);
-                        sceen.add_item(under);
-                    }
-                }
-            }
-            */
-            Item Triangle = new Item(100, -300, 300, 90, 0, 0);
-            Mesh TriangleMesh = new Mesh("Models\\Pine_Tree.JSON", 0, 0, 0, 0, 0, 0);
-            TriangleMesh.scale(50,50,50);
-            Triangle.add_propertie(TriangleMesh);
-            sceen.add_item(Triangle);
-            //sword.add_propertie(demo);
-
-            //sword.add_propertie(swordmesh);
-            //sceen.add_item(sword);
-            for (int jds = 0; jds < 10; jds++)
-            {
-
-                Item Apple = new Item(550 + (400 * jds), 540, 500, 90, 0, 0);
-                Mesh AppleMesh = new Mesh("Models\\Rock.json", 0, 0, 0, 0, 0, 0);
-                AppleMesh.scale(20, 20, 20);
-                Apple.add_propertie(AppleMesh);
-                sceen.add_item(Apple);
-            }
-
-
-            Item.rotatei = false;
-            Item.floatingyay = false;
-            //Console.WriteLine(box2.ToString());
-            Item camera = new Item(0, -0002000, 0, 90, 0, 0);
-            Window win = new Window(600, 300, 2, 2);
-            //demo.win = win;
+            // Camera: WASD/QE to move, arrows to look, F to throw boxes
+            Window win = new Window(1200, 600, 1, 1);
             win.scene = sceen;
+            Item camera = new Item(0, -600, -1500, 90, 0, 0);
             Camera cam = new Camera(0, 0, 10, 90, 0, 0, sceen, win, (double)win.Ethwidth / win.Ethheight);
-            //cam.outline = false;
-            //cam.fillin = true;
-            Movement cam_movement = new Movement(0, 0, 0, 0, 0, 0, camera, 240);
-            cam_movement.window = win;
-            HoverHighlight ffff = new HoverHighlight(camera, win, sceen);
-            ffff.camera = cam;
-            camera.add_propertie(ffff);
-            camera.add_propertie(cam_movement);
+            Movement movement = new Movement(0, 0, 0, 0, 0, 0, apple, 600);
+            movement.window = win;
+            camera.add_propertie(movement);
             camera.add_propertie(cam);
-            //ItemKeys itemKeys = new ItemKeys();
-            //itemKeys.AddKey(83, lolgag.d);
-            //KeysAndBinds keysAndBinds = new KeysAndBinds(0,0,0,0,0,0,win);
-            //keysAndBinds.addItemKey(itemKeys);
-            //camera.add_propertie(keysAndBinds);
-            //camera.add_propertie(cam_movement);
+            camera.add_propertie(new BoxThrower(camera, win, sceen));
             sceen.add_item(camera);
             win.cam = cam;
+
             sceen.Start_scene();
-            
             win.RunGame();
         }
     }
@@ -185,8 +56,9 @@ namespace GEJE
         }
         public override void EnterHover()
         {
-            foreach(Proportie item in this.properties) {
-            if(item is Mesh)
+            foreach (Proportie item in this.properties)
+            {
+                if (item is Mesh)
                 {
                     Mesh a = (Mesh)item;
                     a.hueit(-20, -20, -20);
@@ -254,15 +126,15 @@ namespace GEJE
 
         public static Dictionary<GroundType, HashSet<GroundType>> forbiddenNeighbors = new Dictionary<GroundType, HashSet<GroundType>>
         {
-            [GroundType.Mountain] = new HashSet<GroundType> { GroundType.Water, GroundType.Ocean,GroundType.DeepOcean, GroundType.Plateau },
-            [GroundType.Water] = new HashSet<GroundType> { GroundType.Mountain,GroundType.DeepOcean }, 
-            [GroundType.Ocean] = new HashSet<GroundType> { GroundType.FarmLand,GroundType.Hill,GroundType.Mountain,GroundType.Plateau,GroundType.Grass, GroundType.River },
-            [GroundType.DeepOcean] = new HashSet<GroundType> { GroundType.Water,GroundType.Grass,GroundType.Hill,GroundType.Mountain, GroundType.FarmLand,GroundType.Plateau, GroundType.River },
-            [GroundType.Plateau] = new HashSet<GroundType> { GroundType.Mountain,GroundType.Ocean,GroundType.DeepOcean,GroundType.Hill,GroundType.Plateau},
+            [GroundType.Mountain] = new HashSet<GroundType> { GroundType.Water, GroundType.Ocean, GroundType.DeepOcean, GroundType.Plateau },
+            [GroundType.Water] = new HashSet<GroundType> { GroundType.Mountain, GroundType.DeepOcean },
+            [GroundType.Ocean] = new HashSet<GroundType> { GroundType.FarmLand, GroundType.Hill, GroundType.Mountain, GroundType.Plateau, GroundType.Grass, GroundType.River },
+            [GroundType.DeepOcean] = new HashSet<GroundType> { GroundType.Water, GroundType.Grass, GroundType.Hill, GroundType.Mountain, GroundType.FarmLand, GroundType.Plateau, GroundType.River },
+            [GroundType.Plateau] = new HashSet<GroundType> { GroundType.Mountain, GroundType.Ocean, GroundType.DeepOcean, GroundType.Hill, GroundType.Plateau },
             [GroundType.Grass] = new HashSet<GroundType> { GroundType.DeepOcean, GroundType.Ocean },
-            [GroundType.Hill] = new HashSet<GroundType> { GroundType.DeepOcean,GroundType.Ocean,GroundType.Plateau},
+            [GroundType.Hill] = new HashSet<GroundType> { GroundType.DeepOcean, GroundType.Ocean, GroundType.Plateau },
             [GroundType.FarmLand] = new HashSet<GroundType> { GroundType.Ocean, GroundType.DeepOcean },
-            [GroundType.River] = new HashSet<GroundType> {GroundType.Ocean, GroundType.DeepOcean }
+            [GroundType.River] = new HashSet<GroundType> { GroundType.Ocean, GroundType.DeepOcean }
         };
 
         public static Dictionary<GroundType, int> globalLimits = new Dictionary<GroundType, int>
@@ -291,11 +163,11 @@ namespace GEJE
                 [GroundType.Plateau] = .1,
                 [GroundType.River] = .2,
                 [GroundType.Ocean] = 12.4
-                
+
             },
             [GroundType.Mountain] = new Dictionary<GroundType, double>
             {
-                [GroundType.Hill] = 2.5,    
+                [GroundType.Hill] = 2.5,
                 [GroundType.FarmLand] = 0.7,
                 [GroundType.Mountain] = 9.5
             },
@@ -305,7 +177,7 @@ namespace GEJE
                 [GroundType.Water] = 1.4,
                 [GroundType.Plateau] = .2
             },
-            [GroundType.Grass]= new Dictionary<GroundType, double>
+            [GroundType.Grass] = new Dictionary<GroundType, double>
             {
                 [GroundType.Water] = 1.25,
                 [GroundType.Grass] = 4.3,
@@ -316,15 +188,15 @@ namespace GEJE
                 [GroundType.Mountain] = 4
 
             },
-            [GroundType.FarmLand]= new Dictionary<GroundType, double>
+            [GroundType.FarmLand] = new Dictionary<GroundType, double>
             {
                 [GroundType.Water] = .05,
                 [GroundType.FarmLand] = 1.4,
                 [GroundType.River] = 1.2
             },
-            [GroundType.DeepOcean]= new Dictionary<GroundType, double>
+            [GroundType.DeepOcean] = new Dictionary<GroundType, double>
             {
-                [GroundType .DeepOcean] = 4.6,
+                [GroundType.DeepOcean] = 4.6,
                 [GroundType.Ocean] = 2
             },
             [GroundType.Ocean] = new Dictionary<GroundType, double>
@@ -336,9 +208,9 @@ namespace GEJE
             [GroundType.Plateau] = new Dictionary<GroundType, double>
             {
                 [GroundType.Water] = .15,
-                [GroundType.River ] = .2
+                [GroundType.River] = .2
             }
-            
+
         };
     }
 
@@ -390,7 +262,7 @@ namespace GEJE
                 if (nx >= 0 && nx < tiles.GetLength(0) &&
                     ny >= 0 && ny < tiles.GetLength(1))
                 {
-                    if (tiles[nx,ny] != null)
+                    if (tiles[nx, ny] != null)
                         neighbors.Add(tiles[nx, ny]);
                 }
             }
@@ -410,14 +282,14 @@ namespace GEJE
             {
                 double weight = 1.0;
 
-                
+
                 if (neighbors.Any(n => n != null && n.type == typeCandidate) &&
                     TileRules.clusterBias.TryGetValue(typeCandidate, out double bias))
                 {
                     weight += bias;
                 }
 
-                
+
                 if (neighbors.Any(n => n != null &&
                                        TileRules.forbiddenNeighbors.TryGetValue(n.type, out var forbidden) &&
                                        forbidden.Contains(typeCandidate)))
@@ -425,7 +297,7 @@ namespace GEJE
                     weight = 0;
                 }
 
-                
+
                 if (TileRules.globalLimits.TryGetValue(typeCandidate, out int limit) &&
                     TileRules.globalCounts.TryGetValue(typeCandidate, out int count) &&
                     count >= limit)
@@ -433,7 +305,7 @@ namespace GEJE
                     weight = 0;
                 }
 
-                
+
                 int sameNeighborCount = neighbors.Count(n => n != null && n.type == typeCandidate);
                 if (TileRules.adjacencyLimits.TryGetValue(typeCandidate, out int maxAdj) &&
                     sameNeighborCount >= maxAdj)
@@ -468,7 +340,7 @@ namespace GEJE
                 {
                     type = kv.Key;
 
-                    
+
                     if (!TileRules.globalCounts.ContainsKey(type))
                         TileRules.globalCounts[type] = 0;
                     TileRules.globalCounts[type]++;
@@ -484,9 +356,9 @@ namespace GEJE
         public override string ToString()
         {
             String a = type.ToString() + "\n";
-            foreach(Tile N in Neighbors)
+            foreach (Tile N in Neighbors)
             {
-                if(N!=null)
+                if (N != null)
                     a += N.type.ToString() + " ";
             }
             return a;
@@ -497,9 +369,10 @@ namespace GEJE
     {
         byte[] color1;
         byte[] color2;
-        public terrainTile(double x, double y, double z, double xrot, double yrot, double zrot, byte[] c1, byte[]c2) : base(x, y, z, xrot, yrot, zrot) {
-        this.color1 = c1;
-        this.color2 = c2;
+        public terrainTile(double x, double y, double z, double xrot, double yrot, double zrot, byte[] c1, byte[] c2) : base(x, y, z, xrot, yrot, zrot)
+        {
+            this.color1 = c1;
+            this.color2 = c2;
         }
         public override void EnterHover()
         {
@@ -508,7 +381,7 @@ namespace GEJE
                 if (proportie is Mesh)
                 {
                     //((Mesh)proportie).hardsetcolor(color1[0], color1[1], color1[2]);
-                    
+
 
                 }
             }
@@ -520,7 +393,7 @@ namespace GEJE
                 if (proportie is Mesh)
                 {
                     //((Mesh)proportie).hardsetcolor(color2[0], color2[1], color2[2]);
-                    
+
 
                 }
             }
@@ -585,12 +458,12 @@ namespace GEJE
                     if (x > 0 && y < depthDivisions - 1) neighbors.Add(tiles[x - 1, y + 1]); // bottom-left
                     if (x < widthDivisions - 1 && y > 0) neighbors.Add(tiles[x + 1, y - 1]); // top-right
                     */
-                    neighbors = Tile.GetNeighbors(tiles,x,y,true);
+                    neighbors = Tile.GetNeighbors(tiles, x, y, true);
                     // --- Create tile and assign type based on neighbors ---
                     Tile t = new Tile();
-                    if(x==0 && y==0) t.type = GroundType.Grass;
+                    if (x == 0 && y == 0) t.type = GroundType.Grass;
                     else t.Randomiza(rand, neighbors);
-                    
+
 
                     tiles[x, y] = t; // store in grid
 
@@ -607,7 +480,7 @@ namespace GEJE
                 )
             }, 0, 0, 0, 0, 0, 0);
 
-                    terrainTile triItem1 = new terrainTile(0, 0, 0, 0, 0, 0,color, new byte[] { (byte)((int)cr +20)  , (byte)((int)cg+20), (byte)((int)cb+20) });
+                    terrainTile triItem1 = new terrainTile(0, 0, 0, 0, 0, 0, color, new byte[] { (byte)((int)cr + 20), (byte)((int)cg + 20), (byte)((int)cb + 20) });
                     t.tileMesh = tri1;
                     triItem1.add_propertie(t);
                     triItem1.add_propertie(tri1);
@@ -634,12 +507,12 @@ namespace GEJE
             }
             for (int i = 0; i < widthDivisions; i++)
                 for (int k = 0; k < depthDivisions; k++)
-                    tiles[i,k].Neighbors = Tile.GetNeighbors(tiles, i, k,true);
+                    tiles[i, k].Neighbors = Tile.GetNeighbors(tiles, i, k, true);
 
 
             return terrainItems;
         }
-       
+
 
 
     }

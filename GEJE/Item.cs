@@ -10,6 +10,9 @@ using System.Windows.Forms;
 
 namespace GEJE
 {
+    /// <summary>
+    /// Item Class which holds properties
+    /// </summary>
     public class Item
     {
         public double x, y, z, w;
@@ -28,13 +31,14 @@ namespace GEJE
             this.xrot = xrot;
             this.yrot = yrot;
             this.zrot = zrot;
-            
-        }
 
+        }
+///        <summary>Adds a Property to an Item</summary>
         public void add_propertie(Proportie propertie)
         {
             properties.Add(propertie);
         }
+///      <summart>moves an item to a specifc location</summart>
         public void move(double x, double y, double z, double w) // Add w parameter
         {
             this.x = x;
@@ -42,7 +46,9 @@ namespace GEJE
             this.z = z;
             this.w = w; // Set w
         }
-        
+        /// <summary>
+        /// Sets the rotation of an item
+        /// </summary>
         public void rotate(double x, double y, double z, double w) // Add w parameter
         {
             this.xrot = x;
@@ -50,6 +56,9 @@ namespace GEJE
             this.zrot = z;
             this.wrot = w; // Set wrot
         }
+        /// <summary>
+        /// Initializer for an item, Using the start function in all of its properties.
+        /// </summary>
         public void Start()
         {
             foreach (Proportie propertie in properties)
@@ -58,29 +67,49 @@ namespace GEJE
             }
         }
         bool dddd = true;
+        /// <summary>
+        /// Starts Hovering over Item
+        /// </summary>
         public virtual void EnterHover()
         {
         }
+        /// <summary>
+        /// When Hover Target changes to another Target
+        /// </summary>
         public virtual void ExitHover()
         {
         }
+        /// <summary>
+        /// When you start your Left Click
+        /// </summary>
         public virtual void OnLeftClick_start()
         {
 
         }
+        /// <summary>
+        /// While Left Click is held
+        /// </summary>
         public virtual void OnLeftClick_hold()
         {
 
         }
+        /// <summary>
+        /// When you let go of the Left Click
+        /// </summary>
         public virtual void OnLEftClick_end()
         {
 
         }
+        /// <summary>
+        /// On right click
+        /// </summary>
         public virtual void OnRightClick()
         {
 
         }
-       
+        /// <summary>
+        /// Update Function Called from the ThreeDSceen
+        /// </summary>
         public void Update()
         {
             this.xrot = Rotation.WrapAngle(this.xrot);
@@ -103,14 +132,16 @@ namespace GEJE
                     if (rotatei)
                     {
                         //propertie.zrot += 5;
-                        propertie.yrot += 2.4;
+                        propertie.yrot += 144 * ThreeDSceen.deltaTime;   // degrees per second
                         //propertie.xrot += 3;
                     }
                     else if (floatingyay)
                     {
-                        propertie.yrot += 1.2;
-                        momentumU += (float)Math.Asin((((double)(System.DateTime.Now.Millisecond)) - 599.5) / 10000);
-                        propertie.y += momentumU;
+                        // Tuned for 60 FPS originally; scaled by delta time so it's the same at any frame rate
+                        double frames = ThreeDSceen.deltaTime * 60;
+                        propertie.yrot += 1.2 * frames;
+                        momentumU += (float)(Math.Asin((((double)(System.DateTime.Now.Millisecond)) - 599.5) / 10000) * frames);
+                        propertie.y += momentumU * frames;
                     }
 
 
@@ -177,7 +208,7 @@ namespace GEJE
             String a = "";
             a += x + " " + y + " " + z + " " + "/n";
             a += xrot + " " + yrot + " " + zrot + " " + "\n";
-            foreach(Proportie p in properties)
+            foreach (Proportie p in properties)
             {
                 a += p.ToString() + "\n";
             }
@@ -198,11 +229,11 @@ namespace GEJE
         }
         public override void Start()
         {
-            
+
         }
         public override void Update()
         {
-            sword.yrot += 2.3;
+            sword.yrot += 138 * ThreeDSceen.deltaTime;   // degrees per second
             if (win.pressed.Count() != 0)
             {
 
