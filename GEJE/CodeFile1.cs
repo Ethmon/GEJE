@@ -23,13 +23,27 @@ namespace GEJE
             new PhysicsBody(ground, sceen.physics) { isStatic = true };
             sceen.add_item(ground);
 
-            // An apple that drops onto the ground (-Y is up in this engine)
-            Item apple = new Item(0, -1600, 0, 90, 0, 0);
+            // A pyramid sitting on the ground. Physics uses its real sloped shape.
+            Item pyramid = new Item(-1300, -22, -260, 90, 0, 0);
+            Mesh pyramidMesh = new Mesh("Models\\Torus.JSON", 0, 0, 0, 0, 0, 0);
+            pyramidMesh.scale(60, 60, 60);
+            pyramid.add_propertie(pyramidMesh);
+            new PhysicsBody(pyramid, sceen.physics) { isStatic = true };
+            sceen.add_item(pyramid);
+
+            // An apple that drops onto the pyramid and slides off its side (-Y is up in this engine)
+            Item apple = new Item(170, -1000, -87, 90, 0, 0);
             Mesh appleMesh = new Mesh("Models\\apple.json", 0, 0, 0, 0, 0, 0);
-            appleMesh.scale(50, 50, 50);
+            appleMesh.scale(20, 20, 20);
             apple.add_propertie(appleMesh);
-            new PhysicsBody(apple, sceen.physics) { bounciness = 2.5 };
+            new PhysicsBody(apple, sceen.physics) { bounciness = 0.5 };
             sceen.add_item(apple);
+
+            // Invisible wall: physics only, no visible mesh. Thrown boxes bounce off thin air.
+            Item invisibleWall = new Item(0, -800, 700, 0, 0, 0);
+            PhysicsBody wallBody = new PhysicsBody(invisibleWall, sceen.physics) { isStatic = true };
+            wallBody.SetColliderBox(new Vec3(2200, 1600, 50));
+            sceen.add_item(invisibleWall);
 
             // Camera: WASD/QE to move, arrows to look, F to throw boxes
             Window win = new Window(1200, 600, 1, 1);
