@@ -262,6 +262,38 @@ namespace GEJE
             prevPosition = Position;
         }
 
+        /// <summary>
+        /// A body belongs to one Item, so it can't be copied on its own. Use Item.Duplicate()
+        /// (copies the item and its body together) or DuplicateFor(otherItem).
+        /// </summary>
+        public override Proportie Duplicate()
+        {
+            throw new InvalidOperationException(
+                "A PhysicsBody belongs to one Item. Use item.Duplicate() or body.DuplicateFor(newItem).");
+        }
+
+        /// <summary>
+        /// A new body on newOwner, in the same world, with all the same settings and motion.
+        /// It adds itself to newOwner. Collision event handlers are not copied.
+        /// </summary>
+        public override Proportie DuplicateFor(Item newOwner)
+        {
+            var copy = new PhysicsBody(newOwner, world, mass)
+            {
+                velocity = velocity,
+                isStatic = isStatic,
+                useGravity = useGravity,
+                bounciness = bounciness,
+                friction = friction,
+                drag = drag,
+                angularVelocity = angularVelocity,
+                angularDrag = angularDrag,
+                freezeRotation = freezeRotation,
+            };
+            if (_colliderMesh != null) copy.colliderMesh = (Mesh)_colliderMesh.Duplicate();
+            return copy;
+        }
+
         public double InverseMass => (isStatic || mass <= 0) ? 0.0 : 1.0 / mass;
 
         public Vec3 Position
@@ -519,10 +551,13 @@ namespace GEJE
 
         private int MeshSignature()
         {
-            if (_colliderMesh != null) return -1;
+            // Changes whenever a mesh is added/removed, switched on/off for collision, or reshaped
+            // (scale, animation), so the collision shape rebuilds by itself
+            if (_colliderMesh != null) return -1 - _colliderMesh.ShapeVersion;
             int sig = 17;
             foreach (Proportie p in owner.properties)
-                if (p is Mesh m) sig = sig * 31 + m.oldpoints.Count + 1;
+                if (p is Mesh m && m.collides)
+                    sig = (sig * 31 + m.oldpoints.Count + 1) * 31 + m.ShapeVersion;
             return sig;
         }
 
@@ -539,7 +574,7 @@ namespace GEJE
             double[,] itemRot = BuildRotation(owner.xrot, owner.yrot, owner.zrot);
             IEnumerable<Mesh> meshes = _colliderMesh != null
                 ? new[] { _colliderMesh }
-                : owner.properties.OfType<Mesh>();
+                : owner.properties.OfType<Mesh>().Where(m => m.collides);
 
             var tA = new List<Vec3>(); var tB = new List<Vec3>(); var tC = new List<Vec3>();
             var unique = new Dictionary<(long, long, long), Vec3>();
@@ -743,8 +778,11 @@ namespace GEJE
 
             var shape = a.Shape;
             WorldTri[] tris = s.WorldTriangles;
+            if (handledTris.Length < tris.Length) handledTris = new bool[tris.Length * 2];
+            Array.Clear(handledTris, 0, tris.Length);
             for (int t = 0; t < tris.Length; t++)
             {
+                if (handledTris[t]) continue;     // already solved together with a flat neighbour
                 a.GetBounds(out aMin, out aMax);   // a may have been pushed by the previous triangle
                 if (!Overlaps(aMin, aMax, tris[t].min, tris[t].max)) continue;
 
@@ -773,6 +811,31 @@ namespace GEJE
                     if (curLow >= planeD) continue;
                     normal = -fn;                       // points from a into the surface
                     depth = planeD - curLow;
+
+                    // A flat surface is usually several triangles (a box top is 2). Solve the
+                    // corners on all of them together, or the first triangle takes the whole
+                    // landing and twists the body.
+                    mergedContacts.Clear(); mergedGaps.Clear();
+                    for (int u = t; u < tris.Length; u++)
+                    {
+                        if (u != t)
+                        {
+                            if (handledTris[u] || Math.Abs(Vec3.Dot(tris[u].normal, fn)) < 0.9999) continue;
+                            if (Math.Abs(Vec3.Dot(fn, tris[u].a) - planeD) > slop) continue;
+                            if (!Overlaps(aMin, aMax, tris[u].min, tris[u].max)) continue;
+                        }
+                        handledTris[u] = true;
+                        triVerts[0] = tris[u].a; triVerts[1] = tris[u].b; triVerts[2] = tris[u].c;
+                        ContactPoints(normal, depth, shape, a.Position, triVerts, Vec3.Zero, true);
+                        for (int k = 0; k < contacts.Count; k++)
+                        {
+                            bool dup = false;
+                            foreach (Vec3 q in mergedContacts) if ((q - contacts[k]).LengthSquared < slop * slop) { dup = true; break; }
+                            if (!dup) { mergedContacts.Add(contacts[k]); mergedGaps.Add(contactGaps[k]); }
+                        }
+                    }
+                    Respond(a, s, normal, depth, mergedContacts, mergedGaps);
+                    continue;
                 }
                 else if (!Gjk.Penetration(hullA, tri, simplex, out normal, out depth))
                 {
@@ -805,6 +868,9 @@ namespace GEJE
         private readonly List<Vec3> deepB = new List<Vec3>();
         private readonly List<Vec3> contacts = new List<Vec3>();
         private readonly List<double> contactGaps = new List<double>();
+        private readonly List<Vec3> mergedContacts = new List<Vec3>();
+        private readonly List<double> mergedGaps = new List<double>();
+        private bool[] handledTris = new bool[64];
         private readonly List<Vec3> polyA = new List<Vec3>();
         private readonly List<Vec3> polyB = new List<Vec3>();
         private readonly List<Vec3> clipIn = new List<Vec3>();
@@ -1345,8 +1411,17 @@ namespace GEJE
         public int throwKey = 70; // F
 
         private bool wasDown = false;
-        private readonly Queue<Item> thrown = new Queue<Item>();
-        private readonly Random rnd = new Random();
+        private Queue<Item> thrown = new Queue<Item>();
+        private Random rnd = new Random();
+
+        /// <summary>A copy keeps its own list of thrown boxes.</summary>
+        public override Proportie Duplicate()
+        {
+            var copy = (BoxThrower)base.Duplicate();
+            copy.thrown = new Queue<Item>();
+            copy.rnd = new Random();
+            return copy;
+        }
 
         public BoxThrower(Item camera, Window window, ThreeDSceen scene) : base(0, 0, 0, 0, 0, 0)
         {

@@ -17,16 +17,21 @@ namespace GEJE
 
         public bool Dirty = true;
 
+        /// <summary>
+        /// Whether a PhysicsBody on the same item uses this mesh as part of its collision
+        /// shape. Set false for decorations (a hat, a flag, particles) that shouldn't collide.
+        /// </summary>
+        public bool collides = true;
+
+        /// <summary>Goes up each time the shape changes (scale, animation), so physics knows to rebuild.</summary>
+        public int ShapeVersion { get; private set; }
+
         private double _lastX, _lastY, _lastZ, _lastXRot, _lastYRot, _lastZRot;
         private bool _hasLastTransform = false;
         public bool colorchanged = false;
         public string getPath()
         {
-            string aa = System.IO.Directory.GetCurrentDirectory();
-            //aa = aa.Replace("GEJE\\bin\\Debug", "GEJE\\");
-            aa = aa.Substring(0, aa.LastIndexOf("GEJE") + 4);
-            Console.Write(aa);
-            return aa;
+            return MeshCache.BasePath;
         }
         public Mesh(string filename, double x, double y, double z, double xrot, double yrot, double zrot) : base(x, y, z, xrot, yrot, zrot)
         {
@@ -37,28 +42,8 @@ namespace GEJE
             this.yrot = yrot;
             this.zrot = zrot;
 
-            // Read a json file with a list of lists with 3 doubles and 3 ints
-            string jsonString = File.ReadAllText(getPath() + "\\" + filename);
-            List<List<double>> data = JsonSerializer.Deserialize<List<List<double>>>(jsonString);
-            int count = 0;
-            Point point1 = null;
-            Point point2 = null;
-            foreach (List<double> point in data)
-            {
-                if (count == 2)
-                {
-                    oldpoints.Add(new Polygon(new Point((point[0] * 1), (point[1] * 1), (point[2] * 1), 1, (byte)(point[3]), (byte)(point[4]), (byte)(point[5])), point1, point2));
-                    count = 0;
-                }
-                else if (count == 0)
-                { point1 = new Point((point[0] * 1), (point[1] * 1), (point[2] * 1), 1, (byte)(point[3]), (byte)(point[4]), (byte)(point[5])); count++; }
-                else
-                {
-                    point2 = new Point((point[0] * 1), (point[1] * 1), (point[2] * 1), 1, (byte)(point[3]), (byte)(point[4]), (byte)(point[5]));
-                    count++;
-                }
-            }
-
+            // Loaded once through MeshCache, then copied from memory: much faster for repeats
+            oldpoints = MeshCache.GetData(filename).ToPolygons();
         }
         public Mesh(List<Polygon> polys, double x, double y, double z, double xrot, double yrot, double zrot) : base(x, y, z, xrot, yrot, zrot)
         {
@@ -71,7 +56,34 @@ namespace GEJE
             oldpoints = polys;
 
         }
-        public void hueit(int r, int g, int b)
+        /// <summary>A mesh from cached data (see MeshCache). Gets its own copy of the points.</summary>
+        public Mesh(MeshData data, double x, double y, double z, double xrot, double yrot, double zrot) : base(x, y, z, xrot, yrot, zrot)
+        {
+            oldpoints = data.ToPolygons();
+        }
+
+        /// <summary>
+        /// Call after changing oldpoints yourself: redraws the mesh and tells physics the shape changed.
+        /// </summary>
+        public void GeometryChanged()
+        {
+            ShapeVersion++;
+            colorchanged = true;   // makes Update re-place the points even if the item didn't move
+            Dirty = true;
+        }
+
+        /// <summary>
+        /// An exact copy with its own points: scaling or coloring the copy doesn't change this one.
+        /// </summary>
+        public override Proportie Duplicate()
+        {
+            Mesh copy = (Mesh)base.Duplicate();
+            copy.oldpoints = MeshData.FromPolygons(oldpoints).ToPolygons();
+            copy.points = new List<Polygon>(points);   // never edited in place, so sharing the triangles is safe
+            copy.Dirty = true;
+            return copy;
+        }
+        public virtual void hueit(int r, int g, int b)
         {
             foreach (Polygon point in oldpoints)
             {
@@ -88,7 +100,7 @@ namespace GEJE
             colorchanged = true;
             Dirty = true;
         }
-        public void hardsetcolor(int r, int g, int b)
+        public virtual void hardsetcolor(int r, int g, int b)
         {
             foreach (Polygon point in oldpoints)
             {
@@ -105,7 +117,7 @@ namespace GEJE
             colorchanged = true;
             Dirty = true;
         }
-        public void scale(double x, double y, double z)
+        public virtual void scale(double x, double y, double z)
         {
 
             foreach (Polygon point in oldpoints)
@@ -114,7 +126,7 @@ namespace GEJE
                 point.p2.x *= x; point.p2.y *= y; point.p2.z *= z;
                 point.p3.x *= x; point.p3.y *= y; point.p3.z *= z;
             }
-            Dirty = true;
+            GeometryChanged();
         }
         public override string ToString()
         {
@@ -139,7 +151,7 @@ namespace GEJE
 
             bool transformChanged = !_hasLastTransform
                 || this.nx != _lastX || this.ny != _lastY || this.nz != _lastZ
-                || this.nxrot != _lastXRot || this.nyrot != _lastYRot || this.nzrot != _lastZRot|| colorchanged;
+                || this.nxrot != _lastXRot || this.nyrot != _lastYRot || this.nzrot != _lastZRot || colorchanged;
             if (!transformChanged)
             { return; }
             colorchanged = false;

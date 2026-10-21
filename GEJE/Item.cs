@@ -34,16 +34,34 @@ namespace GEJE
             this.zrot = zrot;
 
         }
-///        <summary>Adds a Property to an Item</summary>
+        ///        <summary>Adds a Property to an Item</summary>
         public void add_propertie(Proportie propertie)
         {
-            if(propertie is PhysicsBody)
+            if (propertie is PhysicsBody)
             {
                 this.LastBody = (PhysicsBody)propertie;
             }
             properties.Add(propertie);
         }
-///      <summart>moves an item to a specifc location</summart>
+        /// <summary>
+        /// Makes a full copy of this Item: same position, rotation and type, with a copy of
+        /// every property (meshes get their own points, a PhysicsBody gets a new body in the
+        /// same world). Add the copy to the scene yourself: scene.add_item(copy) before the
+        /// scene starts, or scene.queue_add(copy) while it's running.
+        /// </summary>
+        public virtual Item Duplicate()
+        {
+            Item copy = (Item)MemberwiseClone();   // keeps the type (e.g. Box) and its fields
+            copy.properties = new List<Proportie>();
+            copy.LastBody = null;
+            foreach (Proportie p in properties)
+            {
+                Proportie dup = p.DuplicateFor(copy);
+                if (!copy.properties.Contains(dup)) copy.add_propertie(dup);   // PhysicsBody adds itself
+            }
+            return copy;
+        }
+        ///      <summart>moves an item to a specifc location</summart>
         public void move(double x, double y, double z, double w) // Add w parameter
         {
             this.x = x;

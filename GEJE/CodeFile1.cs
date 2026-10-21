@@ -57,6 +57,24 @@ namespace GEJE
 
 
 
+            // Elevator: an animated mesh with physics. It slowly rises next to the red box and
+            // sinks back down, carrying whatever stands on it. Ride it up, then walk onto the red box.
+            Item elevator = new Item(950, -20, 170, 0, 0, 0);
+            PhysicsAnimatedMesh elevatorMesh = new PhysicsAnimatedMesh(0, 0, 0, 0, 0, 0);
+            elevatorMesh.AddFrame("down", BlockMesh(400, 20, 400, 200, 170, 40));    // thin pad
+            elevatorMesh.AddFrame("up", BlockMesh(400, 280, 400, 200, 170, 40));     // tall: top just above the red box
+            // wait 1.5 s at the bottom, rise for 3 s, wait 1.5 s at the top, sink for 3 s, repeat
+            elevatorMesh.AddAnimation("lift",
+                new[] { "down", "down", "up", "up" },
+                new[] { 1.5, 3.0, 1.5, 3.0 },
+                true).smooth = true;
+            elevatorMesh.Play("lift");
+            elevator.add_propertie(elevatorMesh);
+            new PhysicsBody(elevator, sceen.physics) { isStatic = true };
+            sceen.add_item(elevator);
+
+
+
             // A pyramid sitting on the ground. Physics uses its real sloped shape.
             Item pyramid = new Item(-1000, -22, -260, 90, 180, 0);
             Mesh pyramidMesh = new Mesh("Models\\Kirby.JSON", 0, 0, 0, 0, 0, 0);
@@ -75,12 +93,12 @@ namespace GEJE
             apple.LastBody.friction = 1;
 
             // Invisible wall: physics only, no visible mesh. Thrown boxes bounce off thin air.
-            /*
+
             Item invisibleWall = new Item(0, -800, 700, 0, 0, 0);
             PhysicsBody wallBody = new PhysicsBody(invisibleWall, sceen.physics) { isStatic = true };
             wallBody.SetColliderBox(new Vec3(2200, 1600, 50));
             sceen.add_item(invisibleWall);
-            */
+
 
             // Camera: WASD/QE to move, arrows to look, F to throw boxes
             Window win = new Window(1200, 600, 1, 1);
@@ -99,6 +117,33 @@ namespace GEJE
 
             sceen.Start_scene();
             win.RunGame();
+        }
+
+        /// <summary>
+        /// A box mesh whose bottom sits on the item's position and that goes up by height
+        /// (-Y is up in GEJE). Each face gets its own shade so the edges are visible.
+        /// Every call builds the triangles in the same order, so two of these can be
+        /// blended smoothly as animation frames.
+        /// </summary>
+        static Mesh BlockMesh(double width, double height, double depth, byte r, byte g, byte b)
+        {
+            double x = width / 2, z = depth / 2, top = -height;
+            var polys = new List<Polygon>();
+            void Face(double shade, (double, double, double) a, (double, double, double) c1,
+                      (double, double, double) c2, (double, double, double) d)
+            {
+                byte R = (byte)Math.Min(255, r * shade), G = (byte)Math.Min(255, g * shade), B = (byte)Math.Min(255, b * shade);
+                Point P((double px, double py, double pz) v) => new Point(v.px, v.py, v.pz, 1, R, G, B);
+                polys.Add(new Polygon(P(a), P(c1), P(c2)));
+                polys.Add(new Polygon(P(a), P(c2), P(d)));
+            }
+            Face(1.15, (-x, top, -z), (x, top, -z), (x, top, z), (-x, top, z));   // top
+            Face(0.55, (-x, 0, -z), (-x, 0, z), (x, 0, z), (x, 0, -z));           // bottom
+            Face(0.85, (-x, 0, -z), (x, 0, -z), (x, top, -z), (-x, top, -z));     // sides
+            Face(0.85, (-x, 0, z), (-x, top, z), (x, top, z), (x, 0, z));
+            Face(0.70, (-x, 0, -z), (-x, top, -z), (-x, top, z), (-x, 0, z));
+            Face(0.70, (x, 0, -z), (x, 0, z), (x, top, z), (x, top, -z));
+            return new Mesh(polys, 0, 0, 0, 0, 0, 0);
         }
     }
     public class Box : Item

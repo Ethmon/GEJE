@@ -7,7 +7,7 @@ using OpenTK.Mathematics;
 public class Camera : Proportie
 {
     public double near = 0.1;      // must be > 0 for a valid projection matrix
-    public double far = 900000000;
+    public double far = 900000000000;
     public double fov = 80;        // degrees
     private double aspectRatio;
 

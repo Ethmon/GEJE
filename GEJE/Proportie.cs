@@ -8,8 +8,8 @@ namespace GEJE
 {
     public class Proportie
     {
-        public double x, y, z , w;
-        public double xrot, yrot, zrot , wrot;
+        public double x, y, z, w;
+        public double xrot, yrot, zrot, wrot;
         public double nx, ny, nz, nw;
         public double nyrot, nzrot, nxrot;
         public Proportie(double x, double y, double z, double xrot, double yrot, double zrot)
@@ -53,6 +53,28 @@ namespace GEJE
         public virtual void Update()
         {
 
+        }
+
+        /// <summary>
+        /// Makes an exact copy of this property that is a separate object from the original.
+        ///
+        /// Every field is copied. Fields that point to other things (a Window, a target Item,
+        /// the scene) still point to the same things, which is usually what you want. If your
+        /// property owns a List, Dictionary or other object that each copy needs its own of,
+        /// override this, call base.Duplicate(), and replace that field in the copy.
+        /// </summary>
+        public virtual Proportie Duplicate()
+        {
+            return (Proportie)MemberwiseClone();
+        }
+
+        /// <summary>
+        /// Copy for a different Item. Same as Duplicate for most properties; ones that belong
+        /// to a single Item (like PhysicsBody) attach the copy to newOwner. Item.Duplicate uses this.
+        /// </summary>
+        public virtual Proportie DuplicateFor(Item newOwner)
+        {
+            return Duplicate();
         }
     }
 }
