@@ -34,6 +34,119 @@ namespace GEJE
     }
 
     /// <summary>
+    /// 3x3 rotation matrix used for body orientation. Built and read back with the same
+    /// Rz * Ry * Rx order as Rotation.cs, so physics and rendering always agree.
+    /// </summary>
+    internal struct Mat3
+    {
+        public double m00, m01, m02, m10, m11, m12, m20, m21, m22;
+
+        public static readonly Mat3 Identity = new Mat3 { m00 = 1, m11 = 1, m22 = 1 };
+
+        public static Mat3 operator *(Mat3 a, Mat3 b) => new Mat3
+        {
+            m00 = a.m00 * b.m00 + a.m01 * b.m10 + a.m02 * b.m20,
+            m01 = a.m00 * b.m01 + a.m01 * b.m11 + a.m02 * b.m21,
+            m02 = a.m00 * b.m02 + a.m01 * b.m12 + a.m02 * b.m22,
+            m10 = a.m10 * b.m00 + a.m11 * b.m10 + a.m12 * b.m20,
+            m11 = a.m10 * b.m01 + a.m11 * b.m11 + a.m12 * b.m21,
+            m12 = a.m10 * b.m02 + a.m11 * b.m12 + a.m12 * b.m22,
+            m20 = a.m20 * b.m00 + a.m21 * b.m10 + a.m22 * b.m20,
+            m21 = a.m20 * b.m01 + a.m21 * b.m11 + a.m22 * b.m21,
+            m22 = a.m20 * b.m02 + a.m21 * b.m12 + a.m22 * b.m22,
+        };
+
+        public static Vec3 operator *(Mat3 m, Vec3 v) => new Vec3(
+            m.m00 * v.X + m.m01 * v.Y + m.m02 * v.Z,
+            m.m10 * v.X + m.m11 * v.Y + m.m12 * v.Z,
+            m.m20 * v.X + m.m21 * v.Y + m.m22 * v.Z);
+
+        public Mat3 Transposed => new Mat3
+        {
+            m00 = m00,
+            m01 = m10,
+            m02 = m20,
+            m10 = m01,
+            m11 = m11,
+            m12 = m21,
+            m20 = m02,
+            m21 = m12,
+            m22 = m22,
+        };
+
+        /// <summary>Same matrix Item/Mesh/BuildShape make from xrot, yrot, zrot (degrees).</summary>
+        public static Mat3 FromEulerDegrees(double xDeg, double yDeg, double zDeg)
+        {
+            double toRad = Math.PI / 180.0;
+            double cx = Math.Cos(xDeg * toRad), sx = Math.Sin(xDeg * toRad);
+            double cy = Math.Cos(yDeg * toRad), sy = Math.Sin(yDeg * toRad);
+            double cz = Math.Cos(zDeg * toRad), sz = Math.Sin(zDeg * toRad);
+            var rx = new Mat3 { m00 = 1, m11 = cx, m12 = -sx, m21 = sx, m22 = cx };
+            var ry = new Mat3 { m00 = cy, m02 = sy, m11 = 1, m20 = -sy, m22 = cy };
+            var rz = new Mat3 { m00 = cz, m01 = -sz, m10 = sz, m11 = cz, m22 = 1 };
+            return rz * (ry * rx);
+        }
+
+        /// <summary>Back to xrot, yrot, zrot in degrees (inverse of FromEulerDegrees).</summary>
+        public void ToEulerDegrees(out double xDeg, out double yDeg, out double zDeg)
+        {
+            double toDeg = 180.0 / Math.PI;
+            double sy = Math.Max(-1.0, Math.Min(1.0, -m20));
+            yDeg = Math.Asin(sy) * toDeg;
+            if (Math.Abs(sy) < 0.999999)
+            {
+                xDeg = Math.Atan2(m21, m22) * toDeg;
+                zDeg = Math.Atan2(m10, m00) * toDeg;
+            }
+            else
+            {
+                // Gimbal lock: x and z spin about the same axis, so put it all in z
+                xDeg = 0;
+                zDeg = Math.Atan2(-m01, m11) * toDeg;
+            }
+        }
+
+        /// <summary>Rotation by angle (radians) around a unit axis.</summary>
+        public static Mat3 AxisAngle(Vec3 k, double angle)
+        {
+            double c = Math.Cos(angle), s = Math.Sin(angle), t = 1 - c;
+            return new Mat3
+            {
+                m00 = c + k.X * k.X * t,
+                m01 = k.X * k.Y * t - k.Z * s,
+                m02 = k.X * k.Z * t + k.Y * s,
+                m10 = k.Y * k.X * t + k.Z * s,
+                m11 = c + k.Y * k.Y * t,
+                m12 = k.Y * k.Z * t - k.X * s,
+                m20 = k.Z * k.X * t - k.Y * s,
+                m21 = k.Z * k.Y * t + k.X * s,
+                m22 = c + k.Z * k.Z * t,
+            };
+        }
+
+        /// <summary>Removes the tiny drift that builds up from multiplying rotations every step.</summary>
+        public Mat3 Orthonormalized()
+        {
+            Vec3 c0 = new Vec3(m00, m10, m20).Normalized;
+            Vec3 c1 = new Vec3(m01, m11, m21);
+            c1 = (c1 - c0 * Vec3.Dot(c0, c1)).Normalized;
+            Vec3 c2 = Vec3.Cross(c0, c1);
+            return new Mat3
+            {
+                m00 = c0.X,
+                m01 = c1.X,
+                m02 = c2.X,
+                m10 = c0.Y,
+                m11 = c1.Y,
+                m12 = c2.Y,
+                m20 = c0.Z,
+                m21 = c1.Z,
+                m22 = c2.Z,
+            };
+        }
+    }
+
+    /// <summary>
     /// The physics shape of a body: its mesh's vertices and triangles, already rotated
     /// by the item's rotation, relative to the item's position.
     /// </summary>
@@ -79,9 +192,22 @@ namespace GEJE
         /// <summary>0 = no bounce, 1 = perfectly bouncy.</summary>
         public double bounciness = 0.2;
         /// <summary>How much sliding is slowed on contact (0 = ice, ~1 = very grippy).</summary>
-        public double friction = 0.5;
+        public double friction = 0.75;
         /// <summary>Air resistance; fraction of velocity lost per second.</summary>
         public double drag = 0.05;
+
+        /// <summary>
+        /// Spin in radians per second, around world axes. The direction is the spin axis
+        /// and the length is how fast it turns. Written back to the item's xrot/yrot/zrot.
+        /// </summary>
+        public Vec3 angularVelocity = Vec3.Zero;
+        /// <summary>Fraction of spin lost per second (keeps things from spinning forever).</summary>
+        public double angularDrag = 0.5;
+        /// <summary>
+        /// True = never rotate from collisions or torque (players, characters, anything a
+        /// script turns itself). The body then behaves exactly like before rotation existed.
+        /// </summary>
+        public bool freezeRotation = false;
 
         /// <summary>True if the body is resting on something this step (touching from the gravity side).</summary>
         public bool isGrounded { get; internal set; }
@@ -103,7 +229,19 @@ namespace GEJE
         public event Action<PhysicsBody, PhysicsBody> OnCollision;
 
         private Vec3 accumulatedForce = Vec3.Zero;
+        private Vec3 accumulatedTorque = Vec3.Zero;
         internal Vec3 prevPosition;
+
+        // Orientation (kept as a matrix so it never drifts, then written back as Euler angles)
+        private Mat3 orientation = Mat3.Identity;
+        private bool orientationValid = false;
+        private double writtenX, writtenY, writtenZ;
+
+        // Mass properties, measured once in a reference orientation and rotated from there
+        private bool massPropsDirty = true;
+        private Mat3 refOrientation = Mat3.Identity;
+        private Vec3 refComOffset = Vec3.Zero;     // item origin -> center of mass, in the reference orientation
+        private Vec3 refInvInertia = Vec3.Zero;    // 1 / moment of inertia around each reference axis
 
         private CollisionShape shape;
         private bool shapeDirty = true;
@@ -145,6 +283,146 @@ namespace GEJE
         {
             if (isStatic) return;
             velocity = velocity + impulse * InverseMass;
+        }
+
+        // ---------------- Rotation ----------------
+
+        /// <summary>True if this body can currently spin.</summary>
+        public bool CanRotate => !isStatic && !freezeRotation && mass > 0 && !Shape.IsEmpty;
+
+        /// <summary>World position of the center of mass (the point the body spins around).</summary>
+        public Vec3 CenterOfMass => Position + ComOffset;
+
+        /// <summary>Continuous twist (e.g. a motor or a wheel). Units: mass * distance^2 / s^2.</summary>
+        public void ApplyTorque(Vec3 torque) { accumulatedTorque = accumulatedTorque + torque; }
+
+        /// <summary>Instant twist: changes spin by the inverse inertia times the impulse.</summary>
+        public void ApplyAngularImpulse(Vec3 angularImpulse)
+        {
+            if (!CanRotate) return;
+            angularVelocity = angularVelocity + InverseInertiaTimes(angularImpulse);
+        }
+
+        /// <summary>
+        /// Push at a point in the world (e.g. thruster on a wing tip). Pushing off-center
+        /// both moves the body and makes it spin.
+        /// </summary>
+        public void ApplyForceAtPoint(Vec3 force, Vec3 worldPoint)
+        {
+            ApplyForce(force);
+            if (CanRotate) ApplyTorque(Vec3.Cross(worldPoint - CenterOfMass, force));
+        }
+
+        /// <summary>Instant kick at a point in the world (e.g. a bullet hit). Off-center hits spin the body.</summary>
+        public void ApplyImpulseAtPoint(Vec3 impulse, Vec3 worldPoint)
+        {
+            if (isStatic) return;
+            ApplyContactImpulse(impulse, worldPoint - CenterOfMass);
+        }
+
+        /// <summary>Velocity of a point on the body (moving plus spinning).</summary>
+        public Vec3 VelocityAtPoint(Vec3 worldPoint) => velocity + Vec3.Cross(angularVelocity, worldPoint - CenterOfMass);
+
+        internal Vec3 ConsumeTorque() { Vec3 t = accumulatedTorque; accumulatedTorque = Vec3.Zero; return t; }
+
+        /// <summary>Center of mass offset from the item origin, in world axes.</summary>
+        internal Vec3 ComOffset
+        {
+            get
+            {
+                if (isStatic || Shape.IsEmpty) return Shape.IsEmpty ? Vec3.Zero : Shape.Center;
+                SyncOrientation();
+                EnsureMassProps();
+                return (orientation * refOrientation.Transposed) * refComOffset;
+            }
+        }
+
+        /// <summary>Inverse inertia (in world axes) applied to v. Zero if the body can't rotate.</summary>
+        internal Vec3 InverseInertiaTimes(Vec3 v)
+        {
+            if (!CanRotate) return Vec3.Zero;
+            SyncOrientation();
+            EnsureMassProps();
+            Mat3 q = orientation * refOrientation.Transposed;   // rotation since the reference
+            Vec3 local = q.Transposed * v;
+            local = new Vec3(local.X * refInvInertia.X, local.Y * refInvInertia.Y, local.Z * refInvInertia.Z);
+            return q * local;
+        }
+
+        /// <summary>Linear + angular response to an impulse at offset r from the center of mass.</summary>
+        internal void ApplyContactImpulse(Vec3 impulse, Vec3 r)
+        {
+            if (isStatic) return;
+            velocity = velocity + impulse * InverseMass;
+            if (CanRotate) angularVelocity = angularVelocity + InverseInertiaTimes(Vec3.Cross(r, impulse));
+        }
+
+        /// <summary>
+        /// How hard it is to change the velocity along direction n at offset r through spinning.
+        /// Goes into the bottom of the impulse formula next to the inverse mass.
+        /// </summary>
+        internal double AngularEffect(Vec3 r, Vec3 n)
+        {
+            if (!CanRotate) return 0;
+            return Vec3.Dot(n, Vec3.Cross(InverseInertiaTimes(Vec3.Cross(r, n)), r));
+        }
+
+        /// <summary>Re-read the orientation if a script (or the constructor) changed xrot/yrot/zrot.</summary>
+        private void SyncOrientation()
+        {
+            if (orientationValid && owner.xrot == writtenX && owner.yrot == writtenY && owner.zrot == writtenZ) return;
+            orientation = Mat3.FromEulerDegrees(owner.xrot, owner.yrot, owner.zrot);
+            writtenX = owner.xrot; writtenY = owner.yrot; writtenZ = owner.zrot;
+            orientationValid = true;
+        }
+
+        /// <summary>
+        /// Measures center of mass and inertia from the collision shape's bounding box
+        /// (treated as a solid box of this body's mass). Redone when the meshes change.
+        /// </summary>
+        private void EnsureMassProps()
+        {
+            if (!massPropsDirty) return;
+            var s = Shape;
+            if (s.IsEmpty) return;
+            SyncOrientation();
+            massPropsDirty = false;
+            refOrientation = orientation;
+            refComOffset = s.Center;
+
+            Vec3 size = s.max - s.min;
+            double m = Math.Max(mass, 1e-9);
+            double ix = m * (size.Y * size.Y + size.Z * size.Z) / 12.0;
+            double iy = m * (size.X * size.X + size.Z * size.Z) / 12.0;
+            double iz = m * (size.X * size.X + size.Y * size.Y) / 12.0;
+            refInvInertia = new Vec3(ix > 1e-12 ? 1 / ix : 0, iy > 1e-12 ? 1 / iy : 0, iz > 1e-12 ? 1 / iz : 0);
+        }
+
+        /// <summary>Called by the world each step: torque -> spin -> new orientation.</summary>
+        internal void IntegrateRotation(double dt, bool wasGrounded)
+        {
+            Vec3 torque = ConsumeTorque();
+            if (!CanRotate) { angularVelocity = Vec3.Zero; return; }
+            SyncOrientation();
+            EnsureMassProps();
+
+            angularVelocity = angularVelocity + InverseInertiaTimes(torque) * dt;
+            angularVelocity = angularVelocity * Math.Max(0.0, 1.0 - angularDrag * dt);
+
+            // Let resting objects settle instead of trembling forever
+            if (wasGrounded && angularVelocity.LengthSquared < 0.0025 && velocity.LengthSquared < 25)
+                angularVelocity = Vec3.Zero;
+
+            double w = angularVelocity.Length;
+            if (w * dt < 1e-9) return;
+
+            // Spin around the center of mass, not the item origin
+            Vec3 oldOffset = ComOffset;
+            orientation = (Mat3.AxisAngle(angularVelocity / w, w * dt) * orientation).Orthonormalized();
+            orientation.ToEulerDegrees(out double xr, out double yr, out double zr);
+            owner.xrot = xr; owner.yrot = yr; owner.zrot = zr;
+            writtenX = xr; writtenY = yr; writtenZ = zr;
+            Position = Position + oldOffset - ComOffset;
         }
 
         /// <summary>Use an invisible mesh loaded from a model file as the collision shape.</summary>
@@ -194,6 +472,8 @@ namespace GEJE
             get
             {
                 int sig = MeshSignature();
+                if (shape == null || shapeDirty || sig != lastSignature)
+                    massPropsDirty = true;    // the meshes changed, not just the rotation
                 if (shape == null || shapeDirty || sig != lastSignature
                     || owner.xrot != lastXr || owner.yrot != lastYr || owner.zrot != lastZr)
                 {
@@ -415,6 +695,7 @@ namespace GEJE
                     b.velocity = b.velocity + accel * dt;
                     b.velocity = b.velocity * Math.Max(0.0, 1.0 - b.drag * dt);
                     b.Position = b.Position + b.velocity * dt;
+                    b.IntegrateRotation(dt, b.isGrounded);
                     b.isGrounded = false;
                 }
 
@@ -497,7 +778,9 @@ namespace GEJE
                 {
                     continue;   // already beside/below this triangle: use the smallest way out
                 }
-                Respond(a, s, normal, depth);
+                triVerts[0] = tris[t].a; triVerts[1] = tris[t].b; triVerts[2] = tris[t].c;
+                ContactPoints(normal, depth, shape, a.Position, triVerts, Vec3.Zero, true);
+                Respond(a, s, normal, depth, contacts, contactGaps);
             }
         }
 
@@ -513,7 +796,212 @@ namespace GEJE
             Vec3 dir = (b.Shape.Center + b.Position) - (a.Shape.Center + a.Position);
             if (!Gjk.Intersect(hullA, hullB, dir, out Vec3[] simplex)) return;
             if (!Gjk.Penetration(hullA, hullB, simplex, out Vec3 normal, out double depth)) return;
-            Respond(a, b, normal, depth);
+            ContactPoints(normal, depth, a.Shape, a.Position, b.Shape.verts, b.Position, false);
+            Respond(a, b, normal, depth, contacts, contactGaps);
+        }
+
+        private readonly Vec3[] triVerts = new Vec3[3];
+        private readonly List<Vec3> deepA = new List<Vec3>();
+        private readonly List<Vec3> deepB = new List<Vec3>();
+        private readonly List<Vec3> contacts = new List<Vec3>();
+        private readonly List<double> contactGaps = new List<double>();
+        private readonly List<Vec3> polyA = new List<Vec3>();
+        private readonly List<Vec3> polyB = new List<Vec3>();
+        private readonly List<Vec3> clipIn = new List<Vec3>();
+        private readonly List<Vec3> clipOut = new List<Vec3>();
+
+        /// <summary>
+        /// Fills 'contacts' with the corners of the patch where A and B touch, and
+        /// 'contactGaps' with how far each corner still is from actually touching.
+        ///
+        /// Takes the face of A that faces B and the face of B that faces A, and cuts one
+        /// to the outline of the other (seen along the normal). A box lying flat gets its 4
+        /// bottom corners (so it sits still), a box on an edge gets that edge (so it tips),
+        /// and a box hanging over a ledge gets the part still on the ledge, including points
+        /// along the ledge's edge (so it only falls when its center is past the edge).
+        /// </summary>
+        private void ContactPoints(Vec3 normal, double depth, CollisionShape shapeA, Vec3 offsetA,
+                                   Vec3[] vertsB, Vec3 offsetB, bool bIsTriangle)
+        {
+            contacts.Clear(); contactGaps.Clear();
+            double tol = 0.01 * (shapeA.max - shapeA.min).Length + 1e-6;
+            double maxA = Deepest(shapeA.verts, offsetA, normal, depth + tol, deepA);
+            double maxB = Deepest(vertsB, offsetB, -normal, depth + tol, deepB);
+
+            // Two directions along the contact surface
+            Vec3 helper = Math.Abs(normal.X) < 0.9 ? new Vec3(1, 0, 0) : new Vec3(0, 1, 0);
+            Vec3 t1 = Vec3.Cross(normal, helper).Normalized;
+            Vec3 t2 = Vec3.Cross(normal, t1);
+
+            Outline(deepA, t1, t2, tol * 0.1, polyA);
+            Outline(deepB, t1, t2, tol * 0.1, polyB);
+
+            // Cut the smaller feature (point / edge / face) to the outline of the face it touches
+            bool fromA;
+            if (polyB.Count >= 3) { Clip(polyA, polyB, t1, t2); fromA = true; }
+            else if (polyA.Count >= 3) { Clip(polyB, polyA, t1, t2); fromA = false; }
+            else { clipOut.Clear(); fromA = true; }
+
+            foreach (Vec3 p in clipOut)
+            {
+                // Gap = how much further this point must travel along the normal to touch
+                double gap = fromA ? maxA - Vec3.Dot(p, normal) : maxB - Vec3.Dot(p, -normal);
+                bool duplicate = false;
+                foreach (Vec3 q in contacts) if ((q - p).LengthSquared < tol * tol * 0.01) { duplicate = true; break; }
+                if (duplicate) continue;
+                contacts.Add(p);
+                contactGaps.Add(Math.Max(0, gap));
+            }
+
+            if (contacts.Count == 0)   // edge crossing edge, or numerical trouble: one point in the middle
+            {
+                contacts.Add(ContactPoint(normal, depth, shapeA, shapeA.verts, offsetA, vertsB, offsetB, deepA, deepB));
+                contactGaps.Add(0);
+            }
+        }
+
+        /// <summary>Convex outline of points seen along the normal, counter-clockwise in (t1, t2).</summary>
+        private static void Outline(List<Vec3> pts, Vec3 t1, Vec3 t2, double eps, List<Vec3> into)
+        {
+            into.Clear();
+            var sorted = new List<Vec3>(pts);
+            sorted.Sort((p, q) =>
+            {
+                int c = Vec3.Dot(p, t1).CompareTo(Vec3.Dot(q, t1));
+                return c != 0 ? c : Vec3.Dot(p, t2).CompareTo(Vec3.Dot(q, t2));
+            });
+            // Drop points that sit on top of each other (seen along the normal)
+            var uniq = new List<Vec3>();
+            foreach (var p in sorted)
+            {
+                bool same = false;
+                foreach (var q in uniq)
+                    if (Math.Abs(Vec3.Dot(p - q, t1)) < eps && Math.Abs(Vec3.Dot(p - q, t2)) < eps) { same = true; break; }
+                if (!same) uniq.Add(p);
+            }
+            if (uniq.Count < 3) { into.AddRange(uniq); return; }
+
+            // Monotone chain convex hull
+            double Turn(Vec3 o, Vec3 a, Vec3 b) =>
+                Vec3.Dot(a - o, t1) * Vec3.Dot(b - o, t2) - Vec3.Dot(a - o, t2) * Vec3.Dot(b - o, t1);
+            var hull = new List<Vec3>();
+            foreach (var p in uniq)
+            {
+                while (hull.Count >= 2 && Turn(hull[hull.Count - 2], hull[hull.Count - 1], p) <= eps * eps) hull.RemoveAt(hull.Count - 1);
+                hull.Add(p);
+            }
+            int lower = hull.Count + 1;
+            for (int i = uniq.Count - 2; i >= 0; i--)
+            {
+                var p = uniq[i];
+                while (hull.Count >= lower && Turn(hull[hull.Count - 2], hull[hull.Count - 1], p) <= eps * eps) hull.RemoveAt(hull.Count - 1);
+                hull.Add(p);
+            }
+            hull.RemoveAt(hull.Count - 1);
+            into.AddRange(hull);
+        }
+
+        /// <summary>
+        /// Sutherland-Hodgman: cut 'subject' (a point, an edge or a polygon) to the inside of
+        /// the convex counter-clockwise outline 'clip', working in the (t1, t2) plane. New
+        /// points along cut edges keep the subject's height. Result goes in clipOut.
+        /// </summary>
+        private void Clip(List<Vec3> subject, List<Vec3> clip, Vec3 t1, Vec3 t2)
+        {
+            clipOut.Clear();
+            clipOut.AddRange(subject);
+            for (int e = 0; e < clip.Count && clipOut.Count > 0; e++)
+            {
+                Vec3 c0 = clip[e], c1 = clip[(e + 1) % clip.Count];
+                double ex = Vec3.Dot(c1 - c0, t1), ey = Vec3.Dot(c1 - c0, t2);
+                double len = Math.Sqrt(ex * ex + ey * ey);
+                if (len < 1e-12) continue;
+                double Side(Vec3 p) => (ex * Vec3.Dot(p - c0, t2) - ey * Vec3.Dot(p - c0, t1)) / len;   // >= 0 inside
+
+                clipIn.Clear(); clipIn.AddRange(clipOut);
+                clipOut.Clear();
+                const double eps = 1e-7;
+                if (clipIn.Count == 1)
+                {
+                    if (Side(clipIn[0]) >= -eps) clipOut.Add(clipIn[0]);
+                    continue;
+                }
+                if (clipIn.Count == 2)
+                {
+                    Vec3 s = clipIn[0], f = clipIn[1];
+                    double ds = Side(s), df = Side(f);
+                    if (ds >= -eps) clipOut.Add(s);
+                    if ((ds >= -eps) != (df >= -eps)) clipOut.Add(s + (f - s) * (ds / (ds - df)));
+                    if (df >= -eps) clipOut.Add(f);
+                    continue;
+                }
+                for (int i = 0; i < clipIn.Count; i++)
+                {
+                    Vec3 s = clipIn[i], f = clipIn[(i + 1) % clipIn.Count];
+                    double ds = Side(s), df = Side(f);
+                    bool sIn = ds >= -eps, fIn = df >= -eps;
+                    if (sIn) clipOut.Add(s);
+                    if (sIn != fIn) clipOut.Add(s + (f - s) * (ds / (ds - df)));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Single fallback contact: the middle of where A's deepest points and B's deepest
+        /// points overlap (used when no corner clearly sits over the other shape).
+        /// </summary>
+        private static Vec3 ContactPoint(Vec3 normal, double depth, CollisionShape shapeA,
+                                         Vec3[] vertsA, Vec3 offsetA, Vec3[] vertsB, Vec3 offsetB,
+                                         List<Vec3> setA = null, List<Vec3> setB = null)
+        {
+            setA = setA ?? new List<Vec3>(); setB = setB ?? new List<Vec3>();
+            double tol = Math.Max(depth, 0.02 * (shapeA.max - shapeA.min).Length) + 1e-6;
+            Deepest(vertsA, offsetA, normal, tol, setA);
+            Deepest(vertsB, offsetB, -normal, tol, setB);
+
+            // Two directions along the contact surface
+            Vec3 helper = Math.Abs(normal.X) < 0.9 ? new Vec3(1, 0, 0) : new Vec3(0, 1, 0);
+            Vec3 t1 = Vec3.Cross(normal, helper).Normalized;
+            Vec3 t2 = Vec3.Cross(normal, t1);
+
+            Extent(setA, t1, t2, normal, out double aMin1, out double aMax1, out double aMin2, out double aMax2, out double aN);
+            Extent(setB, t1, t2, normal, out double bMin1, out double bMax1, out double bMin2, out double bMax2, out double bN);
+
+            double lo1 = Math.Max(aMin1, bMin1), hi1 = Math.Min(aMax1, bMax1);
+            double lo2 = Math.Max(aMin2, bMin2), hi2 = Math.Min(aMax2, bMax2);
+            double c1, c2;
+            if (lo1 <= hi1 && lo2 <= hi2) { c1 = (lo1 + hi1) / 2; c2 = (lo2 + hi2) / 2; }
+            else
+            {
+                // Patches don't overlap (edge against edge etc.): split the difference
+                c1 = ((aMin1 + aMax1) / 2 + (bMin1 + bMax1) / 2) / 2;
+                c2 = ((aMin2 + aMax2) / 2 + (bMin2 + bMax2) / 2) / 2;
+            }
+            return t1 * c1 + t2 * c2 + normal * ((aN + bN) / 2);
+        }
+
+        private static double Deepest(Vec3[] verts, Vec3 offset, Vec3 dir, double tol, List<Vec3> into)
+        {
+            into.Clear();
+            double best = double.MinValue;
+            foreach (var v in verts) best = Math.Max(best, Vec3.Dot(v + offset, dir));
+            foreach (var v in verts)
+                if (Vec3.Dot(v + offset, dir) >= best - tol) into.Add(v + offset);
+            return best;
+        }
+
+        private static void Extent(List<Vec3> pts, Vec3 t1, Vec3 t2, Vec3 n,
+                                   out double min1, out double max1, out double min2, out double max2, out double avgN)
+        {
+            min1 = min2 = double.MaxValue; max1 = max2 = double.MinValue; avgN = 0;
+            foreach (var p in pts)
+            {
+                double d1 = Vec3.Dot(p, t1), d2 = Vec3.Dot(p, t2);
+                min1 = Math.Min(min1, d1); max1 = Math.Max(max1, d1);
+                min2 = Math.Min(min2, d2); max2 = Math.Max(max2, d2);
+                avgN += Vec3.Dot(p, n);
+            }
+            if (pts.Count > 0) avgN /= pts.Count;
         }
 
         private static double LowestAlong(CollisionShape shape, Vec3 pos, Vec3 n)
@@ -523,52 +1011,116 @@ namespace GEJE
             return best + Vec3.Dot(n, pos);
         }
 
-        /// <summary>Push apart, bounce and apply friction. normal points from a towards b.</summary>
-        private void Respond(PhysicsBody a, PhysicsBody b, Vec3 normal, double depth)
+        private static Vec3 PointVelocity(PhysicsBody body, Vec3 r) =>
+            body.velocity + Vec3.Cross(body.angularVelocity, r);
+
+        /// <summary>
+        /// Push apart, then bounce and apply friction at each contact point. normal points
+        /// from a towards b. Off-center contacts make bodies spin; bodies with freezeRotation
+        /// (or static ones) take no spin, which gives the same result as the old version.
+        /// </summary>
+        private void Respond(PhysicsBody a, PhysicsBody b, Vec3 normal, double depth, List<Vec3> points, List<double> gaps)
         {
             double invA = a.InverseMass, invB = b.InverseMass;
             double invSum = invA + invB;
             if (invSum <= 0 || depth <= 0) return;
 
+            // Centers of mass before pushing apart (the contact points were measured then too)
+            Vec3 comA = a.CenterOfMass, comB = b.CenterOfMass;
+
             // Positional correction, split by mass
             a.Position = a.Position - normal * (depth * invA / invSum);
             if (invB > 0) b.Position = b.Position + normal * (depth * invB / invSum);
 
-            // Velocity response
-            Vec3 relVel = b.velocity - a.velocity;
-            double velAlongNormal = Vec3.Dot(relVel, normal);
-            if (velAlongNormal < 0)
+            double mu = Math.Sqrt(a.friction * b.friction);
+            double e = Math.Min(a.bounciness, b.bounciness);
+            double restingSpeed = gravity.Length * fixedTimeStep * 3;
+            double touchGap = 0.002 * Math.Max(1.0, (a.Shape.max - a.Shape.min).Length);
+
+            // Per contact point: lever arms, how hard it is to push there, the speed apart we
+            // want afterwards (bounce), and the push / friction applied so far.
+            int n = points.Count;
+            EnsureSolverBuffers(n);
+            bool hit = false;
+            for (int i = 0; i < n; i++)
             {
-                double e = Math.Min(a.bounciness, b.bounciness);
-                double j = -(1 + e) * velAlongNormal / invSum;
-                Vec3 impulse = normal * j;
-                a.velocity = a.velocity - impulse * invA;
-                b.velocity = b.velocity + impulse * invB;
-
-                // Friction (Coulomb): oppose sliding, limited by how hard they press together
-                relVel = b.velocity - a.velocity;
-                Vec3 tangent = relVel - normal * Vec3.Dot(relVel, normal);
-                double tLen = tangent.Length;
-                if (tLen > 1e-9)
+                rAs[i] = points[i] - comA;
+                rBs[i] = points[i] - comB;
+                kNs[i] = invSum + a.AngularEffect(rAs[i], normal) + b.AngularEffect(rBs[i], normal);
+                double vn = Vec3.Dot(PointVelocity(b, rBs[i]) - PointVelocity(a, rAs[i]), normal);
+                if (gaps[i] > touchGap)
                 {
-                    tangent = tangent / tLen;
-                    double mu = Math.Sqrt(a.friction * b.friction);
-                    double stopAll = tLen / invSum;
-                    double jt = Math.Min(stopAll, mu * j);
-                    Vec3 fImpulse = tangent * jt;
-                    a.velocity = a.velocity + fImpulse * invA;
-                    b.velocity = b.velocity - fImpulse * invB;
+                    // Not touching yet: it may keep closing in, just not past the surface this step
+                    targets[i] = -gaps[i] / fixedTimeStep;
+                }
+                else
+                {
+                    // Touching: bounce, except for gentle contacts (stops resting objects buzzing)
+                    targets[i] = (vn < -restingSpeed) ? -e * vn : 0;
+                }
+                if (vn < targets[i]) hit = true;
+                jNs[i] = 0;
+                jTs[i] = Vec3.Zero;
+            }
+            if (!hit) { MarkTouching(a, b, normal); return; }
 
-                    // Friction held completely against something fixed: also undo the little
-                    // slide this step already made, or objects slowly creep down slopes.
-                    if (invB == 0 && jt >= stopAll)
+            // Solve all corners together a few times, so the push is shared fairly between
+            // them instead of the first corner taking it all and twisting the body.
+            for (int iter = 0; iter < 6; iter++)
+            {
+                for (int i = 0; i < n; i++)
+                {
+                    Vec3 rA = rAs[i], rB = rBs[i];
+
+                    // Normal: push apart until this corner moves apart at the target speed (never pull)
+                    double vn = Vec3.Dot(PointVelocity(b, rB) - PointVelocity(a, rA), normal);
+                    double newJ = Math.Max(jNs[i] + (targets[i] - vn) / kNs[i], 0);
+                    double dj = newJ - jNs[i];
+                    jNs[i] = newJ;
+                    if (dj != 0)
                     {
-                        Vec3 moved = a.Position - a.prevPosition;
-                        a.Position = a.Position - (moved - normal * Vec3.Dot(moved, normal));
+                        a.ApplyContactImpulse(normal * -dj, rA);
+                        b.ApplyContactImpulse(normal * dj, rB);
                     }
+
+                    // Friction (Coulomb): oppose sliding at this corner, limited by how hard it
+                    // presses. Applied at the corner, so a box sliding on the floor can trip over.
+                    Vec3 relVel = PointVelocity(b, rB) - PointVelocity(a, rA);
+                    Vec3 slide = relVel - normal * Vec3.Dot(relVel, normal);
+                    double sLen = slide.Length;
+                    if (sLen < 1e-9) continue;
+                    Vec3 tangent = slide / sLen;
+                    double kt = invSum + a.AngularEffect(rA, tangent) + b.AngularEffect(rB, tangent);
+                    Vec3 newT = jTs[i] + tangent * (sLen / kt);   // friction impulse acting on a
+                    double maxT = mu * jNs[i];
+                    double tLen = newT.Length;
+                    if (tLen > maxT) newT = newT * (maxT / tLen);
+                    Vec3 dT = newT - jTs[i];
+                    jTs[i] = newT;
+                    a.ApplyContactImpulse(dT, rA);
+                    b.ApplyContactImpulse(-dT, rB);
                 }
             }
 
+            // Did friction hold everywhere (nothing slipping)?
+            bool frictionHeld = true;
+            for (int i = 0; i < n; i++)
+                if (jNs[i] > 0 && jTs[i].Length >= mu * jNs[i] * 0.999) frictionHeld = false;
+
+            // Friction held completely against something fixed: also undo the little slide
+            // this step already made, or objects slowly creep down slopes.
+            // Skipped while spinning, so rolling and tipping over still work.
+            if (frictionHeld && invB == 0 && a.angularVelocity.LengthSquared < 0.01)
+            {
+                Vec3 moved = a.Position - a.prevPosition;
+                a.Position = a.Position - (moved - normal * Vec3.Dot(moved, normal));
+            }
+
+            MarkTouching(a, b, normal);
+        }
+
+        private void MarkTouching(PhysicsBody a, PhysicsBody b, Vec3 normal)
+        {
             // Grounded = something under us relative to gravity (slopes up to ~60 degrees)
             Vec3 down = gravity.Normalized;
             if (Vec3.Dot(normal, down) > 0.5) a.isGrounded = true;   // b is below a
@@ -577,13 +1129,19 @@ namespace GEJE
             touching.Add((a, b));
             contactsResolved++;
         }
+
+        // Reused per-contact scratch space for Respond
+        private Vec3[] rAs = new Vec3[8], rBs = new Vec3[8], jTs = new Vec3[8];
+        private double[] kNs = new double[8], targets = new double[8], jNs = new double[8];
+        private void EnsureSolverBuffers(int n)
+        {
+            if (rAs.Length >= n) return;
+            int size = Math.Max(n, rAs.Length * 2);
+            rAs = new Vec3[size]; rBs = new Vec3[size]; jTs = new Vec3[size];
+            kNs = new double[size]; targets = new double[size]; jNs = new double[size];
+        }
     }
 
-    // ------------------------------------------------------------------
-    //  Shape tests: GJK (do two convex shapes overlap?) and EPA (by how
-    //  much, and in which direction?). Works on any convex shape that can
-    //  answer "which of your points is furthest in this direction?".
-    // ------------------------------------------------------------------
 
     internal interface ISupport
     {
@@ -813,13 +1371,14 @@ namespace GEJE
 
             Vec3 spawn = new Vec3(camera.x, camera.y, camera.z) + forward * 150;
             Item box = new Item(spawn.X, spawn.Y, spawn.Z, 90, 0, 0);
-            Mesh mesh = new Mesh("Models\\FullBox.json", 0, 0, 0, 0, 0, 0);
+            Mesh mesh = new Mesh("Models\\Crate.json", 0, 0, 0, 0, 0, 0);
             mesh.scale(5, 5, 5);
-            mesh.hueit(rnd.Next(0, 120), rnd.Next(0, 120), rnd.Next(0, 120));
             box.add_propertie(mesh);
 
             var body = new PhysicsBody(box, scene.physics, mass: 1) { bounciness = 0.35 };
             body.velocity = forward * throwSpeed + up * (throwSpeed * 0.3);
+            // A little random tumble so throws look natural (radians per second)
+            body.angularVelocity = new Vec3(rnd.NextDouble() - 0.5, rnd.NextDouble() - 0.5, rnd.NextDouble() - 0.5) * 8;
 
             scene.queue_add(box);
             thrown.Enqueue(box);

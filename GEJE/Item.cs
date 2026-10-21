@@ -23,6 +23,7 @@ namespace GEJE
         public double xrot, yrot, zrot, wrot;
         public List<Proportie> properties = new List<Proportie>();
         public bool state = true;
+        public PhysicsBody LastBody;
         public Item(double x, double y, double z, double xrot, double yrot, double zrot)
         {
             this.x = x;
@@ -36,6 +37,10 @@ namespace GEJE
 ///        <summary>Adds a Property to an Item</summary>
         public void add_propertie(Proportie propertie)
         {
+            if(propertie is PhysicsBody)
+            {
+                this.LastBody = (PhysicsBody)propertie;
+            }
             properties.Add(propertie);
         }
 ///      <summart>moves an item to a specifc location</summart>

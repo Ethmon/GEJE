@@ -23,9 +23,43 @@ namespace GEJE
             new PhysicsBody(ground, sceen.physics) { isStatic = true };
             sceen.add_item(ground);
 
+
+
+
+            Item Box1 = new Item(0, -100, 0, 0, 0, 0);
+            Mesh Box1Mesh = new Mesh("Models\\Wall1.JSON", 0, 0, 0, 0, 0, 0);
+            Box1Mesh.scale(10, 5, 10);
+            Box1Mesh.hueit(0, 0, 100);
+            Box1.add_propertie(Box1Mesh);
+            new PhysicsBody(Box1, sceen.physics) { isStatic = true };
+            sceen.add_item(Box1);
+
+
+
+
+            Item Box2 = new Item(600, -180, 0, 0, 0, 0);
+            Mesh Box2Mesh = new Mesh("Models\\Wall1.JSON", 0, 0, 0, 0, 0, 0);
+            Box2Mesh.scale(10, 5, 10);
+            Box2Mesh.hueit(0, 100, 0);
+            Box2.add_propertie(Box2Mesh);
+            new PhysicsBody(Box2, sceen.physics) { isStatic = true };
+            sceen.add_item(Box2);
+
+
+            Item Box3 = new Item(750, -240, 500, 0, 0, 0);
+            Mesh Box3Mesh = new Mesh("Models\\Wall1.JSON", 0, 0, 0, 0, 0, 0);
+            Box3Mesh.scale(10, 5, 10);
+            Box3Mesh.hueit(100, 0, 0);
+            Box3.add_propertie(Box3Mesh);
+            new PhysicsBody(Box3, sceen.physics) { isStatic = true };
+            sceen.add_item(Box3);
+
+
+
+
             // A pyramid sitting on the ground. Physics uses its real sloped shape.
-            Item pyramid = new Item(-1300, -22, -260, 90, 0, 0);
-            Mesh pyramidMesh = new Mesh("Models\\Torus.JSON", 0, 0, 0, 0, 0, 0);
+            Item pyramid = new Item(-1000, -22, -260, 90, 180, 0);
+            Mesh pyramidMesh = new Mesh("Models\\Kirby.JSON", 0, 0, 0, 0, 0, 0);
             pyramidMesh.scale(60, 60, 60);
             pyramid.add_propertie(pyramidMesh);
             new PhysicsBody(pyramid, sceen.physics) { isStatic = true };
@@ -33,26 +67,31 @@ namespace GEJE
 
             // An apple that drops onto the pyramid and slides off its side (-Y is up in this engine)
             Item apple = new Item(170, -1000, -87, 90, 0, 0);
-            Mesh appleMesh = new Mesh("Models\\apple.json", 0, 0, 0, 0, 0, 0);
+            Mesh appleMesh = new Mesh("Models\\Coin.json", 0, 0, 0, 0, 0, 0);
             appleMesh.scale(20, 20, 20);
             apple.add_propertie(appleMesh);
-            new PhysicsBody(apple, sceen.physics) { bounciness = 0.5 };
+            new PhysicsBody(apple, sceen.physics) { bounciness = 0.001 };
             sceen.add_item(apple);
+            apple.LastBody.friction = 1;
 
             // Invisible wall: physics only, no visible mesh. Thrown boxes bounce off thin air.
+            /*
             Item invisibleWall = new Item(0, -800, 700, 0, 0, 0);
             PhysicsBody wallBody = new PhysicsBody(invisibleWall, sceen.physics) { isStatic = true };
             wallBody.SetColliderBox(new Vec3(2200, 1600, 50));
             sceen.add_item(invisibleWall);
+            */
 
             // Camera: WASD/QE to move, arrows to look, F to throw boxes
             Window win = new Window(1200, 600, 1, 1);
             win.scene = sceen;
-            Item camera = new Item(0, -600, -1500, 90, 0, 0);
+            Item camera = new Item(0, -1000, -1300, 40, 0, 0);
             Camera cam = new Camera(0, 0, 10, 90, 0, 0, sceen, win, (double)win.Ethwidth / win.Ethheight);
-            Movement movement = new Movement(0, 0, 0, 0, 0, 0, apple, 600);
+            Physics_Mover movement = new Physics_Mover(0, 0, 0, 0, 0, 0, apple.LastBody);
+            movement.multiplyer = 600;
+            apple.LastBody.drag = .1;
             movement.window = win;
-            camera.add_propertie(movement);
+            apple.add_propertie(movement);
             camera.add_propertie(cam);
             camera.add_propertie(new BoxThrower(camera, win, sceen));
             sceen.add_item(camera);
