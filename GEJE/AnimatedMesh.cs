@@ -58,6 +58,10 @@ namespace GEJE
     ///     ...
     ///     anim.Play("walk");
     ///
+    /// Animations made in the Mesh Workshop (.anim.json files) add all their frames at once:
+    ///
+    ///     anim.AddAnimationFile("wave", "Models\\Guy_wave.anim.json");
+    ///
     /// This one is only for looks: physics ignores it. Use PhysicsAnimatedMesh if the
     /// collision shape should follow the animation. A PhysicsBody on an item whose only
     /// mesh is an AnimatedMesh has nothing to collide with, so give it a collider
@@ -128,6 +132,30 @@ namespace GEJE
             lib.frames[name] = data;
             if (CurrentFrame == null) ShowFrame(name);       // the first frame shows right away
             else if (CurrentFrame == name) Refresh();       // replaced the frame on screen
+        }
+
+        /// <summary>
+        /// Adds an animation made in the GEJE Mesh Workshop (a .anim.json file). Each frame in the
+        /// file becomes a frame called name_0, name_1, ... and the animation plays them with the
+        /// FPS, Loop and Smooth settings from the workshop. Returns the animation so you can
+        /// change those settings here.
+        ///
+        ///     guyMesh.AddAnimationFile("walk", "Models\\Guy_walk.anim.json");
+        ///     guyMesh.AddAnimationFile("wave", "Models\\Guy_wave.anim.json").loop = false;
+        ///     guyMesh.Play("walk");
+        /// </summary>
+        public MeshAnimation AddAnimationFile(string name, string animFile)
+        {
+            MeshAnimationFile file = MeshCache.GetAnimationFile(animFile);
+            var names = new string[file.frames.Length];
+            for (int i = 0; i < names.Length; i++)
+            {
+                names[i] = name + "_" + i;
+                AddFrameData(names[i], file.frames[i].Clone());
+            }
+            MeshAnimation anim = AddAnimation(name, file.fps, file.loop, names);
+            anim.smooth = file.smooth;
+            return anim;
         }
 
         public bool RemoveFrame(string name)

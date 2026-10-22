@@ -137,7 +137,15 @@ namespace GEJE
         public static MeshData LoadFile(string fullPath)
         {
             string json = File.ReadAllText(fullPath);
-            List<List<double>> data = JsonSerializer.Deserialize<List<List<double>>>(json);
+            return FromRows(JsonSerializer.Deserialize<List<List<double>>>(json));
+        }
+
+        /// <summary>
+        /// Mesh data from [x, y, z, r, g, b] rows, three per triangle (the model file format).
+        /// Corners are stored in the same order the original Mesh loader used.
+        /// </summary>
+        public static MeshData FromRows(List<List<double>> data)
+        {
             int tris = data.Count / 3;
             var pos = new double[tris * 9];
             var col = new byte[tris * 9];
@@ -155,6 +163,47 @@ namespace GEJE
         {
             pos[i] = v[0]; pos[i + 1] = v[1]; pos[i + 2] = v[2];
             col[i] = (byte)v[3]; col[i + 1] = (byte)v[4]; col[i + 2] = (byte)v[5];
+        }
+    }
+
+    /// <summary>
+    /// An animation file made by the GEJE Mesh Workshop (.anim.json): every frame as mesh data,
+    /// plus the frames per second, loop and smooth settings chosen in the workshop.
+    /// Load it with AnimatedMesh.AddAnimationFile (or MeshCache.GetAnimationFile).
+    /// </summary>
+    public class MeshAnimationFile
+    {
+        public readonly MeshData[] frames;
+        public readonly double fps;
+        public readonly bool loop;
+        public readonly bool smooth;
+
+        public MeshAnimationFile(MeshData[] frames, double fps, bool loop, bool smooth)
+        {
+            this.frames = frames;
+            this.fps = fps;
+            this.loop = loop;
+            this.smooth = smooth;
+        }
+
+        private class Json
+        {
+            public double Fps { get; set; } = 8;
+            public bool Loop { get; set; } = true;
+            public bool Smooth { get; set; } = false;
+            public List<List<List<double>>> Frames { get; set; }
+        }
+
+        public static MeshAnimationFile LoadFile(string fullPath)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            Json file = JsonSerializer.Deserialize<Json>(File.ReadAllText(fullPath), options);
+            if (file == null || file.Frames == null || file.Frames.Count == 0)
+                throw new InvalidDataException(Path.GetFileName(fullPath) +
+                    " has no frames. Export it from the Mesh Workshop with \"Whole animation\" selected.");
+            var frames = new MeshData[file.Frames.Count];
+            for (int i = 0; i < frames.Length; i++) frames[i] = MeshData.FromRows(file.Frames[i]);
+            return new MeshAnimationFile(frames, file.Fps > 0 ? file.Fps : 8, file.Loop, file.Smooth);
         }
     }
 
@@ -227,6 +276,28 @@ namespace GEJE
             }
         }
 
+        private static readonly Dictionary<string, MeshAnimationFile> animCache =
+            new Dictionary<string, MeshAnimationFile>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// The cached contents of a Mesh Workshop animation file (.anim.json), read from disk the
+        /// first time. Shared: don't change its frames, Clone() them (AddAnimationFile does).
+        /// </summary>
+        public static MeshAnimationFile GetAnimationFile(string file)
+        {
+            string key = Key(file);
+            lock (sync)
+            {
+                if (animCache.TryGetValue(key, out MeshAnimationFile a)) return a;
+            }
+            MeshAnimationFile loaded = MeshAnimationFile.LoadFile(FullPath(file));   // read outside the lock
+            lock (sync)
+            {
+                if (!animCache.TryGetValue(key, out MeshAnimationFile existing)) animCache[key] = existing = loaded;
+                return existing;
+            }
+        }
+
         /// <summary>Read model files into memory now, so the first use later doesn't stall.</summary>
         public static void Preload(params string[] files)
         {
@@ -252,8 +323,11 @@ namespace GEJE
         public static bool Contains(string fileOrName) { lock (sync) return cache.ContainsKey(Key(fileOrName)); }
 
         /// <summary>Forget one entry (e.g. after editing a model file while the game runs).</summary>
-        public static bool Remove(string fileOrName) { lock (sync) return cache.Remove(Key(fileOrName)); }
+        public static bool Remove(string fileOrName)
+        {
+            lock (sync) return cache.Remove(Key(fileOrName)) | animCache.Remove(Key(fileOrName));
+        }
 
-        public static void Clear() { lock (sync) cache.Clear(); }
+        public static void Clear() { lock (sync) { cache.Clear(); animCache.Clear(); } }
     }
 }

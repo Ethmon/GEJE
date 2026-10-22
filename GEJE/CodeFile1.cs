@@ -73,7 +73,14 @@ namespace GEJE
             new PhysicsBody(elevator, sceen.physics) { isStatic = true };
             sceen.add_item(elevator);
 
-
+            Item humanFall = new Item(0, 0, 0, 90, 45, 0);
+            PhysicsAnimatedMesh humanFallMesh = new PhysicsAnimatedMesh(0, 0, 0, 0, 0, 0);
+            humanFallMesh.AddAnimationFile("humanfall", "Models\\HumanFall.anim.json").smooth = true;
+            humanFallMesh.scale(20, 20, 20);
+            humanFallMesh.Play("humanfall");
+            humanFall.add_propertie(humanFallMesh);
+            new PhysicsBody(humanFall, sceen.physics) { isStatic = true };
+            sceen.add_item(humanFall);
 
             // A pyramid sitting on the ground. Physics uses its real sloped shape.
             Item pyramid = new Item(-1000, -22, -260, 90, 180, 0);
