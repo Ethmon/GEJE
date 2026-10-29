@@ -57,8 +57,7 @@ namespace GEJE
 
 
 
-            // Elevator: an animated mesh with physics. It slowly rises next to the red box and
-            // sinks back down, carrying whatever stands on it. Ride it up, then walk onto the red box.
+
             Item elevator = new Item(950, -20, 170, 0, 0, 0);
             PhysicsAnimatedMesh elevatorMesh = new PhysicsAnimatedMesh(0, 0, 0, 0, 0, 0);
             elevatorMesh.AddFrame("down", BlockMesh(400, 20, 400, 200, 170, 40));    // thin pad
@@ -90,7 +89,7 @@ namespace GEJE
             new PhysicsBody(pyramid, sceen.physics) { isStatic = true };
             sceen.add_item(pyramid);
 
-            // An apple that drops onto the pyramid and slides off its side (-Y is up in this engine)
+            // An Coin that drops
             Item apple = new Item(170, -1000, -87, 90, 0, 0);
             Mesh appleMesh = new Mesh("Models\\Coin.json", 0, 0, 0, 0, 0, 0);
             appleMesh.scale(20, 20, 20);
